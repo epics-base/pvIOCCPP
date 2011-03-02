@@ -16,7 +16,10 @@
 #include "pvDatabase.h"
 #include "install.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvIOC { 
+
+using namespace epics::pvData;
+using namespace epics::pvAccess;
 
 AfterStart::AfterStart()
 {

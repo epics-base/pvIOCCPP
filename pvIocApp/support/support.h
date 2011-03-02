@@ -20,7 +20,7 @@
 #include "install.h"
 #include "util.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvIOC { 
 
 enum SupportState{
     readyForInitialize,
@@ -53,10 +53,11 @@ class PVDatabaseFactory;
 class SupportStateFunc {
 public:
     static SupportState getSupportState(int value);
-    static std::auto_ptr<PVEnumerated>  getSupportState(PVField &pvField);
+    static std::auto_ptr<epics::pvData::PVEnumerated>  getSupportState(
+        epics::pvData::PVField &pvField);
 };
 
-class ProcessCallbackRequester : public Requester {
+class ProcessCallbackRequester : public epics::pvData::Requester {
 public:
     virtual void processCallback() = 0;
 };
@@ -66,10 +67,10 @@ public:
     virtual void processContinue() = 0;
 };
 
-class RecordProcessRequester : public Requester {
+class RecordProcessRequester : public epics::pvData::Requester {
 public:
     virtual void becomeProcessor() = 0;
-    virtual void canNotProcess(String reason) = 0;
+    virtual void canNotProcess(epics::pvData::String reason) = 0;
     virtual void lostRightToProcess() = 0;
     virtual void recordProcessResult(RequestResult requestResult) = 0;
     virtual void recordProcessComplete() = 0;
@@ -79,13 +80,13 @@ class SupportProcessRequester {
     virtual void supportProcessDone(RequestResult requestResult) = 0;
 };
 
-class ProcessToken : private NoDefaultMethods {
+class ProcessToken : private epics::pvData::NoDefaultMethods {
 public:
     ProcessToken(){}
     virtual ~ProcessToken() {}
 };
 
-class RecordProcess : private NoDefaultMethods {
+class RecordProcess : private epics::pvData::NoDefaultMethods {
 public:
     static RecordProcess &create(PVRecord &pvRecord);
     void destroy();
@@ -104,26 +105,27 @@ public:
         RecordProcessRequester &recordProcessRequester);
     void releaseProcessToken(ProcessToken &processToken);
     void forceInactive();
-    String getRecordProcessRequesterName();
+    epics::pvData::String getRecordProcessRequesterName();
     void queueProcessRequest(ProcessToken &processToken);
     void process(ProcessToken &processToken,bool leaveActive);
     void process(ProcessToken &processToken,
-        bool leaveActive,TimeStamp *timeStamp);
+        bool leaveActive,epics::pvData::TimeStamp *timeStamp);
     void setInactive(ProcessToken &processToken);
     void processContinue(ProcessContinueRequester &processContinueRequester);
     void requestProcessCallback(ProcessCallbackRequester &processCallbackRequester);
-    void setTimeStamp(TimeStamp timeStamp);
-    void getTimeStamp(TimeStamp timeStamp);
+    void setTimeStamp(epics::pvData::TimeStamp timeStamp);
+    void getTimeStamp(epics::pvData::TimeStamp timeStamp);
 private:
     RecordProcess(PVRecord &pvRecord);
     ~RecordProcess();
 };
 
-class Support : public Requester , private NoDefaultMethods {
+class Support
+ : public epics::pvData::Requester , private epics::pvData::NoDefaultMethods {
 public:
-    Support(String name,PVRecordField &pvRecordField);
+    Support(epics::pvData::String name,PVRecordField &pvRecordField);
     ~Support();
-    String getSupportName();
+    epics::pvData::String getSupportName();
     SupportState getSupportState();
     PVRecordField &getPVRecordField();
     virtual void initialize();
@@ -133,7 +135,9 @@ public:
     virtual void process(SupportProcessRequester &supportProcessRequester);
 protected:
     void setSupportState(SupportState state);
-    bool checkSupportState(SupportState expectedState,String message);
+    bool checkSupportState(
+        SupportState expectedState,
+        epics::pvData::String message);
 private:
     // TBD
 };

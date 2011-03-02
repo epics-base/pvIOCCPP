@@ -14,7 +14,10 @@
 #include "support.h"
 #include "pvDatabase.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvIOC { 
+
+using namespace epics::pvData;
+using namespace epics::pvAccess;
 
 PVRecord::PVRecord(String recordName,std::auto_ptr<PVStructure> pvStructure)
 {

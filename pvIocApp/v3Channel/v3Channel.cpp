@@ -1,4 +1,4 @@
-/* pvDatabase.cpp */
+/* v3Channel.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -8,48 +8,63 @@
 #include <stdexcept>
 #include <memory>
 
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "noDefaultMethods.h"
+#include <pvIntrospect.h>
+#include <pvData.h>
+#include <noDefaultMethods.h>
+
 #include "support.h"
 #include "pvDatabase.h"
+#include "v3Channel.h"
 
 namespace epics { namespace pvIOC { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-SupportState SupportStateFunc::getSupportState(int value)
+V3ChannelProvider::V3ChannelProvider()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-RecordProcess &RecordProcess::create(PVRecord &pvRecord)
+V3ChannelProvider::~V3ChannelProvider()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::destroy()
+String V3ChannelProvider::getProviderName()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-RecordProcess::RecordProcess(PVRecord &pvRecord)
+ChannelFind *V3ChannelProvider::channelFind(
+    String channelName,
+    ChannelFindRequester *channelFindRequester)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-RecordProcess::~RecordProcess()
+Channel *V3ChannelProvider::createChannel(
+    String channelName,
+    ChannelRequester *channelRequester,
+    short priority)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Support::Support(String name,PVRecordField &pvRecordField)
+Channel *V3ChannelProvider::createChannel(
+    String channelName,
+    ChannelRequester *channelRequester,
+    short priority,
+    String address)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Support::~Support()
+
+V3Channel::V3Channel(ChannelProvider &provider,
+    ChannelRequester &requester,
+    String name,
+    String remoteAddress)
 {
     throw std::logic_error(String("Not Implemented"));
 }

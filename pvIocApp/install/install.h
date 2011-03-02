@@ -19,7 +19,7 @@
 #include "pvDatabase.h"
 #include "support.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvIOC { 
 
 class AfterStart;
 class AfterStartNode;
@@ -51,7 +51,7 @@ class PVRecordCreate;
 class PVDatabaseFactory;
 
 
-class AfterStartNode : private NoDefaultMethods {
+class AfterStartNode : private epics::pvData::NoDefaultMethods {
 public:
     AfterStartNode(){}
     virtual ~AfterStartNode() {}
@@ -67,7 +67,7 @@ public:
     virtual void callback(AfterStart &afterStart) = 0;
 };
 
-class AfterStart : private NoDefaultMethods {
+class AfterStart : private epics::pvData::NoDefaultMethods {
 public:
     AfterStart();
     ~AfterStart();
@@ -78,20 +78,20 @@ public:
     void requestCallback(
         AfterStartNode &node,
         bool afterMerge,
-        ThreadPriority priority);
+        epics::pvData::ThreadPriority priority);
     void callRequesters(bool afterMerge);
     void done(AfterStartNode &node);
     void doneAndRequest(
         AfterStartNode &node,
         bool afterMerge,
-        ThreadPriority priority);
+        epics::pvData::ThreadPriority priority);
 private:
     //TBD
 };
 
-class SupportCreation : private NoDefaultMethods {
+class SupportCreation : private epics::pvData::NoDefaultMethods {
 public:
-    SupportCreation(PVDatabase &pvDatabase,Requester &requester);
+    SupportCreation(PVDatabase &pvDatabase,epics::pvData::Requester &requester);
     ~SupportCreation();
     bool createSupport();
     bool initializeSupport();
@@ -104,19 +104,29 @@ private:
 class Install {
 public:
     static Install &getInstall();
-    bool installStructures(String xmlFile,Requester &requester);
-    bool installStructures(PVDatabase &pvDatabase,Requester &requester);
-    bool installStructure(PVStructure &pvStructure,Requester &requester);
-    bool installRecords(String xmlFile,Requester &requester);
-    bool installRecords(PVDatabase &pvDatabase,Requester &requester);
-    bool installRecord(PVRecord &pvRecord,Requester &requester);
+    bool installStructures(
+        epics::pvData::String xmlFile,
+        epics::pvData::Requester &requester);
+    bool installStructures(
+        PVDatabase &pvDatabase,
+        epics::pvData::Requester &requester);
+    bool installStructure(
+        epics::pvData::PVStructure &pvStructure,
+        epics::pvData::Requester &requester);
+    bool installRecords(
+        epics::pvData::String xmlFile,
+        epics::pvData::Requester &requester);
+    bool installRecords(
+        PVDatabase &pvDatabase,
+        epics::pvData::Requester &requester);
+    bool installRecord(
+        PVRecord &pvRecord,
+        epics::pvData::Requester &requester);
 private:
     Install();
     ~Install();
     //TBD
 };
-
-extern Install &getInstall();
 
 }}
 

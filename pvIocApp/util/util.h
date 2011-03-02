@@ -19,7 +19,7 @@
 #include "pvDatabase.h"
 #include "support.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvIOC { 
 
 enum RequestResult {
     requestResultZombie,

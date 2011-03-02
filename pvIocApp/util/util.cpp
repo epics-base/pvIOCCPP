@@ -1,4 +1,4 @@
-/* pvDatabase.cpp */
+/* util.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -14,8 +14,11 @@
 
 #include "support.h"
 #include "pvDatabase.h"
-#include "install.h"
+#include "util.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvIOC { 
+
+using namespace epics::pvData;
+using namespace epics::pvAccess;
 
 }}
