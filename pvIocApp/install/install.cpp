@@ -21,6 +21,16 @@ namespace epics { namespace pvIOC {
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
+AfterStartNode::AfterStartNode()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+AfterStartNode::~AfterStartNode()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
 AfterStart::AfterStart()
 {
     throw std::logic_error(String("Not Implemented"));
@@ -37,6 +47,67 @@ std::auto_ptr<AfterStartNode> AfterStart::createNode(
     throw std::logic_error(String("Not Implemented"));
 }
 
+void AfterStart::newAfterStartRegister(NewAfterStartRequester &requester)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::newAfterStartUnregister(NewAfterStartRequester &requester)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::requestCallback(
+    AfterStartNode &node,
+    bool afterMerge,
+    ThreadPriority priority)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::callRequesters(bool afterMerge)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::done(AfterStartNode &node)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::doneAndRequest(
+    AfterStartNode &node,
+    bool afterMerge,
+    ThreadPriority priority)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+SupportCreation::SupportCreation(
+    PVDatabase &pvDatabase,Requester &requester)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+SupportCreation::~SupportCreation()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+bool SupportCreation::createSupport()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+bool SupportCreation::initializeSupport()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+bool SupportCreation::startSupport(AfterStart &afterStart)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
 
 
 Install & Install::getInstall()

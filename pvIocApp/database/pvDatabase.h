@@ -4,6 +4,7 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
+/* Marty Kraimer 2011.03 */
 #ifndef PVDATABASE_H
 #define PVDATABASE_H
 #include <string>
@@ -117,7 +118,7 @@ private:
 class PVRecordStructure : public PVRecordField {
 public:
     // array of pointers to PVRecordField`
-    PVRecordField **getPVRecordFields();
+    PVRecordField * const *getPVRecordFields();
     epics::pvData::PVStructure &getPVStructure();
 private:
     PVRecordStructure(epics::pvData::PVStructure &pvStructure,
@@ -138,14 +139,14 @@ public:
     bool removeRecord(PVRecord &record);
     void getRecordNames(epics::pvData::PVStringArray &result);
     // pointer to array of PVRecord
-    PVRecord ** getRecords();
+    PVRecord * const * getRecords();
     epics::pvData::PVStructure *findStructure(
         epics::pvData::String structureName);
     bool addStructure(std::auto_ptr<epics::pvData::PVStructure> structure);
     bool removeStructure(epics::pvData::PVStructure &structure);
     void getStructureNames(epics::pvData::PVStringArray &result);
     // pointer to array of PVStructure
-    epics::pvData::PVStructure ** getStructures();
+    epics::pvData::PVStructure * const * getStructures();
     void message(
         epics::pvData::String message,
         epics::pvData::MessageType messageType);
@@ -179,7 +180,7 @@ public:
     std::auto_ptr<epics::pvData::PVStructure> createPVStructure(
         epics::pvData::PVStructure *parent,
         epics::pvData::String fieldName,
-        PVDatabase *pvDatabase,
+        PVDatabase * const pvDatabase,
         epics::pvData::String structureName);
 private:
     PVRecordCreate();
@@ -189,7 +190,7 @@ private:
 class PVDatabaseFactory : private epics::pvData::NoDefaultMethods {
 public:
     static PVDatabaseFactory &getPVDatabaseFactory();
-    PVDatabase &create(epics::pvData::String name);
+    std::auto_ptr<PVDatabase> create(epics::pvData::String name);
     PVDatabase &getMaster();
     PVDatabase *getBeingInstalled();
 private:

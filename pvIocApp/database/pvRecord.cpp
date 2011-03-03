@@ -1,9 +1,10 @@
-/* pvDatabase.cpp */
+/* pvRecord.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
+/* Marty Kraimer 2011.03 */
 #include <string>
 #include <stdexcept>
 #include <memory>
@@ -19,203 +20,212 @@ namespace epics { namespace pvIOC {
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-SupportState SupportStateFunc::getSupportState(int value)
+PVRecord::PVRecord(String recordName,std::auto_ptr<PVStructure> pvStructure)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-RecordProcess::RecordProcess(PVRecord &pvRecord)
+PVRecord::~PVRecord()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-RecordProcess::~RecordProcess()
+RecordProcess &PVRecord::getRecordProcess()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-RecordProcess &RecordProcess::create(PVRecord &pvRecord)
+void PVRecord::setRecordProcess(RecordProcess &recordProcess)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::destroy()
+PVRecordStructure &getPVRecordStructure()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool RecordProcess::isEnabled()
+PVRecordField *PVRecord::findPVRecordField(PVField &pvField)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool RecordProcess::setEnabled(bool value)
+String PVRecord::getRecordName()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool RecordProcess::isActive()
+void PVRecord::message(
+        String message,
+        MessageType messageType)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-PVRecord &RecordProcess::getRecord()
+void PVRecord::removeRequester(Requester &requester)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool RecordProcess::isTrace()
+void PVRecord::lock()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool RecordProcess::setTrace(bool value)
+void PVRecord::unlock()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-SupportState RecordProcess::getSupportState()
+void PVRecord::lockOtherRecord(PVRecord &otherRecord)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::initialize()
+void PVRecord::beginGroupPut()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::start(AfterStart &afterStart)
+void PVRecord::endGroupPut()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::stop()
+void PVRecord::registerListener(PVListener &pvListener)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::uninitialize()
+void PVRecord::unregisterListener(PVListener &pvListener)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-ProcessToken *RecordProcess::requestProcessToken(
-        RecordProcessRequester &recordProcessRequester)
+bool PVRecord::isRegisteredListener(PVListener &pvListener)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::releaseProcessToken(ProcessToken &processToken)
+void PVRecord::removeEveryListener()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::forceInactive()
+void PVRecord::registerClient(PVRecordClient &pvRecordClient)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-String RecordProcess::getRecordProcessRequesterName()
+void PVRecord::unregisterClient(PVRecordClient &pvRecordClient)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::queueProcessRequest(ProcessToken &processToken)
+void PVRecord::detachClients()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void RecordProcess::process(ProcessToken &processToken,bool leaveActive)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::process(ProcessToken &processToken,
-        bool leaveActive,TimeStamp *timeStamp)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::setInactive(ProcessToken &processToken)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::processContinue(
-    ProcessContinueRequester &processContinueRequester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::setTimeStamp(TimeStamp timeStamp)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::getTimeStamp(TimeStamp timeStamp)
+int PVRecord::getNumberClients()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
 
-Support::Support(String name,PVRecordField &pvRecordField)
+PVRecordField::PVRecordField(PVField &pvField,
+    PVRecordStructure &parent,
+    PVRecord &pvRecord)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Support::~Support()
+PVRecordField::~PVRecordField()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-String Support::getSupportName()
+Support *PVRecordField::getSupport()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-SupportState Support::getSupportState()
+void PVRecordField::setSupport(Support &support)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-PVRecordField &Support::getPVRecordField()
+PVRecordStructure *PVRecordField::getParent()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void Support::initialize()
+PVField &PVRecordField::getPVField()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void Support::start(AfterStart afterStart)
+void PVRecordField::replacePVField(
+    std::auto_ptr<PVField> pvField)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void Support::stop()
+String PVRecordField::getFullFieldName()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void Support::uninitialize()
+String PVRecordField::getFullName()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void Support::process(SupportProcessRequester &supportProcessRequester)
+PVRecord &PVRecordField::getPVRecord()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-void Support::setSupportState(SupportState state)
+void PVRecordField::renameField(String newName)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Support::checkSupportState(
-        SupportState expectedState,
-        String message)
+bool PVRecordField::addListener(PVListener &pvListener)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void PVRecordField::removeListener(PVListener &vListener)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void PVRecordField::postPut()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+
+PVRecordStructure::PVRecordStructure(PVStructure &pvStructure,
+    PVRecordStructure &parent,
+    PVRecord &pvRecord)
+: PVRecordField(pvStructure,parent,pvRecord)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+PVRecordStructure::~PVRecordStructure()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+PVRecordField * const *PVRecordStructure::getPVRecordFields()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+PVStructure &PVRecordStructure::getPVStructure()
 {
     throw std::logic_error(String("Not Implemented"));
 }

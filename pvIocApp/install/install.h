@@ -53,8 +53,8 @@ class PVDatabaseFactory;
 
 class AfterStartNode : private epics::pvData::NoDefaultMethods {
 public:
-    AfterStartNode(){}
-    virtual ~AfterStartNode() {}
+    AfterStartNode();
+    virtual ~AfterStartNode();
 };
 
 class AfterStartRequester {
