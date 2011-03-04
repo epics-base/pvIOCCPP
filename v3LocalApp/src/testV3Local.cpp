@@ -46,11 +46,11 @@ void FindRequester::channelFindResult(
         (wasFound ? "true" : "false"));
 }
 
-class MyRequester : public ChannelRequester
+class MyRequester :  public ChannelRequester , public ChannelGetRequester
 {
 public:
     MyRequester()
-    : name(String("testV3Local")),channel(0)
+    : name(String("testV3Local")),channel(0),channelGet(0),pvStructure(0),bitSet(0)
     { }
     Channel *getChannel() {return channel;}
     virtual ~MyRequester() { }
@@ -64,7 +64,7 @@ public:
         printf("ChannelRequester message %s messageType %s\n",
             message.c_str(),typeName.c_str());
     }
-    virtual void channelCreated(const epics::pvData::Status &status, Channel *channel)
+    virtual void channelCreated(const Status &status, Channel *channel)
     {
         this->channel = channel;
         String message = status.getMessage();
@@ -78,9 +78,30 @@ public:
         String state = Channel::ConnectionStateNames[connectionState];
         printf("channelStateChange %s\n",state.c_str());
     }
+    virtual void channelGetConnect(
+        const Status &status,ChannelGet *channelGet,
+        PVStructure *pvStructure,BitSet *bitSet)
+    {
+        this->channelGet = channelGet;
+        this->pvStructure = pvStructure;
+        this->bitSet = bitSet;
+        printf("channelGetConnect statusOK %s\n",
+            (status.isOK() ? "true" : "false"));
+    }
+    virtual void getDone(const Status &status)
+    {
+        printf("getDone statusOK %s\n",
+            (status.isOK() ? "true" : "false"));
+        String buffer("");
+        pvStructure->toString(&buffer);
+        printf("%s\n",buffer.c_str());
+    }
 private:
     String name;
     Channel *channel;
+    ChannelGet *channelGet;
+    PVStructure *pvStructure;
+    BitSet *bitSet;
 };
 
 static const iocshArg testArg0 = { "pvName", iocshArgString };
@@ -100,10 +121,17 @@ static void testV3LocalCallFunc(const iocshArgBuf *args)
     channelProvider.channelFind(String(pvName),findRequester.get());
     std::auto_ptr<MyRequester> myRequester(new MyRequester());
     Channel *channel = channelProvider.createChannel(String(pvName),myRequester.get(),0,String(""));
+    CreateRequest *createRequest = getCreateRequest();
+    PVStructure *pvRequest = createRequest->createRequest(
+        String("record[process=true]field(value,timeStamp,alarm)"),myRequester.get());
+    String buffer("");
+    pvRequest->toString(&buffer);
+    printf("%s\n",buffer.c_str());
     if(channel!=0) {
         channel->destroy();
     }
 }
+
 
 static void testV3LocalRegister(void)
 {

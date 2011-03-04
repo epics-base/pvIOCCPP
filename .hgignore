@@ -2,4 +2,6 @@ QtC-pvData.creator.user
 bin
 lib
 include
+db
+dbd
 ./O.*
