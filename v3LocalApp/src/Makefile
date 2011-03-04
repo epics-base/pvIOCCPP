@@ -7,6 +7,11 @@ include $(TOP)/configure/CONFIG
 
 #==================================================
 # Build an IOC support library
+#
+
+DBDINC += byteRecord
+DBDINC += shortRecord
+DBDINC += floatRecord
 
 DBD += v3LocalTest.dbd
 
