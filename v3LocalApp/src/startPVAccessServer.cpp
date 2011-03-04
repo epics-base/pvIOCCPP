@@ -39,14 +39,16 @@ public:
     virtual void run();
 private:
     Thread *thread;
+    ServerContextImpl ctx;
 };
 
 MyRun::MyRun()
-: thread(new Thread(String("pvAccessServer"),lowerPriority,this))
+: thread(new Thread(String("pvAccessServer"),lowerPriority,this)), ctx()
 {}
 
 MyRun::~MyRun()
 {
+    ctx.shutdown();
     delete thread;
 }
 
@@ -55,7 +57,6 @@ void MyRun::run()
     V3ChannelProvider &channelProvider = V3ChannelProvider::getChannelProvider();
     registerChannelProvider(&channelProvider);
 
-    ServerContextImpl ctx;
     ctx.setChannelProviderName(channelProvider.getProviderName());
     ctx.initialize(getChannelAccess());
     ctx.printInfo();
