@@ -40,15 +40,19 @@ public:
 private:
     Thread *thread;
     ServerContextImpl ctx;
+    Event event;
 };
 
 MyRun::MyRun()
-: thread(new Thread(String("pvAccessServer"),lowerPriority,this)), ctx()
+: thread(new Thread(String("pvAccessServer"),lowerPriority,this)), ctx(), event()
 {}
 
 MyRun::~MyRun()
 {
     ctx.shutdown();
+    // we need thead.waitForCompletion()
+    event.wait();
+    epicsThreadSleep(1.0);
     delete thread;
 }
 
@@ -62,6 +66,7 @@ void MyRun::run()
     ctx.printInfo();
     ctx.run(0);
     ctx.destroy();
+    event.signal();
 }
 
 static MyRun *myRun = 0;
