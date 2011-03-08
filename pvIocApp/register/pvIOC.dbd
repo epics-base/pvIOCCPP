@@ -1,0 +1,4 @@
+registrar("startPVAccessServerRegister")
+registrar("stopPVAccessServerRegister")
+registrar("startV3ChannelRegister")
+registrar("stopV3ChannelRegister")
