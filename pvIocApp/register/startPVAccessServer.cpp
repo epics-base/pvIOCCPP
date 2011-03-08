@@ -1,6 +1,6 @@
 /*startPVAccessServer.cpp */
 
-/* Author: Marty Kraimer */
+/* Author: Matej Sekoranja */
 
 #include <cstddef>
 #include <cstdlib>
@@ -75,6 +75,7 @@ static const iocshFuncDef startPVAccessServerFuncDef = {
     "startPVAccessServer", 0, 0};
 static void startPVAccessServerCallFunc(const iocshArgBuf *args)
 {
+    printf("startPVAccessServer\n");
     if(myRun!=0) {
         printf("server already started\n");
         return;
@@ -86,6 +87,7 @@ static const iocshFuncDef stopPVAccessServerFuncDef = {
     "stopPVAccessServer", 0, 0};
 static void stopPVAccessServerCallFunc(const iocshArgBuf *args)
 {
+    printf("stopPVAccessServer\n");
    if(myRun!=0) delete myRun;
    myRun = 0; 
 }

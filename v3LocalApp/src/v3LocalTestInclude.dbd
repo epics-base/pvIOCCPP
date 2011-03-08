@@ -2,6 +2,5 @@ include "base.dbd"
 include "byteRecord.dbd"
 include "shortRecord.dbd"
 include "floatRecord.dbd"
+include "pvIOC.dbd"
 registrar("testV3LocalRegister")
-registrar("startPVAccessServerRegister")
-registrar("stopPVAccessServerRegister")
