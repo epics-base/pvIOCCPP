@@ -46,7 +46,7 @@ void FindRequester::channelFindResult(
         (wasFound ? "true" : "false"));
 }
 
-class MyRequester :  public ChannelRequester , public ChannelGetRequester
+class MyRequester :  public virtual Requester, public ChannelRequester , public ChannelGetRequester
 {
 public:
     MyRequester()
@@ -120,13 +120,16 @@ static void testV3LocalCallFunc(const iocshArgBuf *args)
     std::auto_ptr<FindRequester> findRequester(new FindRequester());
     channelProvider.channelFind(String(pvName),findRequester.get());
     std::auto_ptr<MyRequester> myRequester(new MyRequester());
-    Channel *channel = channelProvider.createChannel(String(pvName),myRequester.get(),0,String(""));
+    Channel *channel = channelProvider.createChannel(
+         String(pvName),myRequester.get(),0,String(""));
     CreateRequest *createRequest = getCreateRequest();
     PVStructure *pvRequest = createRequest->createRequest(
-        String("record[process=true]field(value,timeStamp,alarm)"),myRequester.get());
-    String buffer("");
-    pvRequest->toString(&buffer);
-    printf("%s\n",buffer.c_str());
+        String("record[process=true]field(value,timeStamp,alarm)"),
+        myRequester.get());
+    ChannelGet *channelGet = channel->createChannelGet(
+        myRequester.get(),pvRequest);
+    channelGet->get(false);
+    channelGet->destroy();
     if(channel!=0) {
         channel->destroy();
     }
