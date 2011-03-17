@@ -1,4 +1,4 @@
-/*testV3Local.cpp */
+/*testV3Channel.cpp */
 
 /* Author: Marty Kraimer */
 
@@ -50,7 +50,7 @@ class MyRequester :  public virtual Requester, public ChannelRequester , public 
 {
 public:
     MyRequester()
-    : name(String("testV3Local")),channel(0),channelGet(0),pvStructure(0),bitSet(0)
+    : name(String("testV3Channel")),channel(0),channelGet(0),pvStructure(0),bitSet(0)
     { }
     Channel *getChannel() {return channel;}
     virtual ~MyRequester() { }
@@ -108,12 +108,12 @@ static const iocshArg testArg0 = { "pvName", iocshArgString };
 static const iocshArg *testArgs[] = {
     &testArg0};
 
-static const iocshFuncDef testV3LocalFuncDef = {
-    "testV3Local", 1, testArgs};
-static void testV3LocalCallFunc(const iocshArgBuf *args)
+static const iocshFuncDef testV3ChannelFuncDef = {
+    "testV3Channel", 1, testArgs};
+static void testV3ChannelCallFunc(const iocshArgBuf *args)
 {
     char *pvName = args[0].sval;
-    printf("testV3Local pvName %s\n",pvName);
+    printf("testV3Channel pvName %s\n",pvName);
     V3ChannelProvider &channelProvider = V3ChannelProvider::getChannelProvider();
     String providerName = channelProvider.getProviderName();
     printf("providerName %s\n",providerName.c_str());
@@ -136,12 +136,12 @@ static void testV3LocalCallFunc(const iocshArgBuf *args)
 }
 
 
-static void testV3LocalRegister(void)
+static void testV3ChannelRegister(void)
 {
     static int firstTime = 1;
     if (firstTime) {
         firstTime = 0;
-        iocshRegister(&testV3LocalFuncDef, testV3LocalCallFunc);
+        iocshRegister(&testV3ChannelFuncDef, testV3ChannelCallFunc);
     }
 }
-epicsExportRegistrar(testV3LocalRegister);
+epicsExportRegistrar(testV3ChannelRegister);
