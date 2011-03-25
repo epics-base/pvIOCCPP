@@ -1,8 +1,8 @@
 QtC-pvData.creator.user
+syntax: glob
 bin
 lib
 include
 db
 dbd
-./O.*
-./envPaths
+O.*
