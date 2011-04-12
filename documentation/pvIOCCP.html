@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvIOCCPP</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS pvIOCCPP<br />
+2011.04.11</h1>
+
+<p>Contents</p>
+<hr />
+
+<h2 style="text-align: center">Preface</h2>
+<hr />
+
+<p>This product is available via the <a href="#LicenseAgreement">open source
+license</a> described at the end of this document.</p>
+
+<p>pvIOC is one of a set of related projects:</p>
+<dl>
+  <dt>pvData</dt>
+    <dd>Describes and implements structured data.</dd>
+  <dt>pvAccess</dt>
+    <dd>Provides networking for pvData.</dd>
+  <dt>pvIOC</dt>
+    <dd>Provides a database based on pvData together with record processing,
+      record scanning, and extensible support.</dd>
+</dl>
+
+<p>For pvData and pvAccess both Java and C++ implementations are available. For
+pvIOC the Java implementation is named javaIOC and is available.</p>
+
+<p>At the present time the only part of pvIOCCP that is implemented is pvAccess
+to V3 records. It is all that is described in this document. A complete Java
+implemantation is available but it can not be used inside a V3 IOC.</p>
+<hr />
+
+<h2 style="text-align: center">V3Channel</h2>
+<hr />
+
+<h3>Introduction</h3>
+
+<p>V3Channel is an implementation of pvAccess Channel that provides access to
+V3 records. It can be used as to accesss V3 records directly by other code in
+the same IOC or by pvAccess network clients via remote pvAccess. It implements
+channelGet, channelPut, channelArray, and Monitor. It does not implement
+channelPutGet or channelRPC since, at least for now, these do not apply to V3
+records.</p>
+
+<h3>Remaining tasks</h3>
+The main remaining tasks are: 
+<dl>
+  <dt>Access Security</dt>
+    <dd>Since V3Channnel is not using any of the remote part of V3CA, it
+      "sidesteps" access security. The V3 access security system is independent
+      of CAV3 so it is possible to make V3Channel attach to it directly.</dd>
+  <dt>Monitor Algorithm</dt>
+    <dd>The javaIOC supports an extensible set of monitor algorithms. It
+      provides support for onChange and onPercentChange but allows additional
+      algorithms. This same support will be implemented by pvIOCCP.</dd>
+</dl>
+
+<h3>Getting started</h3>
+
+<p>NOTE: pvIOCCP has a zip file example/example.zip that provides an example
+IOC application that provides V3Channel support.</p>
+
+<p>pvIOCCPP runs in a regular V3 IOC as defined by EPICS base. It uses the base
+build system and is built as an EPICS application. To use V3Channel do the
+following:</p>
+<dl>
+  <dt>configure/RELEASE</dt>
+    <dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
+      <pre>VBASE=/home/mrk/hg
+PVDATA=${PVBASE}/pvDataCPP
+PVACCESS=${PVBASE}/pvAccessCPP
+PVIOC=${PVBASE}/pvIOCCPP
+   </pre>
+    </dd>
+  <dt>pvIOC.dbd</dt>
+    <dd>In the src directory where your application is being built add an
+      include statement for pvIOC.dbd. For example: 
+      <pre>include "base.dbd"
+include "pvIOC.dbd"
+     </pre>
+    </dd>
+  <dt>st.cmd</dt>
+    <dd>After the iocInit command in the st.cmd file add: 
+      <pre>startPVAccessServer
+    </pre>
+    </dd>
+</dl>
+
+<h3>Implementation</h3>
+
+<p>The implementation consists of the following header files:</p>
+<dl>
+  <dt>v3Channel.h</dt>
+    <dd>The V3Channel interface. It implements both ChannelProvider and
+      Channel. For example this is what remote pvAccess sees.</dd>
+  <dt>v3Util.h</dt>
+    <dd>The interace for transfering data between V3 records and pvData, i. e.
+      the code that converts between the V3 data and pvData.</dd>
+  <dt>v3Array.h</dt>
+    <dd>Because arrays are more complex than scalar data they are handled by a
+      separate interface instead of by v3util itself.</dd>
+  <dt>v3CAMonitor.h</dt>
+    <dd>db_post_event is implement in code (dbEvent) that passes events
+      directly to CAV3. This the only way V3Channel can trap monitors is via
+      CAV3. But V3Channel only uses CAV3 for scalar data, timeStamp, and
+      alarms. All other monitored data is obtained from the V3 record
+    itself.</dd>
+  <dt>CAV3Context.h</dt>
+    <dd>This is code that interfaces between pvAccess threads and CAV3
+    context.</dd>
+</dl>
+
+<p>Associated with each header file is a corrseponding implementation file
+which has the same file name as the header but with an extension of ".cpp". The
+remainder of this section gives a brief description of each of these software
+components with an emphasis on how data is converted between pvData and data in
+V3 records.</p>
+
+<h4>Main Concepts</h4>
+
+<p>In epics V3 there are two interfaces for accessing data:</p>
+<dl>
+  <dt>db_access</dt>
+    <dd>This defines all the DBR_XXX types and associated C structures as seen
+      by CAV3 clients. V3Channel, with the exception of V3CAMonitor does not
+      use this. Even for monitors only a few of the DBR_XXX types are used.</dd>
+  <dt>dbAccess</dt>
+    <dd>This and some additional interfaces like the RSET (record support entry
+      table) and the DBADDR are what V3Channel uses to get/put data from the V3
+      records. Wherever possible data is accessed via the DBADDR and RSET.
+      pvAccess method pvPutField is used to put data to fields that have "side
+      effects". For example writing to the SCAN field has side effects.</dd>
+</dl>
+
+<h4>V3Channel</h4>
+
+<p>This defines two interfaces:</p>
+<dl>
+  <dt>V3ChannelProvider</dt>
+    <dd>The implementation of ChannelProvider.</dd>
+  <dt>V3Channel</dt>
+    <dd>The implementation of Channel.</dd>
+</dl>
+
+<p>V3ChannelProvider is defined as:</p>
+<pre>class V3ChannelProvider : publicChannelProvider {
+public:
+    static V3ChannelProvider &amp;getChannelProvider();
+    virtual String getProviderName();
+    virtual void destroy();
+    virtual ChannelFind *channelFind(String channelName,ChannelFindRequester *channelFindRequester);
+    virtual Channel *createChannel(String channelName,ChannelRequester *channelRequester,short priority);
+    virtual Channel *createChannel(String channelName,ChannelRequester *channelRequester,short priority,String address);
+private:
+ ...
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>getChannelProvider</dt>
+    <dd>x</dd>
+  <dt>getProviderName</dt>
+    <dd>x</dd>
+  <dt>channelFind</dt>
+    <dd>x</dd>
+  <dt>createChannel</dt>
+    <dd>x</dd>
+</dl>
+
+<p>V3Channel is defined as:</p>
+<pre>class V3Channel : public virtual Channel {
+public:
+    V3Channel(
+        V3ChannelProvider &amp;provider,ChannelRequester &amp;requester,String name,
+        std::auto_ptr&lt;DbAddr&gt; addr);
+    void init();
+    virtual void destroy();
+    virtual String getRequesterName();
+    virtual void message(String message,MessageType messageType);
+    virtual ChannelProvider *getProvider();
+    virtual String getRemoteAddress();
+    virtual Channel::ConnectionState getConnectionState();
+    virtual String getChannelName();
+    virtual ChannelRequester *getChannelRequester();
+    virtual bool isConnected();
+    virtual void getField(GetFieldRequester *requester,String subField);
+    virtual AccessRights getAccessRights(PVField *pvField);
+    virtual ChannelProcess *createChannelProcess(ChannelProcessRequester *channelProcessRequester,PVStructure *pvRequest);
+    virtual ChannelGet *createChannelGet(ChannelGetRequester *channelGetRequester,PVStructure *pvRequest);
+    virtual ChannelPut *createChannelPut(ChannelPutRequester *channelPutRequester,PVStructure *pvRequest);
+    virtual ChannelPutGet *createChannelPutGet(ChannelPutGetRequester *channelPutGetRequester,PVStructure *pvRequest);
+    virtual ChannelRPC *createChannelRPC(ChannelRPCRequester *channelRPCRequester,PVStructure *pvRequest);
+    virtual Monitor *createMonitor(MonitorRequester *monitorRequester,PVStructure *pvRequest);
+    virtual ChannelArray *createChannelArray(ChannelArrayRequester *channelArrayRequester,PVStructure *pvRequest);
+    virtual void printInfo();
+    virtual void printInfo(StringBuilder out);
+    // following only called by other V3ChannelXXX code
+    void removeChannelProcess(ChannelProcessListNode &amp;);
+    void removeChannelGet(ChannelGetListNode &amp;);
+    void removeChannelPut(ChannelPutListNode &amp;);
+    void removeChannelMonitor(ChannelMonitorListNode &amp;);
+    void removeChannelArray(ChannelArrayListNode &amp;);
+private:
+ ...
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>V3Channel</dt>
+    <dd>x</dd>
+  <dt>init</dt>
+    <dd>x</dd>
+  <dt>destroy</dt>
+    <dd>x</dd>
+  <dt>getRequesterName</dt>
+    <dd>x</dd>
+  <dt>message</dt>
+    <dd>x</dd>
+  <dt>getProvider</dt>
+    <dd>x</dd>
+  <dt>getRemoteAddress</dt>
+    <dd>x</dd>
+  <dt>getConnectionStatus</dt>
+    <dd>x</dd>
+  <dt>getChannelRequester</dt>
+    <dd>x</dd>
+  <dt>isConnected</dt>
+    <dd>x</dd>
+  <dt>GetFieldRequester</dt>
+    <dd>x</dd>
+  <dt>getAccessRights</dt>
+    <dd>x</dd>
+  <dt>createChannelProcess</dt>
+    <dd>x</dd>
+  <dt>createChannelGet</dt>
+    <dd>x</dd>
+  <dt>createChannelPut</dt>
+    <dd>x</dd>
+  <dt>createChannelPutGet</dt>
+    <dd>x</dd>
+  <dt>createChannelRPC</dt>
+    <dd>x</dd>
+  <dt>createMonitor</dt>
+    <dd>x</dd>
+  <dt>createChannelArray</dt>
+    <dd>x</dd>
+  <dt>printInfo</dt>
+    <dd>x</dd>
+  <dt>removeChannelProcess</dt>
+    <dd>x</dd>
+  <dt>removeChannelGet</dt>
+    <dd>x</dd>
+  <dt>removeChannelPut</dt>
+    <dd>x</dd>
+  <dt>removeChannelMonitor</dt>
+    <dd>x</dd>
+  <dt>removeChannelArray</dt>
+    <dd>x</dd>
+</dl>
+
+<h4>V3Util</h4>
+
+<p>V3Util is defined as:</p>
+<pre>class V3Util {
+public:
+    static int getProperties(Requester &amp;requester,PVStructure &amp;pvRequest,DbAddr &amp;dbAddr);
+    static PVStructure *createPVStructure(Requester &amp;requester,int mask,DbAddr &amp;dbAddr);
+    static void getPropertyData(Requester &amp;requester,int mask,DbAddr &amp;dbAddr,PVStructure &amp;pvStructure);
+    static Status get(Requester &amp;requester,int mask,DbAddr &amp;dbAddr,PVStructure &amp;pvStructure,BitSet &amp;bitSet,CAV3Data *caV3Data);
+    static Status put(Requester &amp;requester,int mask,DbAddr &amp;dbAddr,PVField *pvField);
+    static Status putField(Requester &amp;requester,int mask,DbAddr &amp;dbAddr,PVField *pvField);
+    static ScalarType getScalarType(Requester &amp;requester,DbAddr &amp;dbAddr);
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>getProperties</dt>
+    <dd>x</dd>
+  <dt>createPVStructure</dt>
+    <dd>x</dd>
+  <dt>getPropertyData</dt>
+    <dd>x</dd>
+  <dt>get</dt>
+    <dd>x</dd>
+  <dt>put</dt>
+    <dd>x</dd>
+  <dt>putField</dt>
+    <dd>x</dd>
+  <dt>getScalarType</dt>
+  ` 
+    <dd>x</dd>
+</dl>
+
+<h4>V3Array</h4>
+
+<h4>V3Array</h4>
+
+<p>V3Array is defined as:</p>
+<pre>class V3ValueArrayCreate {
+public:
+    PVByteArray *createByteArray(PVStructure *parent,ScalarArrayConstPtr scalar,DbAddr &amp;dbAddr,bool shareData);
+    PVShortArray *createShortArray(PVStructure *parent,ScalarArrayConstPtr scalar,DbAddr &amp;dbAddr,bool shareData);
+    PVIntArray *createIntArray(PVStructure *parent,ScalarArrayConstPtr scalar,DbAddr &amp;dbAddr,bool shareData);
+    PVFloatArray *createFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar,DbAddr &amp;dbAddr,bool shareData);
+    PVDoubleArray *createDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar,DbAddr &amp;dbAddr,bool shareData);
+    // Note that V3StringArray can not share
+    PVStringArray *createStringArray(PVStructure *parent,ScalarArrayConstPtr scalar,DbAddr &amp;dbAddr);
+};
+
+extern V3ValueArrayCreate *getV3ValueArrayCreate();</pre>
+
+<p>where</p>
+<dl>
+  <dt>createByteArray</dt>
+    <dd>x</dd>
+  <dt>createShortArray</dt>
+    <dd>x</dd>
+  <dt>createIntArray</dt>
+    <dd>x</dd>
+  <dt>createFloatArray</dt>
+    <dd>x</dd>
+  <dt>createDoubleArray</dt>
+    <dd>x</dd>
+  <dt>createStringArray</dt>
+    <dd>x</dd>
+</dl>
+
+<h4>V3CAMonitor</h4>
+
+<h4>V3CAMonitor</h4>
+
+<p>V3CAMonitor provides an enum that describes the data type of a V3 field as
+seen by pvData.</p>
+<pre>enum V3Type {
+    v3Enum,
+    v3Byte,
+    v3Short,
+    v3Int,
+    v3Float,
+    v3Double,
+    v3String
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>v3Enum</dt>
+    <dd>This is for a DBF_ENUM field. A pvData enumerated structure is created
+      for this. The monitor request will be a DBR_TIME_ENUM.</dd>
+  <dt>v3Byte</dt>
+    <dd>This is for a DBF_CHAR or DBF_UCHAR field. The monitor request will be
+      a DBR_TIME_CHAR.</dd>
+  <dt>v3Short</dt>
+    <dd>This is for a DBF_SHORT or DBF_UCHAR field. The monitor request will be
+      a DBR_TIME_SHORT.</dd>
+  <dt>v3Int</dt>
+    <dd>This is for a DBF_LONG or DBF_ULONG field. The monitor request will be
+      a DBR_TIME_LONG.</dd>
+  <dt>v3Float</dt>
+    <dd>This is for a DBF_FLOAT field. The monitor request will be a
+      DBR_TIME_FLOAT.</dd>
+  <dt>v3Double</dt>
+    <dd>This is for a DBF_DOUBLE field. The monitor request will be a
+      DBR_TIME_DOUBLE.</dd>
+  <dt>v3String</dt>
+    <dd>This is for a DBF_STRING field. The monitor request will be a
+      DBR_TIME_STRING.</dd>
+</dl>
+
+<p>Next a C structure is defined in which data from CAV3 is put. Each time CAV3
+calls the event callback the CAV3 data is copied to this structure.</p>
+<pre>struct CAV3Data {
+    CAV3Data();
+    ~CAV3Data();
+    /* The following have new values after each data event*/
+    union { //only used for scalar values
+        int8   byteValue;
+        int16  shortValue;
+        int32  intValue;
+        float  floatValue;
+        double doubleValue;
+    };
+    epicsTimeStamp  timeStamp;
+    int             sevr;
+    int             stat;
+    const char *    status;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>union</dt>
+    <dd>This holds a scalar numeric value obtained from CAV3. If the field is
+      an array or a DBF_STRING then the actual data is taken from the record
+      via the DBADDR and RSET.</dd>
+  <dt>timeStamp</dt>
+    <dd>The epics timestamp obtained from CAV3.</dd>
+  <dt>sevr</dt>
+    <dd>The severity obtained from CAV3.</dd>
+  <dt>stat</dt>
+    <dd>The status obtained from CAV3.</dd>
+  <dt>status</dt>
+    <dd>The string value associated with stat. It is taken from
+      epicsAlarmConditionStrings, which is an extrernal that is part of
+      dbAccess.</dd>
+</dl>
+
+<p>Next is an interface that provides c++ callbacks that can be called by the C
+callbacks that CAV3 calls:</p>
+<pre>class CAV3MonitorRequester : public virtual epics::pvData::Requester {
+public:
+    virtual ~CAV3MonitorRequester(){}
+    virtual void exceptionCallback(long status,long op) = 0;
+    virtual void connectionCallback() = 0;
+    virtual void accessRightsCallback() = 0;
+    virtual void eventCallback(long status) = 0;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>~CAV3MonitorRequester</dt>
+    <dd>x</dd>
+  <dt>exceptionCallback</dt>
+    <dd>x</dd>
+  <dt>connectionCallback</dt>
+    <dd>x</dd>
+  <dt>accessRightsCallback</dt>
+    <dd>x</dd>
+  <dt>eventCallback</dt>
+    <dd>x</dd>
+</dl>
+
+<p>Finally the interface for CAV3Monitor:</p>
+<pre>class CAV3Monitor : private epics::pvData::NoDefaultMethods {
+public:
+    CAV3Monitor(CAV3MonitorRequester &amp;requester,String pvName,V3Type v3Type);
+    ~CAV3Monitor();
+    CAV3Data &amp; getData();
+    void connect();
+    void start();
+    void stop();
+    const char * getStatusString(long status);
+    bool hasReadAccess();
+    bool hasWriteAccess();
+    bool isConnected();
+private:
+    class CAV3MonitorPvt *pImpl;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>CAV3Monitor</dt>
+    <dd>x</dd>
+  <dt>~CAV3Monitor</dt>
+    <dd>x</dd>
+  <dt>connect</dt>
+    <dd>x</dd>
+  <dt>start</dt>
+    <dd>x</dd>
+  <dt>stop</dt>
+    <dd>x</dd>
+  <dt>getStatusString</dt>
+    <dd>x</dd>
+  <dt>hasReadAccess</dt>
+    <dd>x</dd>
+  <dt>hasWriteAccess</dt>
+    <dd>x</dd>
+  <dt>isConnected</dt>
+    <dd>x</dd>
+</dl>
+
+<h4>V3CAContext</h4>
+
+<p>CAV3Monitor calls CAV3 in order to monitor changes to the V3 records. In
+order to do this it must call ca_context_create(ca_enable_preemptive_callback).
+It must call this from the thread that wil make calls to CAV3. But it must also
+call ca_attach_context from any other threads associated with the thread that
+calls ca_context_create. The putpose of V3CAContext is to manage this
+interaction with CAV3.</p>
+
+<p>For each thread that V3Channel uses and that makes a CreateMonitor
+V3CAContext keeps a reference count. This is decremented when
+CAV3Contect::release is called, which is done when a V3CAMonitor is deleted.
+Only when the thread that originally resulted in a V3CAContext exits is the
+V3CAContext deleted.</p>
+
+<p>V4CAContext is defined as:</p>
+<pre>class CAV3Context {
+public:
+    ~CAV3Context
+    void release();
+    void stop();
+    void exception(String message);
+    void checkContext();
+private:
+ ...
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>~CAV3Context</dt>
+    <dd>This does nothing.</dd>
+  <dt>release</dt>
+    <dd>This is called by CAV3Monitor when a monitor is being destroyed.</dd>
+  <dt>stop</dt>
+    <dd>This is called when the thread that created the CAV3Context exits. That
+      is when ca_context_destroy is called.</dd>
+  <dt>exception</dt>
+    <dd>This is called when CAV3 calls the exception callback that V3CAContext
+      registers.</dd>
+  <dt>checkContext</dt>
+    <dd>This is called before any call to CAV3. It checks to see if the calling
+      thread is aleady known to CAV3. If not ca_attach_contex is called.</dd>
+</dl>
+
+<p>There is a separate class for creating a context:</p>
+<pre>class CAV3ContextCreate {
+public:
+    static CAV3Context &amp;get(Requester &amp;requester);
+private:
+ ...
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt>get</dt>
+    <dd>This checks to see if the thread has already known to CAV3, i. e. if a
+      CAV3Context altready exists for the calling thread. If so it is returned.
+      If not a new CAV3Context is created and returned.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center">License Agreement</h2>
+<hr />
+<pre>Copyright (c) 2008 Martin R. Kraimer
+Copyright (c) 2007 Control System Laboratory,
+    (COSYLAB) Ljubljana Slovenia
+Copyright (c) 2010 Brookhaven National Laboratory
+
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+________________________________________________________________________
+
+This software is in part copyrighted by Brookhaven National Laboratory(BNL)
+
+In no event shall BNL be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+BNL has been advised of the possibility of such damage.
+
+BNL specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and BNL has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+
+________________________________________________________________________
+
+This software is in part copyrighted by the BERLINER SPEICHERRING
+GESELLSCHAFT FUER SYNCHROTRONSTRAHLUNG M.B.H. (BESSY), BERLIN, GERMANY.
+
+In no event shall BESSY be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+BESSY has been advised of the possibility of such damage.
+
+BESSY specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and BESSY has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+
+________________________________________________________________________
+
+This software is in part copyrighted by the Deutsches Elektronen-Synchroton,
+    Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY.
+
+In no event shall DESY be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+DESY has been advised of the possibility of such damage.
+
+DESY specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and DESY has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+________________________________________________________________________</pre>
+</body>
+</html>
