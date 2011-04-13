@@ -44,7 +44,7 @@ private:
 };
 
 MyRun::MyRun()
-: thread(new Thread(String("pvAccessServer"),lowerPriority,this)), ctx(), event()
+: thread(new Thread(String("pvAccessServer"),lowerPriority,this))
 {}
 
 MyRun::~MyRun()

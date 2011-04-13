@@ -9,12 +9,36 @@
 
 <body>
 <h1 style="text-align: center">EPICS pvIOCCPP<br />
-2011.04.11</h1>
+2011.04.13</h1>
 
 <p>Contents</p>
+
+<div class="toc">
+<ul>
+  <li><a href="#L33">Preface</a></li>
+  <li><a href="#L66">V3Channel</a> 
+    <ul>
+      <li><a href="#L70">Introduction</a></li>
+      <li><a href="#L80">Remaining tasks</a></li>
+      <li><a href="#L105">Getting started</a></li>
+      <li><a href="#L138">Implementation</a> 
+        <ul>
+          <li><a href="#L170">Main Concepts</a></li>
+          <li><a href="#L185">V3Channel</a></li>
+          <li><a href="#L334">V3Util</a></li>
+          <li><a href="#L446">V3Array</a></li>
+          <li><a href="#L485">V3CAMonitor</a></li>
+          <li><a href="#L645">V3CAContext</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#L697">License Agreement</a></li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Preface</h2>
+<h2 style="text-align: center" id="L33">Preface</h2>
 <hr />
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
@@ -39,19 +63,45 @@ to V3 records. It is all that is described in this document. A complete Java
 implemantation is available but it can not be used inside a V3 IOC.</p>
 <hr />
 
-<h2 style="text-align: center">V3Channel</h2>
+<h2 style="text-align: center" id="L66">V3Channel</h2>
 <hr />
 
-<h3>Introduction</h3>
+<h3 id="L70">Introduction</h3>
 
 <p>V3Channel is an implementation of pvAccess Channel that provides access to
-V3 records. It can be used as to accesss V3 records directly by other code in
-the same IOC or by pvAccess network clients via remote pvAccess. It implements
+V3 records. It can be used accesss V3 records by other code in the same IOC or
+by pvAccess network clients via remote pvAccess. It implements channelProcess,
 channelGet, channelPut, channelArray, and Monitor. It does not implement
 channelPutGet or channelRPC since, at least for now, these do not apply to V3
 records.</p>
 
-<h3>Remaining tasks</h3>
+<p>The basic idea is to map what V3 records provide into a PVStruructure that
+has the same information. For example if a client asks for a ChannelGet for
+everything for an analog type channel what the client gets is something
+like:</p>
+<pre>record double01
+    double value 2.0
+    structure alarm
+        severity major
+        message LOLO
+    timeStamp 2011-04-13 06:56:06.932
+    structure display
+        string description 
+        string format %f
+        string units Counts
+        structure limit
+            double low 0.0
+            double high 10.0
+    structure control
+        structure limit
+            double low -0.1
+            double high 9.9
+        double minStep 0.0</pre>
+
+<p>The channelName can be either just a record name or a "recordName.XXX" where
+XXX is the V3 field name, e. g. "SCAN".</p>
+
+<h3 id="L80">Remaining tasks</h3>
 The main remaining tasks are: 
 <dl>
   <dt>Access Security</dt>
@@ -62,17 +112,28 @@ The main remaining tasks are:
     <dd>The javaIOC supports an extensible set of monitor algorithms. It
       provides support for onChange and onPercentChange but allows additional
       algorithms. This same support will be implemented by pvIOCCP.</dd>
+  <dt>Alarm Limits</dt>
+    <dd>Currently it is not possible to get alarmLimits via V3Channel.</dd>
+  <dt>V3Channel::init</dt>
+    <dd>This creates the introspection interface that is returned by getField.
+      Currently it always has property fields alarm, timeStamp, and display. If
+      the field is not an array it also has a property field control. It might
+      be better to look at the record support entry table to see if display and
+      control should be included.</dd>
 </dl>
 
-<h3>Getting started</h3>
+<h3 id="L105">Getting started</h3>
 
 <p>NOTE: pvIOCCP has a zip file example/example.zip that provides an example
-IOC application that provides V3Channel support.</p>
+IOC application that provides V3Channel support. To use it copy and unzip and
+read the README file.</p>
 
 <p>pvIOCCPP runs in a regular V3 IOC as defined by EPICS base. It uses the base
 build system and is built as an EPICS application. To use V3Channel do the
 following:</p>
 <dl>
+  <dt>Create an epics application</dt>
+    <dd>Look at the example to see how to get started.</dd>
   <dt>configure/RELEASE</dt>
     <dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
       <pre>VBASE=/home/mrk/hg
@@ -95,7 +156,7 @@ include "pvIOC.dbd"
     </dd>
 </dl>
 
-<h3>Implementation</h3>
+<h3 id="L138">Implementation</h3>
 
 <p>The implementation consists of the following header files:</p>
 <dl>
@@ -125,7 +186,7 @@ remainder of this section gives a brief description of each of these software
 components with an emphasis on how data is converted between pvData and data in
 V3 records.</p>
 
-<h4>Main Concepts</h4>
+<h4 id="L170">Main Concepts</h4>
 
 <p>In epics V3 there are two interfaces for accessing data:</p>
 <dl>
@@ -141,7 +202,7 @@ V3 records.</p>
       effects". For example writing to the SCAN field has side effects.</dd>
 </dl>
 
-<h4>V3Channel</h4>
+<h4 id="L185">V3Channel</h4>
 
 <p>This defines two interfaces:</p>
 <dl>
@@ -167,13 +228,20 @@ private:
 <p>where</p>
 <dl>
   <dt>getChannelProvider</dt>
-    <dd>x</dd>
+    <dd>This returns the single instance od the V3ChannelProvider.</dd>
   <dt>getProviderName</dt>
-    <dd>x</dd>
+    <dd>This returns "v3Channel"</dd>
   <dt>channelFind</dt>
-    <dd>x</dd>
+    <dd>Calls dbNameToAddr to see if the requested channelName is in the V3
+      database. If calls channelFindRequester-&gt;channelFindResult to report
+      the result. It always returns null.</dd>
   <dt>createChannel</dt>
-    <dd>x</dd>
+    <dd>Calls dbNameToAddr to see if the requested channelName is in the V3
+      database. If not it calls
+      channelRequester-&gt;channelCreated(notFoundStatus,0) and returns null.
+      If it is in the V3 database it creates a new V3Channel, calls init, calls
+      channelRequester-&gt;channelCreated(Status::OK,v3Channel) and returns the
+      newly created V3Channel.</dd>
 </dl>
 
 <p>V3Channel is defined as:</p>
@@ -216,58 +284,133 @@ private:
 <p>where</p>
 <dl>
   <dt>V3Channel</dt>
-    <dd>x</dd>
+    <dd>This is the constructor called by V3ChannelProvider.</dd>
   <dt>init</dt>
-    <dd>x</dd>
+    <dd>This is called by V3ChannelProvider after it has created the V3Channel.
+      It's primary function is to create a FieldConstPtr that provides the
+      introspection interface for the field being accessed. This is what is
+      returned by getField. It is always a structure with a value field that
+      has a type determined by the V3 field being accessed. It always has
+      property fields value, timeStamp, alarm, and display. In addition if the
+      value field is not an array a control property field. NOTE: It might be
+      better to look at the record support entry table to determine what
+      property fields to include.</dd>
   <dt>destroy</dt>
-    <dd>x</dd>
+    <dd>This is called by whoever accesses the V3Channel. For example remote
+      PVAccess calls this when the client disconnects from the channel.</dd>
   <dt>getRequesterName</dt>
-    <dd>x</dd>
+    <dd>Get the requester that created the V3Channel.</dd>
   <dt>message</dt>
-    <dd>x</dd>
+    <dd>This is a method that can be called by any code associated with the
+      V3Channel. It just passes the message to the requester.</dd>
   <dt>getProvider</dt>
-    <dd>x</dd>
+    <dd>This returns the provider which is V3ChannelProvider.</dd>
   <dt>getRemoteAddress</dt>
-    <dd>x</dd>
+    <dd>This returns String("local").</dd>
   <dt>getConnectionStatus</dt>
-    <dd>x</dd>
+    <dd>This returns Channel::CONNECTED;</dd>
   <dt>getChannelRequester</dt>
-    <dd>x</dd>
+    <dd>This gets the requester that asked to create the channel.</dd>
   <dt>isConnected</dt>
-    <dd>x</dd>
-  <dt>GetFieldRequester</dt>
-    <dd>x</dd>
+    <dd>Always returns true.</dd>
+  <dt>getField</dt>
+    <dd>This returns the introspection interface created by init.</dd>
   <dt>getAccessRights</dt>
-    <dd>x</dd>
+    <dd>This is currentky throws an exception. As stated in the TODO list this
+      should interact with the V3 access security system.</dd>
   <dt>createChannelProcess</dt>
-    <dd>x</dd>
+    <dd>This creates a V3ChannelProcess and then call V3ChannelProcess::init.
+      Process is implemented via a V3 dbPutNotify to the .PROC field of the
+      record.</dd>
   <dt>createChannelGet</dt>
-    <dd>x</dd>
+    <dd>This creates a V3ChannelGet and then calls V3ChannelGet::init. The
+      implementation uses V3Util to do most of the work. See V3Util below for
+      details. It is responsible for creating the PVStructure that holds the
+      data and for getting data from the V3 record and putting it into the
+      PVStructure. If an option to process is given then the record is
+      processed via a dbPutNotify to the PROC field before data is fetched.
+      Note that display and control data is only returned for the first get,
+      i.e. display and control data do not change.</dd>
   <dt>createChannelPut</dt>
-    <dd>x</dd>
+    <dd>This creates a V3ChannelPut and then calls V3ChannelPut::init. The
+      implementation uses V3Util to do most of the work. See V3Util below for
+      details. It is responsible for creating the PVStructure that holds the
+      data and for getting/putting data between the V3 record and the
+      PVStructure. Although properties alarm, timeStamp, control, and display
+      can be requested they can not be modified because V3 does not allow them
+      to be changed by a client. If a V3 dbPut to a field has side effects than
+      a put results in a call to the V3 dbPut. Examples are a put to the SCAN
+      field. It actually changes the scanning mechanism for the record. If a V3
+      dbPut does not have side effects other than causing a record to process a
+      put does NOT result in a call to the V3 dbPut. Instead processing is
+      determined by the pvAccess client. If the client requests processing the
+      normal pvAccess semantics are used, i. e. the record is processed via a
+      dbPutNotify to the PROC field after the data is written into the V3
+      record.</dd>
   <dt>createChannelPutGet</dt>
-    <dd>x</dd>
+    <dd>This is not implemented since it does not make sense for V3 records.
+    </dd>
   <dt>createChannelRPC</dt>
-    <dd>x</dd>
+    <dd>This is not implemented since it does not make sense for V3
+    records.</dd>
   <dt>createMonitor</dt>
-    <dd>x</dd>
+    <dd>This is implemented via a monitior request call to CAV3. See
+      V3CaMonitor below for details.</dd>
   <dt>createChannelArray</dt>
-    <dd>x</dd>
+    <dd>This creates a V3ChannelArray that implements the normal ChannelArray
+      semantics. It uses DBADDR and the RSET to direcly access the array in the
+      V3 record.</dd>
   <dt>printInfo</dt>
-    <dd>x</dd>
-  <dt>removeChannelProcess</dt>
-    <dd>x</dd>
-  <dt>removeChannelGet</dt>
-    <dd>x</dd>
-  <dt>removeChannelPut</dt>
-    <dd>x</dd>
-  <dt>removeChannelMonitor</dt>
-    <dd>x</dd>
-  <dt>removeChannelArray</dt>
-    <dd>x</dd>
+    <dd>This just prints a short message.</dd>
 </dl>
 
-<h4>V3Util</h4>
+<h4 id="L334">V3Util</h4>
+
+<p>This does most of the work related to transfering data between a PVStructure
+and a V3 record. All methods are static and are called by V3ChannelGet,
+V3ChannelPut, etc. Each first calls getProperty which returns a mask that is
+passed to the other methods. The mask bits show a combination of what the
+requester requested and characteristics of the V3 field being accessed. The
+mask has the following bits:</p>
+<dl>
+  <dt>processBit</dt>
+    <dd>The client has requested that the record be processes as part of a
+      ChannelGet::get or a ChannelPut::put.</dd>
+  <dt>shareArrayBit</dt>
+    <dd>The client has specified that array data be shared, e. g. has set
+      record[shareData=true], In this case no copy of the array data is
+      created. Instead data is transfered directly between network buffers and
+      the data array in the V3 record. If this is specified the client must
+      understand that if an array is split between network buffers the array
+      may change between buffers.</dd>
+  <dt>scalarValueBit</dt>
+    <dd>The V3 field is a scalar.</dd>
+  <dt>arrayValueBit</dt>
+    <dd>The V3 field is an array.</dd>
+  <dt>enumValueBit</dt>
+    <dd>The V3 field is a DBF_ENUM, DBF_MENU, or DBF_DEVICE.</dd>
+  <dt>timeStampBit</dt>
+    <dd>The rrequester has requsted the timeStamp.</dd>
+  <dt>alarmBit</dt>
+    <dd>The requester has requested alarm info.</dd>
+  <dt>displayBit</dt>
+    <dd>The requseter has requested display info.</dd>
+  <dt>controlBit</dt>
+    <dd>The requester has requested control info.</dd>
+  <dt>noAccessBit</dt>
+    <dd>The V3 field is a no access field. The client will not be allows any
+      access to the field.</dd>
+  <dt>noModBit</dt>
+    <dd>The V3 field is a no mod field. The client will not be allowed to
+      modify the field.</dd>
+  <dt>dbPutBit</dt>
+    <dd>Side effects occur if a dbPut is issued to the field. ChannelPut will
+      issue a dbPutField for such fields instead of directly modifying the
+      field..</dd>
+  <dt>isLinkBit</dt>
+    <dd>Is the field a link field? Link fields require special handling for
+      both get and put.</dd>
+</dl>
 
 <p>V3Util is defined as:</p>
 <pre>class V3Util {
@@ -284,25 +427,36 @@ public:
 <p>where</p>
 <dl>
   <dt>getProperties</dt>
-    <dd>x</dd>
+    <dd>As mentioned that computes the mask discussed above.</dd>
   <dt>createPVStructure</dt>
-    <dd>x</dd>
+    <dd>This method creates a PVStructure that holds data that is transfered
+      between pvAccess and the V3 record. It uses a combination of the mask
+      computed by gerProperties and the V3 DbAddr to determine the contents of
+      the PVStructure.</dd>
   <dt>getPropertyData</dt>
-    <dd>x</dd>
+    <dd>This gets display and control info from the V3 record. Note that this
+      is called only once by V3ChannelGet or V3ChannelPut.</dd>
   <dt>get</dt>
-    <dd>x</dd>
+    <dd>This gets data from the V3 record and puts it into the PVStructure.</dd>
   <dt>put</dt>
-    <dd>x</dd>
+    <dd>This takes data from the PVStructure and puts it into the V3 record.
+      Only the value field can be changed.</dd>
   <dt>putField</dt>
-    <dd>x</dd>
+    <dd>This transfers data from the PVfield to the V3 field via a call to
+      dbPutField.</dd>
   <dt>getScalarType</dt>
-  ` 
-    <dd>x</dd>
+    <dd>This gets the scalar type associated for the V3 field being
+    accessed.</dd>
 </dl>
 
-<h4>V3Array</h4>
+<h4 id="L446">V3Array</h4>
 
-<h4>V3Array</h4>
+<p>This creates special implementations of PVByteArray, ... , PVStringArray
+that access the corresponding array types in the V3 record. It provides the
+ability to share data instead of making copies. It gets and puts array lengths
+via the V3 record support entry table methods. Note that it has speciaized
+methods for all of get, put, serialize, and deserialize that are not provided
+by PVDataCreate,</p>
 
 <p>V3Array is defined as:</p>
 <pre>class V3ValueArrayCreate {
@@ -321,22 +475,33 @@ extern V3ValueArrayCreate *getV3ValueArrayCreate();</pre>
 <p>where</p>
 <dl>
   <dt>createByteArray</dt>
-    <dd>x</dd>
+    <dd>Create a PVByteArray attached to a DBF_CHAR or DBF_UCHAR array
+    field.</dd>
   <dt>createShortArray</dt>
-    <dd>x</dd>
+    <dd>Create a PVShortArray attached to a DBF_SHORT or DBF_USHORT array
+    field.</dd>
   <dt>createIntArray</dt>
-    <dd>x</dd>
+    <dd>Create a PVIntArray attached to a DBF_LONG or DBF_ULONG array
+    field.</dd>
   <dt>createFloatArray</dt>
-    <dd>x</dd>
+    <dd>Create a PVFloatArray attached to a DBF_FLOATarray field.</dd>
   <dt>createDoubleArray</dt>
-    <dd>x</dd>
+    <dd>Create a PVDoubleArray attached to a DBF_DOUBLE array field.</dd>
   <dt>createStringArray</dt>
-    <dd>x</dd>
+    <dd>Create a PVFloatArray attached to a DBF_STRING array field. Note that
+      it has special semantics to handle the fixed size strings that V3
+      supports.</dd>
 </dl>
 
-<h4>V3CAMonitor</h4>
+<h4 id="L485">V3CAMonitor</h4>
 
-<h4>V3CAMonitor</h4>
+<p>In V3 dbEvent is what implements db_post_event, which is what is called when
+a field value changes in a V3 record. But dbEvent just passes this to V3CA.
+Thus the only way to trap V3 monitors is via a call to ca_create_subscription.
+The implementation takes only the following from the CAV3 event callback:
+scalar value, alarm status and sererity, and the timeStamp. All other data,
+e.g. array values, are taken from the record as a result of the CAV3 event
+callback. </p>
 
 <p>V3CAMonitor provides an enum that describes the data type of a V3 field as
 seen by pvData.</p>
@@ -353,26 +518,21 @@ seen by pvData.</p>
 <p>where</p>
 <dl>
   <dt>v3Enum</dt>
-    <dd>This is for a DBF_ENUM field. A pvData enumerated structure is created
-      for this. The monitor request will be a DBR_TIME_ENUM.</dd>
+    <dd>A pvData enumerated structure is created for this. The monitor request
+      will be a DBR_TIME_ENUM.</dd>
   <dt>v3Byte</dt>
-    <dd>This is for a DBF_CHAR or DBF_UCHAR field. The monitor request will be
-      a DBR_TIME_CHAR.</dd>
+    <dd>The monitor request will be a DBR_TIME_CHAR.</dd>
   <dt>v3Short</dt>
-    <dd>This is for a DBF_SHORT or DBF_UCHAR field. The monitor request will be
-      a DBR_TIME_SHORT.</dd>
+    <dd>The monitor request will be a DBR_TIME_SHORT.</dd>
   <dt>v3Int</dt>
-    <dd>This is for a DBF_LONG or DBF_ULONG field. The monitor request will be
-      a DBR_TIME_LONG.</dd>
+    <dd>The monitor request will be a DBR_TIME_LONG.</dd>
   <dt>v3Float</dt>
-    <dd>This is for a DBF_FLOAT field. The monitor request will be a
-      DBR_TIME_FLOAT.</dd>
+    <dd>The monitor request will be a DBR_TIME_FLOAT.</dd>
   <dt>v3Double</dt>
-    <dd>This is for a DBF_DOUBLE field. The monitor request will be a
-      DBR_TIME_DOUBLE.</dd>
+    <dd>The monitor request will be a DBR_TIME_DOUBLE.</dd>
   <dt>v3String</dt>
-    <dd>This is for a DBF_STRING field. The monitor request will be a
-      DBR_TIME_STRING.</dd>
+    <dd>The monitor request will be a DBR_TIME_STRING. Note that for strings
+      data is taken from the record not from CAV3.</dd>
 </dl>
 
 <p>Next a C structure is defined in which data from CAV3 is put. Each time CAV3
@@ -381,7 +541,7 @@ calls the event callback the CAV3 data is copied to this structure.</p>
     CAV3Data();
     ~CAV3Data();
     /* The following have new values after each data event*/
-    union { //only used for scalar values
+    union { //only used for scalar values.
         int8   byteValue;
         int16  shortValue;
         int32  intValue;
@@ -425,16 +585,15 @@ public:
 
 <p>where</p>
 <dl>
-  <dt>~CAV3MonitorRequester</dt>
-    <dd>x</dd>
   <dt>exceptionCallback</dt>
-    <dd>x</dd>
+    <dd>Called when CAV3 calls the exception callback.</dd>
   <dt>connectionCallback</dt>
-    <dd>x</dd>
+    <dd>Called when CAV3 calls the connection callback.</dd>
   <dt>accessRightsCallback</dt>
-    <dd>x</dd>
+    <dd>Called when CAV3 calls the access rights callback,</dd>
   <dt>eventCallback</dt>
-    <dd>x</dd>
+    <dd>Called when CAV3 calls the event callback. The data in CAV3Data is
+      updated before this is called,</dd>
 </dl>
 
 <p>Finally the interface for CAV3Monitor:</p>
@@ -456,27 +615,27 @@ private:
 
 <p>where</p>
 <dl>
-  <dt>CAV3Monitor</dt>
-    <dd>x</dd>
-  <dt>~CAV3Monitor</dt>
-    <dd>x</dd>
   <dt>connect</dt>
-    <dd>x</dd>
+    <dd>Ask to connect. This calls ca_create_channel and
+      ca_replace_access_rights_event.</dd>
   <dt>start</dt>
-    <dd>x</dd>
+    <dd>This calls ca_create_subscription.</dd>
   <dt>stop</dt>
-    <dd>x</dd>
+    <dd>This calls ca_clear_subscription.</dd>
   <dt>getStatusString</dt>
-    <dd>x</dd>
+    <dd>This returns ca_message(status),</dd>
   <dt>hasReadAccess</dt>
-    <dd>x</dd>
+    <dd>This calls ca_read_access. This will always be true because CAV3 treats
+      this a local rather than remote client.</dd>
   <dt>hasWriteAccess</dt>
-    <dd>x</dd>
+    <dd>This calls ca_write_access. This will always be true because CAV3
+      treats this a local rather than remote client.</dd>
   <dt>isConnected</dt>
-    <dd>x</dd>
+    <dd>This calls ca_state to determine connection state. If connected this
+      should always return true.</dd>
 </dl>
 
-<h4>V3CAContext</h4>
+<h4 id="L645">V3CAContext</h4>
 
 <p>CAV3Monitor calls CAV3 in order to monitor changes to the V3 records. In
 order to do this it must call ca_context_create(ca_enable_preemptive_callback).
@@ -537,7 +696,7 @@ private:
 </dl>
 <hr />
 
-<h2 style="text-align: center">License Agreement</h2>
+<h2 style="text-align: center" id="L697">License Agreement</h2>
 <hr />
 <pre>Copyright (c) 2008 Martin R. Kraimer
 Copyright (c) 2007 Control System Laboratory,
