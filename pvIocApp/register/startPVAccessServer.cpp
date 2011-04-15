@@ -75,7 +75,6 @@ static const iocshFuncDef startPVAccessServerFuncDef = {
     "startPVAccessServer", 0, 0};
 static void startPVAccessServerCallFunc(const iocshArgBuf *args)
 {
-    printf("startPVAccessServer\n");
     if(myRun!=0) {
         printf("server already started\n");
         return;

@@ -9,7 +9,7 @@
 
 <body>
 <h1 style="text-align: center">EPICS pvIOCCPP<br />
-2011.04.13</h1>
+2011.04.15</h1>
 
 <p>Contents</p>
 
@@ -55,12 +55,13 @@ license</a> described at the end of this document.</p>
       record scanning, and extensible support.</dd>
 </dl>
 
-<p>For pvData and pvAccess both Java and C++ implementations are available. For
-pvIOC the Java implementation is named javaIOC and is available.</p>
+<p>For pvData and pvAccess both Java and C++ implementations are available.</p>
 
 <p>At the present time the only part of pvIOCCP that is implemented is pvAccess
-to V3 records. It is all that is described in this document. A complete Java
-implemantation is available but it can not be used inside a V3 IOC.</p>
+to V3 records. It is all that is described in this document. </p>
+
+<p>A complete Java implemantation is available but it can not be used inside a
+V3 IOC.</p>
 <hr />
 
 <h2 style="text-align: center" id="L66">V3Channel</h2>
@@ -68,12 +69,11 @@ implemantation is available but it can not be used inside a V3 IOC.</p>
 
 <h3 id="L70">Introduction</h3>
 
-<p>V3Channel is an implementation of pvAccess Channel that provides access to
-V3 records. It can be used accesss V3 records by other code in the same IOC or
-by pvAccess network clients via remote pvAccess. It implements channelProcess,
-channelGet, channelPut, channelArray, and Monitor. It does not implement
-channelPutGet or channelRPC since, at least for now, these do not apply to V3
-records.</p>
+<p>V3Channel provides access to V3 records. It can be used accesss V3 records
+by other code in the same IOC or by pvAccess network clients via remote
+pvAccess. It implements channelProcess, channelGet, channelPut, channelArray,
+and Monitor. It does not implement channelPutGet or channelRPC since, at least
+for now, these do not apply to V3 records.</p>
 
 <p>The basic idea is to map what V3 records provide into a PVStruructure that
 has the same information. For example if a client asks for a ChannelGet for
@@ -107,7 +107,8 @@ The main remaining tasks are:
   <dt>Access Security</dt>
     <dd>Since V3Channnel is not using any of the remote part of V3CA, it
       "sidesteps" access security. The V3 access security system is independent
-      of CAV3 so it is possible to make V3Channel attach to it directly.</dd>
+      of CAV3 so V3Channel will be able to implement access security without
+      going through V3CA but this has not been done.</dd>
   <dt>Monitor Algorithm</dt>
     <dd>The javaIOC supports an extensible set of monitor algorithms. It
       provides support for onChange and onPercentChange but allows additional
@@ -133,10 +134,11 @@ build system and is built as an EPICS application. To use V3Channel do the
 following:</p>
 <dl>
   <dt>Create an epics application</dt>
-    <dd>Look at the example to see how to get started.</dd>
+    <dd>Look at the example to see how to get started or use MakeBaseApp that
+      comes with EPICS base.</dd>
   <dt>configure/RELEASE</dt>
     <dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
-      <pre>VBASE=/home/mrk/hg
+      <pre>PVBASE=/home/mrk/hg
 PVDATA=${PVBASE}/pvDataCPP
 PVACCESS=${PVBASE}/pvAccessCPP
 PVIOC=${PVBASE}/pvIOCCPP
@@ -161,18 +163,18 @@ include "pvIOC.dbd"
 <p>The implementation consists of the following header files:</p>
 <dl>
   <dt>v3Channel.h</dt>
-    <dd>The V3Channel interface. It implements both ChannelProvider and
-      Channel. For example this is what remote pvAccess sees.</dd>
+    <dd>The V3Channel interface. It defines extensions for both ChannelProvider
+      and Channel. This is what client code including remote pvAccess sees.</dd>
   <dt>v3Util.h</dt>
     <dd>The interace for transfering data between V3 records and pvData, i. e.
       the code that converts between the V3 data and pvData.</dd>
   <dt>v3Array.h</dt>
     <dd>Because arrays are more complex than scalar data they are handled by a
-      separate interface instead of by v3util itself.</dd>
+      separate interface instead of by v3Util itself.</dd>
   <dt>v3CAMonitor.h</dt>
     <dd>db_post_event is implement in code (dbEvent) that passes events
-      directly to CAV3. This the only way V3Channel can trap monitors is via
-      CAV3. But V3Channel only uses CAV3 for scalar data, timeStamp, and
+      directly to CAV3. Thus the only way V3Channel can trap monitors is via
+      CAV3. V3Channel only uses CAV3 for scalar numeric data, timeStamp, and
       alarms. All other monitored data is obtained from the V3 record
     itself.</dd>
   <dt>CAV3Context.h</dt>
@@ -180,7 +182,7 @@ include "pvIOC.dbd"
     context.</dd>
 </dl>
 
-<p>Associated with each header file is a corrseponding implementation file
+<p>Associated with each header file is a corresponding implementation file
 which has the same file name as the header but with an extension of ".cpp". The
 remainder of this section gives a brief description of each of these software
 components with an emphasis on how data is converted between pvData and data in
@@ -221,6 +223,7 @@ public:
     virtual ChannelFind *channelFind(String channelName,ChannelFindRequester *channelFindRequester);
     virtual Channel *createChannel(String channelName,ChannelRequester *channelRequester,short priority);
     virtual Channel *createChannel(String channelName,ChannelRequester *channelRequester,short priority,String address);
+    static void removeChannel(ChannelListNode &amp;node);
 private:
  ...
 };</pre>
@@ -250,7 +253,7 @@ public:
     V3Channel(
         V3ChannelProvider &amp;provider,ChannelRequester &amp;requester,String name,
         std::auto_ptr&lt;DbAddr&gt; addr);
-    void init();
+    ChannelListNode&amp; init();
     virtual void destroy();
     virtual String getRequesterName();
     virtual void message(String message,MessageType messageType);
@@ -316,7 +319,7 @@ private:
   <dt>getField</dt>
     <dd>This returns the introspection interface created by init.</dd>
   <dt>getAccessRights</dt>
-    <dd>This is currentky throws an exception. As stated in the TODO list this
+    <dd>This is currently throws an exception. As stated in the TODO list this
       should interact with the V3 access security system.</dd>
   <dt>createChannelProcess</dt>
     <dd>This creates a V3ChannelProcess and then call V3ChannelProcess::init.
@@ -325,12 +328,10 @@ private:
   <dt>createChannelGet</dt>
     <dd>This creates a V3ChannelGet and then calls V3ChannelGet::init. The
       implementation uses V3Util to do most of the work. See V3Util below for
-      details. It is responsible for creating the PVStructure that holds the
-      data and for getting data from the V3 record and putting it into the
-      PVStructure. If an option to process is given then the record is
-      processed via a dbPutNotify to the PROC field before data is fetched.
-      Note that display and control data is only returned for the first get,
-      i.e. display and control data do not change.</dd>
+      details. If an option to process is given then the record is processed
+      via a dbPutNotify to the PROC field before data is fetched. Note that
+      display and control data is only returned for the first get, i.e. display
+      and control data do not change.</dd>
   <dt>createChannelPut</dt>
     <dd>This creates a V3ChannelPut and then calls V3ChannelPut::init. The
       implementation uses V3Util to do most of the work. See V3Util below for
@@ -374,7 +375,7 @@ requester requested and characteristics of the V3 field being accessed. The
 mask has the following bits:</p>
 <dl>
   <dt>processBit</dt>
-    <dd>The client has requested that the record be processes as part of a
+    <dd>The client has requested that the record be processed as part of a
       ChannelGet::get or a ChannelPut::put.</dd>
   <dt>shareArrayBit</dt>
     <dd>The client has specified that array data be shared, e. g. has set
@@ -383,22 +384,22 @@ mask has the following bits:</p>
       the data array in the V3 record. If this is specified the client must
       understand that if an array is split between network buffers the array
       may change between buffers.</dd>
-  <dt>scalarValueBit</dt>
-    <dd>The V3 field is a scalar.</dd>
-  <dt>arrayValueBit</dt>
-    <dd>The V3 field is an array.</dd>
-  <dt>enumValueBit</dt>
-    <dd>The V3 field is a DBF_ENUM, DBF_MENU, or DBF_DEVICE.</dd>
   <dt>timeStampBit</dt>
-    <dd>The rrequester has requsted the timeStamp.</dd>
+    <dd>The requester has requsted the timeStamp.</dd>
   <dt>alarmBit</dt>
     <dd>The requester has requested alarm info.</dd>
   <dt>displayBit</dt>
     <dd>The requseter has requested display info.</dd>
   <dt>controlBit</dt>
     <dd>The requester has requested control info.</dd>
+  <dt>scalarValueBit</dt>
+    <dd>The V3 field is a scalar.</dd>
+  <dt>arrayValueBit</dt>
+    <dd>The V3 field is an array.</dd>
+  <dt>enumValueBit</dt>
+    <dd>The V3 field is a DBF_ENUM, DBF_MENU, or DBF_DEVICE.</dd>
   <dt>noAccessBit</dt>
-    <dd>The V3 field is a no access field. The client will not be allows any
+    <dd>The V3 field is a no access field. The client will not be allowed any
       access to the field.</dd>
   <dt>noModBit</dt>
     <dd>The V3 field is a no mod field. The client will not be allowed to
@@ -435,7 +436,9 @@ public:
       the PVStructure.</dd>
   <dt>getPropertyData</dt>
     <dd>This gets display and control info from the V3 record. Note that this
-      is called only once by V3ChannelGet or V3ChannelPut.</dd>
+      is called only once by V3ChannelGet, V3ChannelPut, and V3ChannelMonitor.
+      This only the first get or monitor will cause the property data to be
+      sent to the client.</dd>
   <dt>get</dt>
     <dd>This gets data from the V3 record and puts it into the PVStructure.</dd>
   <dt>put</dt>
@@ -452,11 +455,11 @@ public:
 <h4 id="L446">V3Array</h4>
 
 <p>This creates special implementations of PVByteArray, ... , PVStringArray
-that access the corresponding array types in the V3 record. It provides the
-ability to share data instead of making copies. It gets and puts array lengths
-via the V3 record support entry table methods. Note that it has speciaized
-methods for all of get, put, serialize, and deserialize that are not provided
-by PVDataCreate,</p>
+that access the corresponding array types in the V3 record. Except for
+PVStringArray it provides the ability to share data instead of making copies.
+It gets and puts array lengths via the V3 record support entry table methods.
+Note that it has speciaized methods for all of get, put, serialize, and
+deserialize that are not provided by PVDataCreate.</p>
 
 <p>V3Array is defined as:</p>
 <pre>class V3ValueArrayCreate {
@@ -519,7 +522,8 @@ seen by pvData.</p>
 <dl>
   <dt>v3Enum</dt>
     <dd>A pvData enumerated structure is created for this. The monitor request
-      will be a DBR_TIME_ENUM.</dd>
+      will be a DBR_TIME_ENUM. For an enum a DBF_ENUM is an index. For pvData
+      it is the index field on an enumerated structure.</dd>
   <dt>v3Byte</dt>
     <dd>The monitor request will be a DBR_TIME_CHAR.</dd>
   <dt>v3Short</dt>
@@ -648,7 +652,11 @@ interaction with CAV3.</p>
 V3CAContext keeps a reference count. This is decremented when
 CAV3Contect::release is called, which is done when a V3CAMonitor is deleted.
 Only when the thread that originally resulted in a V3CAContext exits is the
-V3CAContext deleted.</p>
+V3CAContext deleted. Thus if a single client connects to several V3 records
+each instance of V3Channel and all ChannelGets, etc. for that channel share the
+same context.:q</p>
+
+<p></p>
 
 <p>V4CAContext is defined as:</p>
 <pre>class CAV3Context {
