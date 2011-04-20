@@ -49,6 +49,7 @@ class PVReplace;
 class PVRecordCreate;
 class PVDatabaseFactory;
 
+typedef Support * const SupportPtr;
 
 class SupportStateFunc {
 public:

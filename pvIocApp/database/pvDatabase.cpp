@@ -8,6 +8,13 @@
 #include <string>
 #include <stdexcept>
 #include <memory>
+#include <cstdio>
+#include <cstddef>
+#include <cstdlib>
+#include <string>
+
+#include <epicsThread.h>
+#include <epicsExit.h>
 
 #include "pvIntrospect.h"
 #include "pvData.h"
@@ -17,94 +24,299 @@
 
 namespace epics { namespace pvIOC { 
 
+typedef typename RecordMap::iterator RecordMapIterator;
+typedef typename StructureMap::iterator StructureMapIterator;
+
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
+int PVDatabase::messageQueueSize = 300;
+
 PVDatabase::PVDatabase(String name)
+: name(name),
+  isMaster(((name.compare("master")==0) ? true : false)),
+  messageQueue(messageQueueSize),
+  executor(0),
+  executorNode(0)
 {
-    throw std::logic_error(String("Not Implemented"));
+    if(name.compare("master")==0) {
+        isMaster = true;
+        executor = new Executor(String("PVDatabaseMessage"),lowestPriority);
+        executorNode = executor->createNode(this);
+    }
 }
 
 PVDatabase::~PVDatabase()
 {
-    throw std::logic_error(String("Not Implemented"));
+    if(isMaster) delete executor;
+}
+
+String PVDatabase::getRequesterName()
+{
+    return name;
+}
+
+void PVDatabase::command() // handles messages
+{
+    while(true) {
+        String message;
+        MessageType messageType;
+        MessageNode *messageNode = 0;
+        int numOverrun = 0;
+        {
+            Lock xx(databaseMutex);
+            messageNode = messageQueue.get();
+            numOverrun = messageQueue.getClearOverrun();
+            if(messageNode==0) break;
+            message = messageNode->getMessage();
+            messageType = messageNode->getMessageType();
+            messageNode->setMessageNull();
+        }
+        {
+            Lock xx(requesterMutex);
+            if(requesterList.isEmpty()) {
+                FILE *out = stdout;
+                if(messageType!=infoMessage) out = stderr;
+                if(numOverrun>0) {
+                     fprintf(out,"%s numberOverrun %d dropped messages\n",
+                         messageTypeName[messageType].c_str(),
+                         numOverrun);
+                }
+             } else {
+                RequesterListNode *node = requesterList.getHead();
+                while(node!=0) {
+                    Requester &requester = node->getObject();
+                    requester.message(message,messageType);
+                    if(numOverrun>0) {
+                        char buffer[20];
+                        sprintf(buffer,"%d dropped messages",numOverrun);
+                        requester.message(buffer,messageType);
+                    }
+                    node = requesterList.getNext(*node);
+                }
+            }
+        }
+    }
+}
+
+void PVDatabase::message(String message,MessageType messageType)
+{
+    if(isMaster) {
+        bool execute;
+        {
+            Lock xx(databaseMutex);
+            if(messageQueue.isEmpty()) execute = true;
+            messageQueue.put(message,messageType,true);
+        }
+        if(execute) executor->execute(executorNode);
+        return;
+    }
+    Lock xx(requesterMutex);
+    if(requesterList.isEmpty()) {
+        FILE *out = stdout;
+        if(messageType!=infoMessage) out = stderr;
+        fprintf(out,"%s %s\n",
+             messageTypeName[messageType].c_str(),
+             message.c_str());
+     } else {
+        RequesterListNode *node = requesterList.getHead();
+        while(node!=0) {
+            Requester &requester = node->getObject();
+            requester.message(message,messageType);
+            node = requesterList.getNext(*node);
+        }
+    }
 }
 
 String PVDatabase::getName()
 {
-    throw std::logic_error(String("Not Implemented"));
+    return name;
 }
 
 void PVDatabase::mergeIntoMaster()
 {
-    throw std::logic_error(String("Not Implemented"));
+    if(isMaster) return;
+    PVDatabaseFactory &factory = PVDatabaseFactory::getPVDatabaseFactory();
+    PVDatabase &master = factory.getMaster();
+    Lock xx(databaseMutex);
+    master.merge(recordMap,structureMap);
 }
 
-PVRecord *PVDatabase::findRecord(String recordName)
+void PVDatabase::merge(RecordMap recMap,StructureMap structMap)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    RecordMapIterator iter = recMap.begin();
+    while(iter!=recMap.end()) {
+        String key = iter->first;
+        PVRecordPtr pvRecord = iter->second;
+        recordMap.insert(RecordMap::value_type(key,pvRecord));
+        recMap.erase(iter);
+        iter = recMap.begin();
+    }
+    StructureMapIterator iter1 = structMap.begin();
+    while(iter1!=structMap.end()) {
+        String key = iter1->first;
+        PVStructurePtr pvStructure = iter1->second;
+        structureMap.insert(StructureMap::value_type(key,pvStructure));
+        structMap.erase(iter1);
+        iter1 = structMap.begin();
+    }
+    
 }
 
-bool PVDatabase::addRecord(std::auto_ptr<PVRecord> record)
+PVRecordPtr PVDatabase::findRecord(String recordName)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    RecordMapIterator iter = recordMap.find(recordName);
+    if(iter!=recordMap.end()) {
+        return iter->second;
+    }
+    return 0;
+}
+
+bool PVDatabase::addRecord(PVRecordPtr record)
+{
+    {
+        Lock xx(databaseMutex);
+        String key = record->getRecordName();
+        RecordMapIterator iter = recordMap.find(key);
+        if(iter!=recordMap.end()) {
+             message(String("PVDatabase::addRecord " + key + "already exists"),
+                 warningMessage);
+             return false;
+        }
+        if(!isMaster) {
+            PVDatabaseFactory &factory =
+                 PVDatabaseFactory::getPVDatabaseFactory();
+            PVDatabase &master = factory.getMaster();
+            if(master.findRecord(key)!=0) {
+                message(String(
+                    "PVDatabase::addRecord " + key + "already exists in master"),
+                    warningMessage);
+                return false;
+            }
+        }
+        recordMap.insert(RecordMap::value_type(key,record));
+    }
+    if(isMaster) record->addRequester(*this);
+    return true;
 }
 
 bool PVDatabase::removeRecord(PVRecord &record)
 {
-    throw std::logic_error(String("Not Implemented"));
+    if(isMaster) record.removeRequester(*this);
+    Lock xx(databaseMutex);
+    String key = record.getRecordName();
+    RecordMapIterator iter = recordMap.find(key);
+    if(iter!=recordMap.end()) {
+        recordMap.erase(iter);
+        return true;
+    }
+    return false;
 }
 
 void PVDatabase::getRecordNames(PVStringArray &result)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    int32 size = recordMap.size();
+    String *strings = new String[size];
+    RecordMapIterator iter = recordMap.begin();
+    int index = 0;
+    while(iter!=recordMap.end()) {
+        String key = iter->first;
+        strings[index++] = key;
+        iter = recordMap.begin();
+    }
+    result.put(0,size,strings,0);
 }
 
-PVRecord * const * PVDatabase::getRecords()
+
+PVStructurePtr PVDatabase::findStructure(String structureName)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    StructureMapIterator iter = structureMap.find(structureName);
+    if(iter!=structureMap.end()) {
+        return iter->second;
+    }
+    if(isMaster) return 0;
+    PVDatabaseFactory &factory = PVDatabaseFactory::getPVDatabaseFactory();
+    PVDatabase &master = factory.getMaster();
+    return master.findStructure(structureName);
 }
 
-PVStructure *PVDatabase::findStructure(String structureName)
+bool PVDatabase::addStructure(PVStructurePtr structure)
 {
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool PVDatabase::addStructure(std::auto_ptr<PVStructure> structure)
-{
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    String key = structure->getField()->getFieldName();
+    StructureMapIterator iter = structureMap.find(key);
+    if(iter!=structureMap.end()) return false;
+    if(!isMaster) {
+        PVDatabaseFactory &factory =
+             PVDatabaseFactory::getPVDatabaseFactory();
+        PVDatabase &master = factory.getMaster();
+        if(master.findStructure(key)!=0) return false;
+    }
+    structureMap.insert(StructureMap::value_type(key,structure));
+    return true;
 }
 
 bool PVDatabase::removeStructure(PVStructure &structure)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    String key = structure.getField()->getFieldName();
+    StructureMapIterator iter = structureMap.find(key);
+    if(iter!=structureMap.end()) {
+        structureMap.erase(iter);
+        return true;
+    }
+    return false;
 }
 
 void PVDatabase::getStructureNames(PVStringArray &result)
 {
-    throw std::logic_error(String("Not Implemented"));
-}
-
-PVStructure * const *PVDatabase::getStructures()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void PVDatabase::message(
-        String message,
-        MessageType messageType)
-{
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(databaseMutex);
+    int32 size = structureMap.size();
+    String *strings = new String[size];
+    StructureMapIterator iter = structureMap.begin();
+    int index = 0;
+    while(iter!=structureMap.end()) {
+        String key = iter->first;
+        strings[index++] = key;
+        iter = structureMap.begin();
+    }
+    result.put(0,size,strings,0);
 }
 
 void PVDatabase::addRequester(Requester &requester)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(requesterMutex);
+    RequesterListNode *node = requesterList.getHead();
+    while(node!=0) {
+        Requester &xxx = node->getObject();
+        if(&xxx==&requester) {
+            requester.message(
+                String("already on requesterList"),warningMessage);
+            return;
+        }
+        node = requesterList.getNext(*node);
+    }
+    node = new RequesterListNode(requester);
+    requesterList.addTail(*node);
 }
 
 void PVDatabase::removeRequester(Requester &requester)
 {
-    throw std::logic_error(String("Not Implemented"));
+    Lock xx(requesterMutex);
+    RequesterListNode *node = requesterList.getHead();
+    while(node!=0) {
+        Requester &xxx = node->getObject();
+        if(&xxx==&requester) {
+            requesterList.remove(*node);
+            delete node;
+            return;
+        }
+        node = requesterList.getNext(*node);
+    }
 }
 
 void PVDatabase::recordList(
@@ -135,67 +347,43 @@ void PVDatabase::structureToString(
     throw std::logic_error(String("Not Implemented"));
 }
 
-
-PVRecordCreate::PVRecordCreate()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-PVRecordCreate::~PVRecordCreate()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-PVRecordCreate &PVRecordCreate::getPVRecordCreate()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-std::auto_ptr<PVRecord>PVRecordCreate::createPVRecord(
-    String recordName,
-    std::auto_ptr<PVStructure> pvStructure)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-std::auto_ptr<PVStructure> PVRecordCreate::createPVStructure(
-    PVStructure *parent,
-    String fieldName,
-    PVDatabase * const pvDatabase,
-    String structureName)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
 PVDatabaseFactory::PVDatabaseFactory()
+: master(std::auto_ptr<PVDatabase>( new PVDatabase(String("master")))),
+  beingInstalled(std::auto_ptr<PVDatabase>(new PVDatabase(String("beingInstalled"))))
 {
-    throw std::logic_error(String("Not Implemented"));
 }
 
 PVDatabaseFactory::~PVDatabaseFactory()
 {
-    throw std::logic_error(String("Not Implemented"));
-}
-
-PVDatabaseFactory &PVDatabaseFactory::getPVDatabaseFactory()
-{
-    throw std::logic_error(String("Not Implemented"));
 }
 
 std::auto_ptr<PVDatabase> PVDatabaseFactory::create(String name)
 {
-    throw std::logic_error(String("Not Implemented"));
+    return std::auto_ptr<PVDatabase>(new PVDatabase(name));
 }
 
 PVDatabase &PVDatabaseFactory::getMaster()
 {
-    throw std::logic_error(String("Not Implemented"));
+    return *master.get();
 }
 
-PVDatabase *PVDatabaseFactory::getBeingInstalled()
+PVDatabase &PVDatabaseFactory::getBeingInstalled()
 {
-    throw std::logic_error(String("Not Implemented"));
+    return *beingInstalled.get();
 }
 
+static PVDatabaseFactory *pvDatabaseFactory;
+
+static void myDeleteStatic(void*)
+{
+    delete pvDatabaseFactory;
+}
+
+PVDatabaseFactory &PVDatabaseFactory::getPVDatabaseFactory()
+{
+    pvDatabaseFactory = new PVDatabaseFactory();
+    epicsAtExit(&myDeleteStatic,0);
+    return *pvDatabaseFactory;
+}
 
 }}

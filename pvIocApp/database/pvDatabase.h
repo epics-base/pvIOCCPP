@@ -10,11 +10,19 @@
 #include <string>
 #include <stdexcept>
 #include <memory>
+#include <map>
+#include <list>
 
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "pvAccess.h"
-#include "noDefaultMethods.h"
+#include <pvIntrospect.h>
+#include <pvData.h>
+#include <pvAccess.h>
+#include <convert.h>
+#include <linkedList.h>
+#include <lock.h>
+#include <noDefaultMethods.h>
+#include <executor.h>
+#include <messageQueue.h>
+
 #include "support.h"
 
 namespace epics { namespace pvIOC { 
@@ -25,8 +33,6 @@ class PVRecordClient;
 class PVRecord;
 class PVRecordField;
 class PVRecordStructure;
-class PVReplace;
-class PVRecordCreate;
 class PVDatabaseFactory;
 
 
@@ -39,6 +45,27 @@ class RecordProcess;
 class RecordProcessRequester;
 class Support;
 class SupportProcessRequester;
+
+typedef Support * const SupportPtr;
+typedef RecordProcess * const RecordProcessPtr;
+typedef PVDatabase * const PVDatabasePtr;
+typedef PVRecord *const PVRecordPtr;
+typedef PVRecordPtr * const PVRecordPtrArray;
+typedef PVRecordStructure * const PVRecordStructurePtr;
+typedef PVRecordStructurePtr * const PVRecordStructurePtrArray;
+typedef PVRecordField * const PVRecordFieldPtr;
+typedef PVRecordFieldPtr * const PVRecordFieldPtrArray;
+
+// following are for private fields
+typedef epics::pvData::LinkedListNode<epics::pvData::Requester> RequesterListNode;
+typedef epics::pvData::LinkedList<epics::pvData::Requester> RequesterList;
+typedef epics::pvData::LinkedListNode<PVListener> PVListenerListNode;
+typedef epics::pvData::LinkedList<PVListener> PVListenerList;
+typedef epics::pvData::LinkedListNode<PVRecordClient> PVRecordClientListNode;
+typedef epics::pvData::LinkedList<PVRecordClient> PVRecordClientList;
+typedef std::map<epics::pvData::String,PVRecordPtr> RecordMap;
+typedef std::map<epics::pvData::String,epics::pvData::PVStructurePtr> StructureMap;
+// end definitions for private fields
 
 
 class PVListener {
@@ -57,16 +84,24 @@ public:
     virtual void detach(PVRecord &pvRecord) = 0;
 };
 
-class PVRecord : private epics::pvData::NoDefaultMethods {
+class PVRecord :
+    virtual public epics::pvData::Requester,
+    private epics::pvData::NoDefaultMethods
+{
 public:
-    RecordProcess &getRecordProcess();
+    PVRecord(
+        epics::pvData::String recordName,
+        std::auto_ptr<epics::pvData::PVStructure> pvStructure);
+    void destroy();
+    virtual epics::pvData::String getRequesterName();
+    virtual void message(epics::pvData::String message, epics::pvData::MessageType);
+    void toString(epics::pvData::StringBuilder buf) ;
+    void toString(epics::pvData::StringBuilder buf,int indentLevel) ;
+    RecordProcessPtr getRecordProcess();
     void setRecordProcess(RecordProcess &recordProcess);
-    PVRecordField *findPVRecordField(epics::pvData::PVField &pvField);
+    PVRecordField &findPVRecordField(epics::pvData::PVField &pvField);
     PVRecordStructure &getPVRecordStructure();
     epics::pvData::String getRecordName();
-    void message(
-        epics::pvData::String message,
-        epics::pvData::MessageType messageType);
     void addRequester(epics::pvData::Requester &requester);
     void removeRequester(epics::pvData::Requester &requester);
     void lock();
@@ -83,73 +118,102 @@ public:
     void detachClients();
     int getNumberClients();
 private:
-    PVRecord(
-        epics::pvData::String recordName,
-        std::auto_ptr<epics::pvData::PVStructure> pvStructure);
     ~PVRecord();
-    friend class PVRecordCreate;
-    // TBD
+    static epics::pvData::int32 numberRecords;
+    epics::pvData::String recordName;
+    std::auto_ptr<epics::pvData::PVStructure> pvStructure;
+    std::auto_ptr<PVRecordStructure> pvRecordStructure;
+    epics::pvData::int32 id;
+    epics::pvData::int32 depthGroupPut;
+    RecordProcess* recordProcess;
+    epics::pvData::Convert &convert;
+    RequesterList requesterList;
+    PVListenerList listenerList;
+    PVRecordClientList clientList;
+    epics::pvData::Mutex mutex;
+    epics::pvData::Lock recordLock;
+    int lockRecursiveCount;
 };
 
-class PVRecordField : public epics::pvData::Requester , private epics::pvData::NoDefaultMethods {
+class PVRecordField :
+    virtual public epics::pvData::Requester ,
+    virtual public epics::pvData::PostHandler ,
+    private epics::pvData::NoDefaultMethods
+{
 public:
-    Support *getSupport();
+    virtual ~PVRecordField();
+    virtual epics::pvData::String getRequesterName();
+    virtual void message(
+        epics::pvData::String, epics::pvData::MessageType);
+    SupportPtr getSupport();
     void setSupport(Support &support);
-    PVRecordStructure *getParent();
+    PVRecordStructurePtr getParent();
     epics::pvData::PVField &getPVField();
-    void replacePVField(std::auto_ptr<epics::pvData::PVField> pvField);
     epics::pvData::String getFullFieldName();
     epics::pvData::String getFullName();
     PVRecord &getPVRecord();
     void renameField(epics::pvData::String newName);
     bool addListener(PVListener &pvListener);
     void removeListener(PVListener &vListener);
-    void postPut();
+    virtual void postPut();
 private:
     PVRecordField(epics::pvData::PVField &pvField,
-        PVRecordStructure &parent,
+        PVRecordStructurePtr parent,
         PVRecord &pvRecord);
-    ~PVRecordField();
+    void postParent(PVRecordField &subField);
+    void postSubField();
+    void callListener();
+    void createNames();
     friend class PVRecord;
     friend class PVRecordStructure;
-    // TBD
+    PVListenerList listenerList;
+    Support *support;
+    epics::pvData::PVField &pvField;
+    PVRecord &pvRecord;
+    PVRecordStructure* parent;
+    bool isStructure;
+    epics::pvData::String fullName;
+    epics::pvData::String fullFieldName;
 };
 
 class PVRecordStructure : public PVRecordField {
 public:
+    virtual ~PVRecordStructure();
     // array of pointers to PVRecordField`
-    PVRecordField * const *getPVRecordFields();
+    PVRecordFieldPtrArray getPVRecordFields();
     epics::pvData::PVStructure &getPVStructure();
 private:
     PVRecordStructure(epics::pvData::PVStructure &pvStructure,
-        PVRecordStructure &parent,
+        PVRecordStructurePtr parent,
         PVRecord &pvRecord);
-    ~PVRecordStructure();
     friend class PVRecord;
     friend class PVRecordField;
-    // TBD
+    epics::pvData::PVStructure &pvStructure;
+    PVRecordField ** pvRecordFieldPtrArray;
 };
     
-class PVDatabase : public epics::pvData::Requester , private epics::pvData::NoDefaultMethods {
+class PVDatabase :
+     public virtual epics::pvData::Requester,
+     public virtual epics::pvData::Command,
+     private epics::pvData::NoDefaultMethods
+{
 public:
+    virtual ~PVDatabase();
+    virtual epics::pvData::String getRequesterName();
+    virtual void message(
+        epics::pvData::String, epics::pvData::MessageType);
     epics::pvData::String getName();
+    virtual void command();
     void mergeIntoMaster();
-    PVRecord *findRecord(epics::pvData::String recordName);
-    bool addRecord(std::auto_ptr<PVRecord> record);
+    PVRecordPtr findRecord(epics::pvData::String recordName);
+    bool addRecord(PVRecordPtr record);
     bool removeRecord(PVRecord &record);
     void getRecordNames(epics::pvData::PVStringArray &result);
-    // pointer to array of PVRecord
-    PVRecord * const * getRecords();
-    epics::pvData::PVStructure *findStructure(
+    epics::pvData::PVStructurePtr findStructure(
         epics::pvData::String structureName);
-    bool addStructure(std::auto_ptr<epics::pvData::PVStructure> structure);
+    bool addStructure(epics::pvData::PVStructurePtr structure);
     bool removeStructure(epics::pvData::PVStructure &structure);
     void getStructureNames(epics::pvData::PVStringArray &result);
-    // pointer to array of PVStructure
-    epics::pvData::PVStructure * const * getStructures();
-    void message(
-        epics::pvData::String message,
-        epics::pvData::MessageType messageType);
     void addRequester(epics::pvData::Requester &requester);
     void removeRequester(epics::pvData::Requester &requester);
     void recordList(
@@ -165,52 +229,33 @@ public:
         epics::pvData::StringBuilder buf,
         epics::pvData::String regularExpression);
 private:
+    void merge(RecordMap,StructureMap);
     PVDatabase(epics::pvData::String name);
-    ~PVDatabase();
     friend class PVDatabaseFactory;
-    // TBD
-};
-
-class PVRecordCreate : private epics::pvData::NoDefaultMethods {
-public:
-    static PVRecordCreate & getPVRecordCreate();
-    std::auto_ptr<PVRecord> createPVRecord(
-        epics::pvData::String recordName,
-        std::auto_ptr<epics::pvData::PVStructure> pvStructure);
-    std::auto_ptr<epics::pvData::PVStructure> createPVStructure(
-        epics::pvData::PVStructure *parent,
-        epics::pvData::String fieldName,
-        PVDatabase * const pvDatabase,
-        epics::pvData::String structureName);
-private:
-    PVRecordCreate();
-    ~PVRecordCreate();
+    static int messageQueueSize;
+    epics::pvData::String name;
+    RecordMap recordMap;
+    StructureMap structureMap;
+    bool isMaster;
+    epics::pvData::Mutex databaseMutex;
+    epics::pvData::Mutex requesterMutex;
+    RequesterList requesterList;
+    epics::pvData::MessageQueue messageQueue;
+    epics::pvData::Executor *executor;
+    epics::pvData::ExecutorNode *executorNode;
 };
 
 class PVDatabaseFactory : private epics::pvData::NoDefaultMethods {
 public:
+    ~PVDatabaseFactory();
     static PVDatabaseFactory &getPVDatabaseFactory();
     std::auto_ptr<PVDatabase> create(epics::pvData::String name);
     PVDatabase &getMaster();
-    PVDatabase *getBeingInstalled();
+    PVDatabase &getBeingInstalled();
 private:
     PVDatabaseFactory();
-    ~PVDatabaseFactory();
-};
-
-class PVReplace : private epics::pvData::NoDefaultMethods {
-public:
-    static PVReplace & getPVReplace();
-    void replace(PVDatabase &pvDatabase);
-    void replace(PVDatabase &pvDatabase,
-        PVRecord &pvRecord,
-        PVRecordStructure &pvRecordStructure);
-    void replace(PVDatabase &pvDatabase,
-        PVRecord &pvRecord,
-        PVRecordField &pvRecordField);
-private:
-    PVReplace();
-    ~PVReplace();
+    std::auto_ptr<PVDatabase> master;
+    std::auto_ptr<PVDatabase> beingInstalled;
 };
 
 
