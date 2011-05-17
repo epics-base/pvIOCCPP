@@ -11,214 +11,94 @@
 #include "pvIntrospect.h"
 #include "pvData.h"
 #include "noDefaultMethods.h"
-#include "support.h"
 #include "pvDatabase.h"
+
+#include "support.h"
 
 namespace epics { namespace pvIOC { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-SupportState SupportStateFunc::getSupportState(int value)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-RecordProcess::RecordProcess(PVRecord &pvRecord)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-RecordProcess::~RecordProcess()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-RecordProcess &RecordProcess::create(PVRecord &pvRecord)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::destroy()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool RecordProcess::isEnabled()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool RecordProcess::setEnabled(bool value)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool RecordProcess::isActive()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-PVRecord &RecordProcess::getRecord()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool RecordProcess::isTrace()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool RecordProcess::setTrace(bool value)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-SupportState RecordProcess::getSupportState()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::initialize()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::start(AfterStart &afterStart)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::stop()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::uninitialize()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-ProcessToken *RecordProcess::requestProcessToken(
-        RecordProcessRequester &recordProcessRequester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::releaseProcessToken(ProcessToken &processToken)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::forceInactive()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-String RecordProcess::getRecordProcessRequesterName()
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::queueProcessRequest(ProcessToken &processToken)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::process(ProcessToken &processToken,bool leaveActive)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::process(ProcessToken &processToken,
-        bool leaveActive,TimeStamp *timeStamp)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::setInactive(ProcessToken &processToken)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::processContinue(
-    ProcessContinueRequester &processContinueRequester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::setTimeStamp(TimeStamp timeStamp)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-void RecordProcess::getTimeStamp(TimeStamp timeStamp)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-
 Support::Support(String name,PVRecordField &pvRecordField)
+:  supportName(name),
+   pvRecordField(pvRecordField),
+   supportState(readyForInitialize)
 {
-    throw std::logic_error(String("Not Implemented"));
+    
 }
 
 Support::~Support()
 {
-    throw std::logic_error(String("Not Implemented"));
 }
 
-String Support::getSupportName()
+epics::pvData::String Support::getRequesterName()
 {
-    throw std::logic_error(String("Not Implemented"));
+    return supportName;
+}
+
+void Support::message(String message,MessageType messageType)
+{
+    pvRecordField.message(message,messageType);
+}
+
+epics::pvData::String Support::getSupportName()
+{
+    return supportName;
 }
 
 SupportState Support::getSupportState()
 {
-    throw std::logic_error(String("Not Implemented"));
+    return supportState;
 }
 
 PVRecordField &Support::getPVRecordField()
 {
-    throw std::logic_error(String("Not Implemented"));
+    return pvRecordField;
 }
 
 void Support::initialize()
 {
-    throw std::logic_error(String("Not Implemented"));
+    setSupportState(readyForStart);
 }
 
-void Support::start(AfterStart afterStart)
+void Support::start(AfterStart &afterStart)
 {
-    throw std::logic_error(String("Not Implemented"));
+    setSupportState(ready);
 }
 
 void Support::stop()
 {
-    throw std::logic_error(String("Not Implemented"));
+    setSupportState(readyForStart);
 }
 
 void Support::uninitialize()
 {
-    throw std::logic_error(String("Not Implemented"));
+    if(supportState==ready) stop();
+    setSupportState(readyForInitialize);
 }
 
 void Support::process(SupportProcessRequester &supportProcessRequester)
 {
-    throw std::logic_error(String("Not Implemented"));
+    supportProcessRequester.supportProcessDone(requestResultSuccess);
 }
 
 void Support::setSupportState(SupportState state)
 {
-    throw std::logic_error(String("Not Implemented"));
+    supportState = state;
 }
 
 bool Support::checkSupportState(
         SupportState expectedState,
         String message)
 {
-    throw std::logic_error(String("Not Implemented"));
+    if(expectedState==supportState) return true;
+    message += String(" expected supportState ")
+            + SupportStateFunc::name(expectedState)
+            + "but state is " 
+            + SupportStateFunc::name(supportState);
+    pvRecordField.message(message,fatalErrorMessage);
+    return false;
 }
-
 
 }}

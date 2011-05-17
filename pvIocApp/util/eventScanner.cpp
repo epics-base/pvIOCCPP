@@ -1,4 +1,4 @@
-/* install.cpp */
+/* eventScanner.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -14,59 +14,49 @@
 
 #include "support.h"
 #include "pvDatabase.h"
-#include "install.h"
+#include "util.h"
 
 namespace epics { namespace pvIOC { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-
-Install & Install::getInstall()
+EventScanner::EventScanner()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::Install()
+EventScanner::~EventScanner()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::~Install()
+bool EventScanner::removeRecord(
+        PVRecord &pvRecord, String eventName, ThreadPriority scanPriority)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-
-bool Install::installStructures(String xmlFile,Requester &requester)
+std::auto_ptr<EventAnnounce> EventScanner::addEventAnnouncer(
+        String eventName, String announcer)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructures(PVDatabase &pvDatabase,Requester &requester)
+void EventScanner::removeEventAnnouncer(
+        EventAnnounce &eventAnnounce, String announcer)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructure(PVStructure &pvStructure,Requester &requester)
+void EventScanner::toString(StringBuilder buf)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(String xmlFile,Requester &requester)
+void EventScanner::show( StringBuilder buf, String eventName)
 {
     throw std::logic_error(String("Not Implemented"));
 }
-
-bool Install::installRecords(PVDatabase &pvDatabase,Requester &requester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool Install::installRecord(PVRecord &pvRecord,Requester &requester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
 
 }}

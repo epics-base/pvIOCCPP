@@ -39,17 +39,19 @@ public:
     virtual void run();
 private:
     Thread *thread;
-    ServerContextImpl ctx;
+    ServerContextImpl::shared_pointer ctx;
     Event event;
 };
 
 MyRun::MyRun()
-: thread(new Thread(String("pvAccessServer"),lowerPriority,this))
+: thread(new Thread(String("pvAccessServer"),lowerPriority,this)),
+  ctx(ServerContextImpl::create()),
+  event()
 {}
 
 MyRun::~MyRun()
 {
-    ctx.shutdown();
+    ctx->shutdown();
     // we need thead.waitForCompletion()
     event.wait();
     epicsThreadSleep(1.0);
@@ -58,14 +60,14 @@ MyRun::~MyRun()
 
 void MyRun::run()
 {
-    V3ChannelProvider &channelProvider = V3ChannelProvider::getChannelProvider();
-    registerChannelProvider(&channelProvider);
-
-    ctx.setChannelProviderName(channelProvider.getProviderName());
-    ctx.initialize(getChannelAccess());
-    ctx.printInfo();
-    ctx.run(0);
-    ctx.destroy();
+    ChannelProvider::shared_pointer const &channelProvider
+        = V3ChannelProvider::getChannelProvider();
+    registerChannelProvider(channelProvider);
+    ctx->setChannelProviderName(channelProvider->getProviderName());
+    ctx->initialize(getChannelAccess());
+    ctx->printInfo();
+    ctx->run(0);
+    ctx->destroy();
     event.signal();
 }
 

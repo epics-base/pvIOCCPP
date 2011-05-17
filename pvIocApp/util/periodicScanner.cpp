@@ -1,4 +1,4 @@
-/* install.cpp */
+/* periodicScanner.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -14,59 +14,58 @@
 
 #include "support.h"
 #include "pvDatabase.h"
-#include "install.h"
+#include "util.h"
 
 namespace epics { namespace pvIOC { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-
-Install & Install::getInstall()
+PeriodicScanner::PeriodicScanner()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::Install()
+PeriodicScanner::~PeriodicScanner()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::~Install()
+PeriodicScanner& PeriodicScanner::getPeriodicScanner()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-
-bool Install::installStructures(String xmlFile,Requester &requester)
+bool PeriodicScanner::addRecord(PVRecord &pvRecord)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructures(PVDatabase &pvDatabase,Requester &requester)
+bool PeriodicScanner::removeRecord(
+        PVRecord &pvRecord, double rate, ThreadPriority threadPriority)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructure(PVStructure &pvStructure,Requester &requester)
+void PeriodicScanner::toString(StringBuilder buf)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(String xmlFile,Requester &requester)
+void PeriodicScanner::show( StringBuilder buf, ThreadPriority threadPriority)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(PVDatabase &pvDatabase,Requester &requester)
+void PeriodicScanner::show( StringBuilder buf, double rate)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecord(PVRecord &pvRecord,Requester &requester)
+void PeriodicScanner::show(
+     StringBuilder buf, double rate, ThreadPriority threadPriority)
 {
     throw std::logic_error(String("Not Implemented"));
 }
-
 
 }}

@@ -44,7 +44,7 @@ static const iocshFuncDef stopV3ChannelFuncDef = {
 };
 static void stopV3ChannelCallFunc(const iocshArgBuf *args)
 {
-    V3ChannelProvider::getChannelProvider().destroy();
+    V3ChannelProvider::getChannelProvider()->destroy();
 }
 
 static void startV3ChannelRegister(void)

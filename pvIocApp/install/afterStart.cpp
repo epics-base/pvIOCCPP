@@ -1,4 +1,4 @@
-/* install.cpp */
+/* afterStart.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -21,49 +21,64 @@ namespace epics { namespace pvIOC {
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-
-Install & Install::getInstall()
+AfterStartNode::AfterStartNode()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::Install()
+AfterStartNode::~AfterStartNode()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::~Install()
+AfterStart::AfterStart()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-
-bool Install::installStructures(String xmlFile,Requester &requester)
+AfterStart::~AfterStart()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructures(PVDatabase &pvDatabase,Requester &requester)
+std::auto_ptr<AfterStartNode> AfterStart::createNode(
+    AfterStartRequester &requester)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructure(PVStructure &pvStructure,Requester &requester)
+void AfterStart::newAfterStartRegister(NewAfterStartRequester &requester)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(String xmlFile,Requester &requester)
+void AfterStart::newAfterStartUnregister(NewAfterStartRequester &requester)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(PVDatabase &pvDatabase,Requester &requester)
+void AfterStart::requestCallback(
+    AfterStartNode &node,
+    bool afterMerge,
+    ThreadPriority priority)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecord(PVRecord &pvRecord,Requester &requester)
+void AfterStart::callRequesters(bool afterMerge)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::done(AfterStartNode &node)
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+void AfterStart::doneAndRequest(
+    AfterStartNode &node,
+    bool afterMerge,
+    ThreadPriority priority)
 {
     throw std::logic_error(String("Not Implemented"));
 }

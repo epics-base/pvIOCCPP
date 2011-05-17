@@ -1,4 +1,4 @@
-/* install.cpp */
+/* pvDatabase.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -22,48 +22,28 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 
 
-Install & Install::getInstall()
+SupportCreation::SupportCreation(
+    PVDatabase &pvDatabase,Requester &requester)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::Install()
+SupportCreation::~SupportCreation()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::~Install()
+bool SupportCreation::createSupport()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-
-bool Install::installStructures(String xmlFile,Requester &requester)
+bool SupportCreation::initializeSupport()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructures(PVDatabase &pvDatabase,Requester &requester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool Install::installStructure(PVStructure &pvStructure,Requester &requester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool Install::installRecords(String xmlFile,Requester &requester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool Install::installRecords(PVDatabase &pvDatabase,Requester &requester)
-{
-    throw std::logic_error(String("Not Implemented"));
-}
-
-bool Install::installRecord(PVRecord &pvRecord,Requester &requester)
+bool SupportCreation::startSupport(AfterStart &afterStart)
 {
     throw std::logic_error(String("Not Implemented"));
 }

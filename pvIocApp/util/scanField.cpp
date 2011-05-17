@@ -1,4 +1,4 @@
-/* install.cpp */
+/* scanField.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -14,59 +14,86 @@
 
 #include "support.h"
 #include "pvDatabase.h"
-#include "install.h"
+#include "util.h"
 
 namespace epics { namespace pvIOC { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-
-Install & Install::getInstall()
+ScanField::ScanField(PVRecord& pvRecord)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::Install()
+ScanField::~ScanField()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-Install::~Install()
+std::auto_ptr<ScanField> ScanField::create(PVRecord& pvRecord)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-
-bool Install::installStructures(String xmlFile,Requester &requester)
+ThreadPriority ScanField::getPriority()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructures(PVDatabase &pvDatabase,Requester &requester)
+PVInt & ScanField::getPriorityIndexPV()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installStructure(PVStructure &pvStructure,Requester &requester)
+ScanType ScanField::getScanType()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(String xmlFile,Requester &requester)
+PVInt & ScanField::getScanTypeIndexPV()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecords(PVDatabase &pvDatabase,Requester &requester)
+double ScanField::getRate()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-bool Install::installRecord(PVRecord &pvRecord,Requester &requester)
+PVDouble & ScanField::getRatePV()
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
+String ScanField::getEventName()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+PVString & ScanField::getEventNamePV()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+bool ScanField::getSingleProcessRequester()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+PVBoolean & ScanField::getSingleProcessRequesterPV()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+bool ScanField::getProcessAfterStart()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
+
+PVBoolean & ScanField::getProcessAfterStartPV()
+{
+    throw std::logic_error(String("Not Implemented"));
+}
 
 }}

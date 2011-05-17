@@ -23,8 +23,6 @@
 #include <executor.h>
 #include <messageQueue.h>
 
-#include "support.h"
-
 namespace epics { namespace pvIOC { 
 
 class PVDatabase;

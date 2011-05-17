@@ -29,27 +29,9 @@ class NewAfterStartRequester;
 class Install;
 class SupportCreation;
 
-// from support.h
-class SupportStateFunc;
-class ProcessCallbackRequester;
-class ProcessContinueRequester;
-class ProcessToken;
-class RecordProcess;
-class RecordProcessRequester;
-class Support;
-class SupportProcessRequester;
-
 // from pvDatabase.h
 class PVDatabase;
-class PVListener;
-class PVRecordClient;
 class PVRecord;
-class PVRecordField;
-class PVRecordStructure;
-class PVReplace;
-class PVRecordCreate;
-class PVDatabaseFactory;
-
 
 class AfterStartNode : private epics::pvData::NoDefaultMethods {
 public:
