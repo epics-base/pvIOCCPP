@@ -24,9 +24,6 @@
 
 namespace epics { namespace pvIOC { 
 
-typedef typename RecordMap::iterator RecordMapIterator;
-typedef typename StructureMap::iterator StructureMapIterator;
-
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
@@ -145,7 +142,7 @@ void PVDatabase::mergeIntoMaster()
 void PVDatabase::merge(RecordMap recMap,StructureMap structMap)
 {
     Lock xx(databaseMutex);
-    RecordMapIterator iter = recMap.begin();
+    RecordMap::iterator iter = recMap.begin();
     while(iter!=recMap.end()) {
         String key = iter->first;
         PVRecordPtr pvRecord = iter->second;
@@ -153,7 +150,7 @@ void PVDatabase::merge(RecordMap recMap,StructureMap structMap)
         recMap.erase(iter);
         iter = recMap.begin();
     }
-    StructureMapIterator iter1 = structMap.begin();
+    StructureMap::iterator iter1 = structMap.begin();
     while(iter1!=structMap.end()) {
         String key = iter1->first;
         PVStructurePtr pvStructure = iter1->second;
@@ -167,7 +164,7 @@ void PVDatabase::merge(RecordMap recMap,StructureMap structMap)
 PVRecordPtr PVDatabase::findRecord(String recordName)
 {
     Lock xx(databaseMutex);
-    RecordMapIterator iter = recordMap.find(recordName);
+    RecordMap::iterator iter = recordMap.find(recordName);
     if(iter!=recordMap.end()) {
         return iter->second;
     }
@@ -179,7 +176,7 @@ bool PVDatabase::addRecord(PVRecordPtr record)
     {
         Lock xx(databaseMutex);
         String key = record->getRecordName();
-        RecordMapIterator iter = recordMap.find(key);
+        RecordMap::iterator iter = recordMap.find(key);
         if(iter!=recordMap.end()) {
              message(String("PVDatabase::addRecord " + key + "already exists"),
                  warningMessage);
@@ -207,7 +204,7 @@ bool PVDatabase::removeRecord(PVRecord &record)
     if(isMaster) record.removeRequester(*this);
     Lock xx(databaseMutex);
     String key = record.getRecordName();
-    RecordMapIterator iter = recordMap.find(key);
+    RecordMap::iterator iter = recordMap.find(key);
     if(iter!=recordMap.end()) {
         recordMap.erase(iter);
         return true;
@@ -220,7 +217,7 @@ void PVDatabase::getRecordNames(PVStringArray &result)
     Lock xx(databaseMutex);
     int32 size = recordMap.size();
     String *strings = new String[size];
-    RecordMapIterator iter = recordMap.begin();
+    RecordMap::iterator iter = recordMap.begin();
     int index = 0;
     while(iter!=recordMap.end()) {
         String key = iter->first;
@@ -234,7 +231,7 @@ void PVDatabase::getRecordNames(PVStringArray &result)
 PVStructurePtr PVDatabase::findStructure(String structureName)
 {
     Lock xx(databaseMutex);
-    StructureMapIterator iter = structureMap.find(structureName);
+    StructureMap::iterator iter = structureMap.find(structureName);
     if(iter!=structureMap.end()) {
         return iter->second;
     }
@@ -248,7 +245,7 @@ bool PVDatabase::addStructure(PVStructurePtr structure)
 {
     Lock xx(databaseMutex);
     String key = structure->getField()->getFieldName();
-    StructureMapIterator iter = structureMap.find(key);
+    StructureMap::iterator iter = structureMap.find(key);
     if(iter!=structureMap.end()) return false;
     if(!isMaster) {
         PVDatabaseFactory &factory =
@@ -264,7 +261,7 @@ bool PVDatabase::removeStructure(PVStructure &structure)
 {
     Lock xx(databaseMutex);
     String key = structure.getField()->getFieldName();
-    StructureMapIterator iter = structureMap.find(key);
+    StructureMap::iterator iter = structureMap.find(key);
     if(iter!=structureMap.end()) {
         structureMap.erase(iter);
         return true;
@@ -277,7 +274,7 @@ void PVDatabase::getStructureNames(PVStringArray &result)
     Lock xx(databaseMutex);
     int32 size = structureMap.size();
     String *strings = new String[size];
-    StructureMapIterator iter = structureMap.begin();
+    StructureMap::iterator iter = structureMap.begin();
     int index = 0;
     while(iter!=structureMap.end()) {
         String key = iter->first;
