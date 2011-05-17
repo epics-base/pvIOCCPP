@@ -38,15 +38,15 @@ public:
     ~MyRun();
     virtual void run();
 private:
-    Thread *thread;
-    ServerContextImpl::shared_pointer ctx;
     Event event;
+    ServerContextImpl::shared_pointer ctx;
+    Thread *thread;
 };
 
 MyRun::MyRun()
-: thread(new Thread(String("pvAccessServer"),lowerPriority,this)),
+: event(),
   ctx(ServerContextImpl::create()),
-  event()
+  thread(new Thread(String("pvAccessServer"),lowerPriority,this))
 {}
 
 MyRun::~MyRun()
