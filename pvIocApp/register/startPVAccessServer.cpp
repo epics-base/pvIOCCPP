@@ -60,7 +60,7 @@ MyRun::~MyRun()
 
 void MyRun::run()
 {
-    ChannelProvider::shared_pointer const &channelProvider
+    ChannelProvider::shared_pointer channelProvider
         = V3ChannelProvider::getChannelProvider();
     registerChannelProvider(channelProvider);
     ctx->setChannelProviderName(channelProvider->getProviderName());
