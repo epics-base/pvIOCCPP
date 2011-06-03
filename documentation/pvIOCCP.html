@@ -12,33 +12,9 @@
 2011.04.15</h1>
 
 <p>Contents</p>
-
-<div class="toc">
-<ul>
-  <li><a href="#L33">Preface</a></li>
-  <li><a href="#L66">V3Channel</a> 
-    <ul>
-      <li><a href="#L70">Introduction</a></li>
-      <li><a href="#L80">Remaining tasks</a></li>
-      <li><a href="#L105">Getting started</a></li>
-      <li><a href="#L138">Implementation</a> 
-        <ul>
-          <li><a href="#L170">Main Concepts</a></li>
-          <li><a href="#L185">V3Channel</a></li>
-          <li><a href="#L334">V3Util</a></li>
-          <li><a href="#L446">V3Array</a></li>
-          <li><a href="#L485">V3CAMonitor</a></li>
-          <li><a href="#L645">V3CAContext</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><a href="#L697">License Agreement</a></li>
-</ul>
-</div>
 <hr />
 
-<h2 style="text-align: center" id="L33">Preface</h2>
+<h2 style="text-align: center">Preface</h2>
 <hr />
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
@@ -64,10 +40,214 @@ to V3 records. It is all that is described in this document. </p>
 V3 IOC.</p>
 <hr />
 
-<h2 style="text-align: center" id="L66">V3Channel</h2>
+<h2 style="text-align: center">pvService</h2>
 <hr />
 
-<h3 id="L70">Introduction</h3>
+<p>A pvService is a network based service that supports pvData and pvAccess. A
+service implements the Channel and ChannelProvider interfaces and calls
+registerChannelProvider. It calls registerChannelProvider. Remote channel
+access calls the ChannelProvider and Channel methods.</p>
+
+<p>Base interfaces for both ChannelProvider and Channel are provided that make
+it easier to develop a service.</p>
+
+<p>The interfaces are described in pvServiceBase.h The following provides a
+brief description. Look at the header file for complete details.</p>
+
+<h3>pvServiceBaseProvider</h3>
+
+<p>pvServiceBaseProvider takes care of "lifetime" issues. It registers the
+provider, keeps a list of all channels the service provider creates and
+destroys all channels when the provider is destroyed.</p>
+<pre>class PVServiceBaseProvider : public ChannelProvider {
+public:
+    PVServiceBaseProvider(
+        String providerName
+    );
+    virtual ~PVServiceBaseProvider();
+    virtual String getProviderName();
+    virtual void destroy();
+    virtual ChannelFind::shared_pointer channelFind(
+        String channelName,
+        ChannelFindRequester::shared_pointer const &amp;
+            channelFindRequester) = 0;
+    virtual Channel::shared_pointer createChannel(
+        String channelName,
+        ChannelRequester::shared_pointer const &amp;requester,
+        short priority);
+    virtual Channel::shared_pointer createChannel(
+        String channelName,
+        ChannelRequester::shared_pointer  const &amp;
+             channelRequester,
+        short priority,
+        String address) = 0;
+    PVServiceBaseProvider::shared_pointer getChannelProvider()
+    {
+        return channelProviderPtr;
+    }
+    // following called by derived class
+    void channelFound(
+        bool found,
+        ChannelFindRequester::shared_pointer const &amp; requester);
+    void channelNotCreated(
+        ChannelRequester::shared_pointer const &amp; requester);
+    void channelCreated(PVServiceBase::shared_pointer channel);
+    void removeChannel(PVServiceBase &amp;channel);
+};</pre>
+
+<p>The service must implement the following two ChannelProvider methods:</p>
+<dl>
+  <dt>channelFind</dt>
+    <dd>The service must keep a list or directory the channel names it
+      supports. channelFind looks at the list or directory to see if the
+      requested channelName is one that it supports. It call channelFound to
+      report the result. </dd>
+  <dt>createChannel</dt>
+    <dd>This creates a new Channel if the requested channelName is a name that
+      the service supports. createChannel calls either channelNotCreated or
+      channelCreated.</dd>
+</dl>
+
+<p>pvServiceBaseProvider implements the following methods:</p>
+<dl>
+  <dt>channelFound</dt>
+    <dd>This is called to report the channelFind request.</dd>
+  <dt>channelNotCreated</dt>
+    <dd>This is called if createChannel fails.</dd>
+  <dt>channelCreated</dt>
+    <dd>This is called when a new channel is created. The channel is put on a
+      list so that when pvServiceBaseProvider is destroyed it can destroy each
+      channel.</dd>
+  <dt>removeChannel</dt>
+    <dd>This must be called when a channel is destroyed. Note that channels are
+      normally destroyed by remote pvAccess rather than because
+      pvServiceBaseProvider is destroyed.</dd>
+</dl>
+
+<h3>pvServiceBase</h3>
+
+<p>This implements all the Channel methods. This a service only needs the
+implement the methods it supports. For example a service may only implement
+ChannelGet and ChannelPut. In that case it only needs to implement the
+createChannelGet and createChannelPut methods of Channel as well as ChannelGet
+and ChannelPut.</p>
+<pre>class PVServiceBase :
+  public virtual Channel,
+  public std::tr1::enable_shared_from_this&lt;PVServiceBase&gt;
+{
+public:
+    POINTER_DEFINITIONS(PVServiceBase);
+    PVServiceBase(
+        std::tr1::shared_ptr&lt;PVServiceBaseProvider&gt; const &amp;channelProvider,
+        ChannelRequester::shared_pointer const &amp; requester,
+        String channelName
+    );
+    virtual ~PVServiceBase();
+    virtual void destroy();
+    virtual String getRequesterName();
+    virtual void message(
+        String message,
+        MessageType messageType);
+    virtual ChannelProvider::shared_pointer const &amp; getProvider();
+    virtual String getRemoteAddress();
+    virtual Channel::ConnectionState getConnectionState();
+    virtual String getChannelName();
+    virtual ChannelRequester::shared_pointer const &amp;
+       getChannelRequester();
+    virtual bool isConnected();
+    virtual void getField(
+        GetFieldRequester::shared_pointer const &amp;requester,
+        String subField);
+    virtual AccessRights getAccessRights(
+        PVField::shared_pointer const &amp;pvField);
+    virtual ChannelProcess::shared_pointer createChannelProcess(
+        ChannelProcessRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual ChannelGet::shared_pointer createChannelGet(
+        ChannelGetRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual ChannelPut::shared_pointer createChannelPut(
+        ChannelPutRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual ChannelPutGet::shared_pointer createChannelPutGet(
+        ChannelPutGetRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual ChannelRPC::shared_pointer createChannelRPC(
+        ChannelRPCRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual Monitor::shared_pointer createMonitor(
+        MonitorRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual ChannelArray::shared_pointer createChannelArray(
+        ChannelArrayRequester::shared_pointer const &amp;requester,
+        PVStructure::shared_pointer const &amp;pvRequest);
+    virtual void printInfo();
+    virtual void printInfo(StringBuilder out);
+    // following called by derived classes
+    void addChannelProcess(ChannelProcess &amp;);
+    void addChannelGet(ChannelGet &amp;);
+    void addChannelPut(ChannelPut &amp;);
+    void addChannelPutGet(ChannelPutGet &amp;);
+    void addChannelMonitor(Monitor &amp;);
+    void addChannelRPC(ChannelRPC &amp;);
+    void addChannelArray(ChannelArray &amp;);
+    void removeChannelProcess(ChannelProcess &amp;);
+    void removeChannelGet(ChannelGet &amp;);
+    void removeChannelPut(ChannelPut &amp;);
+    void removeChannelPutGet(ChannelPutGet &amp;);
+    void removeChannelMonitor(Monitor &amp;);
+    void removeChannelRPC(ChannelRPC &amp;);
+    void removeChannelArray(ChannelArray &amp;);
+};</pre>
+
+<p>The service only needs to implement the set of create methods that it
+supports. For each the service must also implement the associated ChannelXXX
+interfaces. The service may also want to implement the printInfo methods.</p>
+
+<p>PVServiceBase implements the following methods:</p>
+<dl>
+  <dt>addChannelProcess</dt>
+    <dd>If channelProcess is supported then this must be called whenever
+      createChannelProcess is successful.</dd>
+  <dt>addChannelGet</dt>
+    <dd>If channelGet is supported then this must be called whenever
+      createChannelGet is successful.</dd>
+  <dt>addChannelPut</dt>
+    <dd>If channelPut is supported then this must be called whenever
+      createChannelPut is successful.</dd>
+  <dt>addChannelPutGet</dt>
+    <dd>If channelPutGet is supported then this must be called whenever
+      createChannelPutGet is successful.</dd>
+  <dt>addChannelMonitor</dt>
+    <dd>If channelMonitor is supported then this must be called whenever
+      createChannelMonitor is successful.</dd>
+  <dt>addChannelRPC</dt>
+    <dd>If channelRPC is supported then this must be called whenever
+      createChannelRPC is successful.</dd>
+  <dt>addChannelArray</dt>
+    <dd>If channelArray is supported then this must be called whenever
+      createChannelArray is successful.</dd>
+  <dt>removeChannelProcess</dt>
+    <dd>This is called when a channelProcess is destroyed.</dd>
+  <dt>removeChannelGet</dt>
+    <dd>This is called when a channelGet is destroyed.</dd>
+  <dt>removeChannelPut</dt>
+    <dd>This is called when a channelPut is destroyed.</dd>
+  <dt>removeChannelPutGet</dt>
+    <dd>This is called when a channelPutGet is destroyed.</dd>
+  <dt>removeChannelMonitor</dt>
+    <dd>This is called when a channelMonitor is destroyed.</dd>
+  <dt>removeChannelRPC</dt>
+    <dd>This is called when a channelRPC is destroyed.</dd>
+  <dt>removeChannelArray</dt>
+    <dd>This is called when a channelArray is destroyed.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center">V3Channel</h2>
+<hr />
+
+<h3>Introduction</h3>
 
 <p>V3Channel provides access to V3 records. It can be used accesss V3 records
 by other code in the same IOC or by pvAccess network clients via remote
@@ -101,7 +281,7 @@ like:</p>
 <p>The channelName can be either just a record name or a "recordName.XXX" where
 XXX is the V3 field name, e. g. "SCAN".</p>
 
-<h3 id="L80">Remaining tasks</h3>
+<h3>Remaining tasks</h3>
 The main remaining tasks are: 
 <dl>
   <dt>Access Security</dt>
@@ -123,7 +303,7 @@ The main remaining tasks are:
       control should be included.</dd>
 </dl>
 
-<h3 id="L105">Getting started</h3>
+<h3>Getting started</h3>
 
 <p>NOTE: pvIOCCP has a zip file example/example.zip that provides an example
 IOC application that provides V3Channel support. To use it copy and unzip and
@@ -158,7 +338,7 @@ include "pvIOC.dbd"
     </dd>
 </dl>
 
-<h3 id="L138">Implementation</h3>
+<h3>Implementation</h3>
 
 <p>The implementation consists of the following header files:</p>
 <dl>
@@ -188,7 +368,7 @@ remainder of this section gives a brief description of each of these software
 components with an emphasis on how data is converted between pvData and data in
 V3 records.</p>
 
-<h4 id="L170">Main Concepts</h4>
+<h4>Main Concepts</h4>
 
 <p>In epics V3 there are two interfaces for accessing data:</p>
 <dl>
@@ -204,7 +384,7 @@ V3 records.</p>
       effects". For example writing to the SCAN field has side effects.</dd>
 </dl>
 
-<h4 id="L185">V3Channel</h4>
+<h4>V3Channel</h4>
 
 <p>This defines two interfaces:</p>
 <dl>
@@ -365,7 +545,7 @@ private:
     <dd>This just prints a short message.</dd>
 </dl>
 
-<h4 id="L334">V3Util</h4>
+<h4>V3Util</h4>
 
 <p>This does most of the work related to transfering data between a PVStructure
 and a V3 record. All methods are static and are called by V3ChannelGet,
@@ -452,7 +632,7 @@ public:
     accessed.</dd>
 </dl>
 
-<h4 id="L446">V3Array</h4>
+<h4>V3Array</h4>
 
 <p>This creates special implementations of PVByteArray, ... , PVStringArray
 that access the corresponding array types in the V3 record. Except for
@@ -496,7 +676,7 @@ extern V3ValueArrayCreate *getV3ValueArrayCreate();</pre>
       supports.</dd>
 </dl>
 
-<h4 id="L485">V3CAMonitor</h4>
+<h4>V3CAMonitor</h4>
 
 <p>In V3 dbEvent is what implements db_post_event, which is what is called when
 a field value changes in a V3 record. But dbEvent just passes this to V3CA.
@@ -639,7 +819,7 @@ private:
       should always return true.</dd>
 </dl>
 
-<h4 id="L645">V3CAContext</h4>
+<h4>V3CAContext</h4>
 
 <p>CAV3Monitor calls CAV3 in order to monitor changes to the V3 records. In
 order to do this it must call ca_context_create(ca_enable_preemptive_callback).
@@ -704,7 +884,7 @@ private:
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="L697">License Agreement</h2>
+<h2 style="text-align: center">License Agreement</h2>
 <hr />
 <pre>Copyright (c) 2008 Martin R. Kraimer
 Copyright (c) 2007 Control System Laboratory,
