@@ -101,6 +101,7 @@ void PVServiceBaseProvider::channelNotCreated(
 
 void PVServiceBaseProvider::channelCreated(PVServiceBase::shared_pointer channel)
 {
+printf("PVServiceBaseProvider::channelCreated\n");
     ChannelListNode *channelListNode = new ChannelListNode(*channel.get());
     channelList.addTail(*channelListNode);
     channel->getChannelRequester()->channelCreated(Status::OK,channel);

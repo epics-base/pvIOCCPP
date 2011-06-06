@@ -17,22 +17,28 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 
 ExampleChannelProvider::ExampleChannelProvider(String channelName)
-: PVServiceBaseProvider("exampleChannel"),
+: PVServiceBaseProvider(channelName),
   channelName(channelName),
   pvTop()
 {
 printf("ExampleChannelProvider::ExampleChannelProvider\n");
-    PVDataCreate *pvDataCreate = getPVDataCreate();
-    PVScalar *pvScalar = pvDataCreate->createPVScalar(0,"value",pvDouble);
-    PVFieldPtrArray pvFields = new PVFieldPtr[1];
-    pvFields[0] = pvScalar;
-    pvTop = PVStructure::shared_pointer(
-        pvDataCreate->createPVStructure(0,String(),1,pvFields));
 }
 
 ExampleChannelProvider::~ExampleChannelProvider()
 {
 printf("ExampleChannelProvider::~ExampleChannelProvider\n");
+}
+
+void ExampleChannelProvider::init()
+{
+    PVDataCreate *pvDataCreate = getPVDataCreate();
+    PVScalar *pvScalar = pvDataCreate->createPVScalar(0,"value",pvDouble);
+    PVFieldPtrArray pvFields = new PVFieldPtr[1];
+    pvFields[0] = pvScalar;
+    pvTop.reset(pvDataCreate->createPVStructure(0,String(),1,pvFields));
+String builder;
+pvTop->toString(&builder);
+printf("pvTop\n%s\n",builder.c_str());
 }
 
 ChannelFind::shared_pointer ExampleChannelProvider::channelFind(
@@ -56,10 +62,10 @@ Channel::shared_pointer ExampleChannelProvider::createChannel(
         return Channel::shared_pointer();
     }
     ExampleChannel *exampleChannel = new ExampleChannel(
-            this,
             getChannelProvider(),
             channelRequester,channelName);
     PVServiceBase::shared_pointer channel(exampleChannel);
+    exampleChannel->init();
     channelCreated(channel);
     return channel;
 }

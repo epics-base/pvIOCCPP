@@ -20,17 +20,20 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 
 ExampleChannel::ExampleChannel(
-    ExampleChannelProvider *exampleChannelProvider,
     PVServiceBaseProvider::shared_pointer const & channelProvider,
     ChannelRequester::shared_pointer const & requester,
     String name
 )
 :  PVServiceBase(channelProvider,requester,name),
-   channelProvider(exampleChannelProvider)
+   exampleChannelProvider(0)
 {
 printf("ExampleChannel::ExampleChannel\n");
-    PVServiceBase::shared_pointer channel(this);
-    channelProvider->channelCreated(channel);
+}
+
+void ExampleChannel::init()
+{
+    ChannelProvider::shared_pointer channelProvider = getProvider();
+    exampleChannelProvider = static_cast<ExampleChannelProvider *>(channelProvider.get());
 }
 
 ExampleChannel::~ExampleChannel()
@@ -41,7 +44,7 @@ printf("ExampleChannel::~ExampleChannel\n");
 void ExampleChannel::getField(GetFieldRequester::shared_pointer const &requester,
         String subField)
 {
-    requester->getDone(Status::OK,channelProvider->getField());
+    requester->getDone(Status::OK,exampleChannelProvider->getField());
 }
 
 
@@ -50,8 +53,9 @@ ChannelGet::shared_pointer ExampleChannel::createChannelGet(
         PVStructure::shared_pointer const &pvRequest)
 {
     ExampleChannelGet * exampleChannelGet = new ExampleChannelGet(
-        channelProvider, getPtrSelf(),channelGetRequester);
+        exampleChannelProvider, getPtrSelf(),channelGetRequester);
     ChannelGet::shared_pointer channelGet(exampleChannelGet);
+    if(exampleChannelGet->init(pvRequest)) addChannelGet(*exampleChannelGet);
     return channelGet;
 }
 
@@ -60,8 +64,9 @@ ChannelPut::shared_pointer ExampleChannel::createChannelPut(
         PVStructure::shared_pointer const &pvRequest)
 {
     ExampleChannelPut * exampleChannelPut = new ExampleChannelPut(
-        channelProvider, getPtrSelf(),channelPutRequester);
+        exampleChannelProvider, getPtrSelf(),channelPutRequester);
     ChannelPut::shared_pointer channelPut(exampleChannelPut);
+    if(exampleChannelPut->init(pvRequest)) addChannelPut(*exampleChannelPut);
     return channelPut;
 }
 

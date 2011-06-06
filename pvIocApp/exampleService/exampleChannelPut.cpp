@@ -35,29 +35,33 @@ using namespace epics::pvAccess;
 
 
 ExampleChannelPut::ExampleChannelPut(
-    ExampleChannelProvider *channelProvider,
+    ExampleChannelProvider *exampleChannelProvider,
     PVServiceBase::shared_pointer const & exampleChannel,
     ChannelPutRequester::shared_pointer const &channelPutRequester)
-: channelProvider(channelProvider),
+: exampleChannelProvider(exampleChannelProvider),
   exampleChannel(exampleChannel),
   channelPutRequester(channelPutRequester),
-  pvTop(channelProvider->createTop()),
-  bitSet(new BitSet(pvTop->getNumberFields()))
+  pvTop(),
+  bitSet()
 {
 printf("ExampleChannelPut::ExampleChannelPut()\n");
+}
+
+ExampleChannelPut::~ExampleChannelPut()
+{
+printf("ExampleChannelPut::~ExampleChannelPut()\n");
+}
+
+bool ExampleChannelPut::init(PVStructure::shared_pointer const & pvRequest)
+{
+    pvTop.reset(exampleChannelProvider->createTop());
     bitSet.reset(new BitSet(pvTop->getNumberFields()));
     channelPutRequester->channelPutConnect(
        Status::OK,
        getPtrSelf(),
        pvTop,
        bitSet);
-    exampleChannel->addChannelPut(*this);
-
-}
-
-ExampleChannelPut::~ExampleChannelPut()
-{
-printf("ExampleChannelPut::~ExampleChannelPut()\n");
+    return true;
 }
 
 String ExampleChannelPut::getRequesterName() {
@@ -75,14 +79,14 @@ void ExampleChannelPut::destroy() {
 
 void ExampleChannelPut::put(bool lastRequest)
 {
-    channelProvider->putData(pvTop.get());
+    exampleChannelProvider->putData(pvTop.get());
     channelPutRequester->putDone(Status::OK);
     if(lastRequest) destroy();
 }
 
 void ExampleChannelPut::get()
 {
-    channelProvider->getData(pvTop.get(),bitSet.get());
+    exampleChannelProvider->getData(pvTop.get(),bitSet.get());
     channelPutRequester->getDone(Status::OK);
 }
 

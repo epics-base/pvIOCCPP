@@ -30,41 +30,32 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 
 ExampleChannelGet::ExampleChannelGet(
-    ExampleChannelProvider *channelProvider,
+    ExampleChannelProvider *exampleChannelProvider,
     PVServiceBase::shared_pointer const & exampleChannel,
     ChannelGetRequester::shared_pointer const &channelGetRequester)
-: channelProvider(channelProvider),
+: exampleChannelProvider(exampleChannelProvider),
   exampleChannel(exampleChannel),
   channelGetRequester(channelGetRequester),
-  pvTop(channelProvider->createTop()),
+  pvTop(),
   bitSet()
+{ }
+
+ExampleChannelGet::~ExampleChannelGet()
 {
+printf("ExampleChannelGet destruct\n");
+}
+
+bool ExampleChannelGet::init(PVStructure::shared_pointer const & pvRequest)
+{
+    pvTop.reset(exampleChannelProvider->createTop());
     int numFields = pvTop->getNumberFields();
-printf("numFields %d\n",numFields);
-printf("ExampleChannelGet::ExampleChannelGet\n");
     bitSet.reset(new BitSet(numFields));
-printf("pvTop->getNumberFields %d\n",pvTop->getNumberFields());
-String builder;
-pvTop->toString(&builder);
-printf("pvTop\n %s\n",builder.c_str());
-builder.clear();
-bitSet->set(1);
-bitSet->toString(&builder);
-printf("bitSet\n %s\n",builder.c_str());
-printf("calling channelGetConnect %p\n",channelGetRequester.get());
     channelGetRequester->channelGetConnect(
        Status::OK,
        getPtrSelf(),
        pvTop,
        bitSet);
-printf("calling addChannelGet\n");
-    exampleChannel->addChannelGet(*this);
-printf("ExampleChannelGet::ExampleChannelGet done\n");
-}
-
-ExampleChannelGet::~ExampleChannelGet()
-{
-printf("ExampleChannelGet destruct\n");
+    return true;
 }
 
 String ExampleChannelGet::getRequesterName() {
@@ -83,7 +74,7 @@ printf("ExampleChannelGet::destroy\n");
 
 void ExampleChannelGet::get(bool lastRequest)
 {
-    channelProvider->getData(pvTop.get(),bitSet.get());
+    exampleChannelProvider->getData(pvTop.get(),bitSet.get());
     channelGetRequester->getDone(Status::OK);
     if(lastRequest) destroy();
 }

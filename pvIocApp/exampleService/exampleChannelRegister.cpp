@@ -60,8 +60,10 @@ ExampleChannelRun::~ExampleChannelRun()
 
 void ExampleChannelRun::run()
 {
-    ChannelProvider::shared_pointer channelProvider(
-        new ExampleChannelProvider(channelName));
+    ExampleChannelProvider *exampleChannelProvider
+        = new ExampleChannelProvider(channelName);
+    ChannelProvider::shared_pointer channelProvider(exampleChannelProvider);
+    exampleChannelProvider->init();
     registerChannelProvider(channelProvider);
     ctx->setChannelProviderName(channelProvider->getProviderName());
     ctx->initialize(getChannelAccess());
