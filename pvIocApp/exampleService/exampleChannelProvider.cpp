@@ -9,7 +9,7 @@
 #include <memory>
 
 
-#include "exampleChannel.h"
+#include <pv/exampleChannel.h>
 
 namespace epics { namespace pvIOC { 
 

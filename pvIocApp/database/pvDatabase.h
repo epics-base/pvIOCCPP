@@ -13,15 +13,15 @@
 #include <map>
 #include <list>
 
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <pvAccess.h>
-#include <convert.h>
-#include <linkedList.h>
-#include <lock.h>
-#include <noDefaultMethods.h>
-#include <executor.h>
-#include <messageQueue.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/pvAccess.h>
+#include <pv/convert.h>
+#include <pv/linkedList.h>
+#include <pv/lock.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/executor.h>
+#include <pv/messageQueue.h>
 
 namespace epics { namespace pvIOC { 
 

@@ -8,13 +8,13 @@
 #include <stdexcept>
 #include <memory>
 
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <noDefaultMethods.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/noDefaultMethods.h>
 
-#include "support.h"
-#include "pvDatabase.h"
-#include "install.h"
+#include <pv/support.h>
+#include <pv/pvDatabase.h>
+#include <pv/install.h>
 
 namespace epics { namespace pvIOC { 
 

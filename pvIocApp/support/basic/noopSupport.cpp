@@ -5,7 +5,7 @@
  * in file LICENSE that is included with this distribution.
  */
 
-#include "basicSupport.h"
+#include <pv/basicSupport.h>
 
 namespace epics { namespace pvIOC { 
 

@@ -11,14 +11,14 @@
 #include "dbFldTypes.h"
 #include "dbDefs.h"
 
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <noDefaultMethods.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/noDefaultMethods.h>
 
-#include "support.h"
-#include "pvDatabase.h"
-#include "standardField.h"
-#include "pvServiceBase.h"
+#include <pv/support.h>
+#include <pv/pvDatabase.h>
+#include <pv/standardField.h>
+#include <pv/pvServiceBase.h>
 
 namespace epics { namespace pvIOC { 
 

@@ -16,11 +16,11 @@
 #include <epicsThread.h>
 #include <epicsExit.h>
 
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "noDefaultMethods.h"
-#include "support.h"
-#include "pvDatabase.h"
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/support.h>
+#include <pv/pvDatabase.h>
 
 namespace epics { namespace pvIOC { 
 

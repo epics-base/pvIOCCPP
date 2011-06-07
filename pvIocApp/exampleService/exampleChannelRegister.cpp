@@ -18,13 +18,13 @@
 
 #include <epicsExport.h>
 
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <pvAccess.h>
-#include <serverContext.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/pvAccess.h>
+#include <pv/serverContext.h>
 
-#include "pvDatabase.h"
-#include "exampleChannel.h"
+#include <pv/pvDatabase.h>
+#include <pv/exampleChannel.h>
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;

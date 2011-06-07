@@ -11,15 +11,15 @@
 #include <stdexcept>
 #include <memory>
 
-#include <lock.h>
+#include <pv/lock.h>
 
-#include <status.h>
-#include <monitor.h>
-#include <linkedList.h>
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <noDefaultMethods.h>
-#include <pvAccess.h>
+#include <pv/status.h>
+#include <pv/monitor.h>
+#include <pv/linkedList.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/pvAccess.h>
 
 namespace epics { namespace pvIOC { 
 

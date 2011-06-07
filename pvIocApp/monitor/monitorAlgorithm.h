@@ -9,7 +9,7 @@
 #define MONITORALGORITHM_H
 #include <string>
 
-#include <pvData.h>
+#include <pv/pvData.h>
 
 namespace epics { namespace pvIOC { 
 

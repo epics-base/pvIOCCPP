@@ -22,11 +22,11 @@
 #include <dbNotify.h>
 #include <dbCommon.h>
 
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <pvAccess.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/pvAccess.h>
 
-#include "exampleChannel.h"
+#include <pv/exampleChannel.h>
 
 namespace epics { namespace pvIOC { 
 

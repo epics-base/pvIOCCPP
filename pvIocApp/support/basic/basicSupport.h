@@ -7,7 +7,7 @@
 #ifndef BASICSUPPORT_H
 #define BASICSUPPORT_H
 
-#include "support.h"
+#include <pv/support.h>
 
 namespace epics { namespace pvIOC { 
 

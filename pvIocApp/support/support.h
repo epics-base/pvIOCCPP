@@ -11,17 +11,17 @@
 #include <memory>
 #include <list>
 
-#include <pvIntrospect.h>
-#include <pvData.h>
-#include <noDefaultMethods.h>
-#include <pvEnumerated.h>
-#include <timeStamp.h>
-#include <pvTimeStamp.h>
-#include <lock.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/pvEnumerated.h>
+#include <pv/timeStamp.h>
+#include <pv/pvTimeStamp.h>
+#include <pv/lock.h>
 
-#include "pvDatabase.h"
-#include "install.h"
-#include "util.h"
+#include <pv/pvDatabase.h>
+#include <pv/install.h>
+#include <pv/util.h>
 
 namespace epics { namespace pvIOC { 
 

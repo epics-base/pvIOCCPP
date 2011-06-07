@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <memory>
 
-#include "pvServiceBase.h"
+#include <pv/pvServiceBase.h>
 
 namespace epics { namespace pvIOC { 
 

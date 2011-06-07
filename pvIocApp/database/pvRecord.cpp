@@ -6,7 +6,7 @@
  */
 /* Marty Kraimer 2011.03 */
 
-#include "pvDatabase.h"
+#include <pv/pvDatabase.h>
 
 namespace epics { namespace pvIOC { 
 
