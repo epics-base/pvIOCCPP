@@ -38,7 +38,7 @@ class PVServiceBaseArray;
 /* PVServiceBase is a base class for implementing pvAccess services.
  * A service must implement Channel.
  * PVServiceBase implements all Channel methods.
- * A service need only implement thye methods it supports and lets
+ * A service need only implement the methods it supports and lets
  * the base class handle the others.
  */
 
