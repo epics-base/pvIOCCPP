@@ -58,17 +58,17 @@ PVServiceBase::PVServiceBase(
     channelArrayList(),
     beingDestroyed(false)
 {
-printf("PVServiceBase::PVServiceBase\n");
+//printf("PVServiceBase::PVServiceBase\n");
 }
 
 PVServiceBase::~PVServiceBase()
 {
-printf("PVServiceBase::~PVServiceBase\n");
+//printf("PVServiceBase::~PVServiceBase\n");
 }
 
 void PVServiceBase::destroy()
 {
-printf("PVServiceBase::destroy\n");
+//printf("PVServiceBase::destroy\n");
     beingDestroyed = true;
     while(true) {
         ChannelProcessListNode *node = channelProcessList.getHead();

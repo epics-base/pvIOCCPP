@@ -35,18 +35,18 @@ PVServiceBaseProvider::PVServiceBaseProvider(
   channelProviderPtr(this),
   beingDestroyed(false)
 {
-printf("PVServiceBaseProvider::PVServiceBaseProvider %s\n",providerName.c_str());
+//printf("PVServiceBaseProvider::PVServiceBaseProvider %s\n",providerName.c_str());
     registerChannelProvider(channelProviderPtr);
 }
 
 PVServiceBaseProvider::~PVServiceBaseProvider()
 {
-printf("PVServiceBaseProvider::~PVServiceBaseProvider\n");
+//printf("PVServiceBaseProvider::~PVServiceBaseProvider\n");
 }
 
 void PVServiceBaseProvider::destroy()
 {
-printf("PVServiceBaseProvider::destroy\n");
+//printf("PVServiceBaseProvider::destroy\n");
     Lock xx(mutex);
     beingDestroyed = true;
     unregisterChannelProvider(channelProviderPtr);
@@ -101,7 +101,8 @@ void PVServiceBaseProvider::channelNotCreated(
 
 void PVServiceBaseProvider::channelCreated(PVServiceBase::shared_pointer channel)
 {
-printf("PVServiceBaseProvider::channelCreated\n");
+//printf("PVServiceBaseProvider::channelCreated\n");
+    Lock xx(mutex);
     ChannelListNode *channelListNode = new ChannelListNode(*channel.get());
     channelList.addTail(*channelListNode);
     channel->getChannelRequester()->channelCreated(Status::OK,channel);
@@ -110,6 +111,7 @@ printf("PVServiceBaseProvider::channelCreated\n");
 void PVServiceBaseProvider::removeChannel(PVServiceBase &channel)
 {
     if(beingDestroyed) return;
+    Lock xx(mutex);
     ChannelListNode *channelListNode = channelList.getHead();
     while(channelListNode!=0) {
         PVServiceBase *chan = &channelListNode->getObject();

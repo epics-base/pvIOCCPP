@@ -22,29 +22,26 @@ using namespace epics::pvAccess;
 ExampleChannel::ExampleChannel(
     PVServiceBaseProvider::shared_pointer const & channelProvider,
     ChannelRequester::shared_pointer const & requester,
-    String name
+    String name,
+    ExamplePVTop::shared_pointer const &examplePVTop
 )
 :  PVServiceBase(channelProvider,requester,name),
-   exampleChannelProvider(0)
+   examplePVTop(examplePVTop)
 {
-printf("ExampleChannel::ExampleChannel\n");
 }
 
 void ExampleChannel::init()
 {
-    ChannelProvider::shared_pointer channelProvider = getProvider();
-    exampleChannelProvider = static_cast<ExampleChannelProvider *>(channelProvider.get());
 }
 
 ExampleChannel::~ExampleChannel()
 {
-printf("ExampleChannel::~ExampleChannel\n");
 }
 
 void ExampleChannel::getField(GetFieldRequester::shared_pointer const &requester,
         String subField)
 {
-    requester->getDone(Status::OK,exampleChannelProvider->getField());
+    requester->getDone(Status::OK,examplePVTop->getField());
 }
 
 
@@ -53,7 +50,7 @@ ChannelGet::shared_pointer ExampleChannel::createChannelGet(
         PVStructure::shared_pointer const &pvRequest)
 {
     ExampleChannelGet * exampleChannelGet = new ExampleChannelGet(
-        exampleChannelProvider, getPtrSelf(),channelGetRequester);
+        examplePVTop, getPtrSelf(),channelGetRequester);
     ChannelGet::shared_pointer channelGet(exampleChannelGet);
     if(exampleChannelGet->init(pvRequest)) addChannelGet(*exampleChannelGet);
     return channelGet;
@@ -64,7 +61,7 @@ ChannelPut::shared_pointer ExampleChannel::createChannelPut(
         PVStructure::shared_pointer const &pvRequest)
 {
     ExampleChannelPut * exampleChannelPut = new ExampleChannelPut(
-        exampleChannelProvider, getPtrSelf(),channelPutRequester);
+        examplePVTop, getPtrSelf(),channelPutRequester);
     ChannelPut::shared_pointer channelPut(exampleChannelPut);
     if(exampleChannelPut->init(pvRequest)) addChannelPut(*exampleChannelPut);
     return channelPut;

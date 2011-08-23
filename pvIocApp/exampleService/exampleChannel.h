@@ -11,37 +11,41 @@
 #include <stdexcept>
 #include <memory>
 
-#include <pv/pvServiceBase.h>
+#include <pv/pvServiceProvider.h>
 
 namespace epics { namespace pvIOC { 
 
-class ExampleChannelProvider;
+class ExamplePVTop;
 class ExampleChannel;
 class ExampleChannelGet;
 class ExampleChannelPut;
 
-class ExampleChannelProvider : public PVServiceBaseProvider {
+class ExamplePVTop :
+    public virtual ServicePVTop,
+    public std::tr1::enable_shared_from_this<ExamplePVTop>
+{
 public:
-    POINTER_DEFINITIONS(ExampleChannelProvider);
-    ExampleChannelProvider(epics::pvData::String channelName);
-    virtual ~ExampleChannelProvider();
+    POINTER_DEFINITIONS(ExamplePVTop);
+    ExamplePVTop(epics::pvData::String channelName);
+    virtual ~ExamplePVTop();
+    virtual epics::pvData::String getName();
+    virtual PVServiceBase::shared_pointer createChannel(
+        epics::pvAccess::ChannelRequester::shared_pointer const &requester,
+        PVServiceProvider::shared_pointer const &provider);
+    virtual void destroy();
+    //following are for example
     void init();
-    virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
-        epics::pvData::String channelName,
-        epics::pvAccess::ChannelFindRequester::shared_pointer const & channelFindRequester);
-    virtual epics::pvAccess::Channel::shared_pointer createChannel(
-        epics::pvData::String channelName,
-        epics::pvAccess::ChannelRequester::shared_pointer  const &channelRequester,
-        short priority,
-        epics::pvData::String address);
-    // following are for example
-    epics::pvData::FieldConstPtr getField();
+     epics::pvData::FieldConstPtr getField();
     epics::pvData::PVStructure *createTop();
     void putData(epics::pvData::PVStructure *pvStructure);
     void getData(
         epics::pvData::PVStructure *pvStructure,
         epics::pvData::BitSet *pvBitSet);
 private:
+    ExamplePVTop::shared_pointer getPtrSelf()
+    {
+        return shared_from_this();
+    }
     epics::pvData::String channelName;
     epics::pvData::PVStructure::shared_pointer pvTop;
 };
@@ -54,7 +58,8 @@ public:
     ExampleChannel(
         PVServiceBaseProvider::shared_pointer const & channelProvider,
         epics::pvAccess::ChannelRequester::shared_pointer const & requester,
-        epics::pvData::String name);
+        epics::pvData::String name,
+        ExamplePVTop::shared_pointer const &examplePVTop);
     virtual ~ExampleChannel();
     void init();
     virtual void getField(
@@ -69,7 +74,7 @@ public:
     virtual void printInfo();
     virtual void printInfo(epics::pvData::StringBuilder out);
 private:
-    ExampleChannelProvider *exampleChannelProvider;
+    ExamplePVTop::shared_pointer examplePVTop;
 };
 
 
@@ -80,7 +85,7 @@ class ExampleChannelGet :
 public:
     POINTER_DEFINITIONS(ExampleChannelGet);
     ExampleChannelGet(
-        ExampleChannelProvider *exampleChannelProvider,
+        ExamplePVTop::shared_pointer const & examplePVTop,
         PVServiceBase::shared_pointer const & exampleChannel,
         epics::pvAccess::ChannelGetRequester::shared_pointer const &channelGetRequester);
     virtual ~ExampleChannelGet();
@@ -96,7 +101,8 @@ private:
     {
         return shared_from_this();
     }
-    ExampleChannelProvider *exampleChannelProvider;
+    bool firstTime;
+    ExamplePVTop::shared_pointer examplePVTop;
     PVServiceBase::shared_pointer exampleChannel;
     epics::pvAccess::ChannelGetRequester::shared_pointer channelGetRequester;
     epics::pvData::PVStructure::shared_pointer pvTop;
@@ -110,7 +116,7 @@ class ExampleChannelPut :
 public:
     POINTER_DEFINITIONS(ExampleChannelPut);
     ExampleChannelPut(
-        ExampleChannelProvider *exampleChannelProvider,
+        ExamplePVTop::shared_pointer const & examplePVTop,
         PVServiceBase::shared_pointer const & exampleChannel,
         epics::pvAccess::ChannelPutRequester::shared_pointer const & channelPutRequester);
     virtual ~ExampleChannelPut();
@@ -127,13 +133,12 @@ private:
     {
         return shared_from_this();
     }
-    ExampleChannelProvider *exampleChannelProvider;
+    ExamplePVTop::shared_pointer examplePVTop;
     PVServiceBase::shared_pointer exampleChannel;
     epics::pvAccess::ChannelPutRequester::shared_pointer channelPutRequester;
     epics::pvData::PVStructure::shared_pointer pvTop;
     epics::pvData::BitSet::shared_pointer bitSet;
 };
-
 
 }}
 

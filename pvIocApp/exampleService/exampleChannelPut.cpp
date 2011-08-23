@@ -35,26 +35,24 @@ using namespace epics::pvAccess;
 
 
 ExampleChannelPut::ExampleChannelPut(
-    ExampleChannelProvider *exampleChannelProvider,
+    ExamplePVTop::shared_pointer const & examplePVTop,
     PVServiceBase::shared_pointer const & exampleChannel,
     ChannelPutRequester::shared_pointer const &channelPutRequester)
-: exampleChannelProvider(exampleChannelProvider),
+: examplePVTop(examplePVTop),
   exampleChannel(exampleChannel),
   channelPutRequester(channelPutRequester),
   pvTop(),
   bitSet()
 {
-printf("ExampleChannelPut::ExampleChannelPut()\n");
 }
 
 ExampleChannelPut::~ExampleChannelPut()
 {
-printf("ExampleChannelPut::~ExampleChannelPut()\n");
 }
 
 bool ExampleChannelPut::init(PVStructure::shared_pointer const & pvRequest)
 {
-    pvTop.reset(exampleChannelProvider->createTop());
+    pvTop.reset(examplePVTop->createTop());
     bitSet.reset(new BitSet(pvTop->getNumberFields()));
     channelPutRequester->channelPutConnect(
        Status::OK,
@@ -79,14 +77,14 @@ void ExampleChannelPut::destroy() {
 
 void ExampleChannelPut::put(bool lastRequest)
 {
-    exampleChannelProvider->putData(pvTop.get());
+    examplePVTop->putData(pvTop.get());
     channelPutRequester->putDone(Status::OK);
     if(lastRequest) destroy();
 }
 
 void ExampleChannelPut::get()
 {
-    exampleChannelProvider->getData(pvTop.get(),bitSet.get());
+    examplePVTop->getData(pvTop.get(),bitSet.get());
     channelPutRequester->getDone(Status::OK);
 }
 

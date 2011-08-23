@@ -30,24 +30,25 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 
 ExampleChannelGet::ExampleChannelGet(
-    ExampleChannelProvider *exampleChannelProvider,
+    ExamplePVTop::shared_pointer const & examplePVTop,
     PVServiceBase::shared_pointer const & exampleChannel,
     ChannelGetRequester::shared_pointer const &channelGetRequester)
-: exampleChannelProvider(exampleChannelProvider),
+: firstTime(true),
+  examplePVTop(examplePVTop),
   exampleChannel(exampleChannel),
   channelGetRequester(channelGetRequester),
   pvTop(),
   bitSet()
-{ }
+{
+}
 
 ExampleChannelGet::~ExampleChannelGet()
 {
-printf("ExampleChannelGet destruct\n");
 }
 
 bool ExampleChannelGet::init(PVStructure::shared_pointer const & pvRequest)
 {
-    pvTop.reset(exampleChannelProvider->createTop());
+    pvTop.reset(examplePVTop->createTop());
     int numFields = pvTop->getNumberFields();
     bitSet.reset(new BitSet(numFields));
     channelGetRequester->channelGetConnect(
@@ -68,13 +69,17 @@ void ExampleChannelGet::message(String message,MessageType messageType)
 }
 
 void ExampleChannelGet::destroy() {
-printf("ExampleChannelGet::destroy\n");
     exampleChannel->removeChannelGet(*this);
 }
 
 void ExampleChannelGet::get(bool lastRequest)
 {
-    exampleChannelProvider->getData(pvTop.get(),bitSet.get());
+    examplePVTop->getData(pvTop.get(),bitSet.get());
+    if(firstTime) {
+        firstTime = false;
+        bitSet->clear();
+        bitSet->set(0);
+    }
     channelGetRequester->getDone(Status::OK);
     if(lastRequest) destroy();
 }
