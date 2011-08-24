@@ -30,6 +30,7 @@ class ServicePVTop
 {
 public:
     POINTER_DEFINITIONS(ServicePVTop);
+    virtual ~ServicePVTop(){}
     virtual epics::pvData::String getName() = 0;
     virtual PVServiceBase::shared_pointer createChannel(
         epics::pvAccess::ChannelRequester::shared_pointer const &requester,
