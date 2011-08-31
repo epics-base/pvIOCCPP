@@ -110,8 +110,8 @@ void PVServiceBaseProvider::channelCreated(PVServiceBase::shared_pointer channel
 
 void PVServiceBaseProvider::removeChannel(PVServiceBase &channel)
 {
-    if(beingDestroyed) return;
     Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelListNode *channelListNode = channelList.getHead();
     while(channelListNode!=0) {
         PVServiceBase *chan = &channelListNode->getObject();

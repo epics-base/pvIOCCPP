@@ -40,6 +40,9 @@ typedef LinkedList<ServicePVTopBase> TopList;
 
 PVServiceProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
 {
+    static Mutex mutex;
+    Lock xx(mutex);
+
     if(pvServiceProvider.get()==0) {
         pvServiceProvider = PVServiceProvider::shared_pointer(
              new PVServiceProvider());
@@ -120,8 +123,8 @@ void PVServiceProvider::addRecord(
     ServicePVTop::shared_pointer servicePVTop)
 {
 //printf("PVServiceProvider::addRecord\n");
-    ServicePVTopBase *servicePVTopBase = new ServicePVTopBase(servicePVTop);
     Lock xx(mutex);
+    ServicePVTopBase *servicePVTopBase = new ServicePVTopBase(servicePVTop);
     TopListNode *node = new TopListNode(*servicePVTopBase);
     topList.addTail(*node);
 }

@@ -1,11 +1,11 @@
-/* exampleChannel.h */
+/* exampleService.h */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef EXAMPLE_CHANNEL_H
-#define EXAMPLE_CHANNEL_H
+#ifndef EXAMPLE_SERVICE_H
+#define EXAMPLE_SERVICE_H
 #include <string>
 #include <cstring>
 #include <stdexcept>
@@ -48,6 +48,7 @@ private:
     }
     epics::pvData::String channelName;
     epics::pvData::PVStructure::shared_pointer pvTop;
+    epics::pvData::Mutex mutex;
 };
 
 class ExampleChannel :
@@ -142,4 +143,4 @@ private:
 
 }}
 
-#endif  /* EXAMPLE_CHANNEL_H */
+#endif  /* EXAMPLE_SERVICE_H */

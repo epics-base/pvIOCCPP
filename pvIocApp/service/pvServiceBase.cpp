@@ -69,7 +69,10 @@ PVServiceBase::~PVServiceBase()
 void PVServiceBase::destroy()
 {
 //printf("PVServiceBase::destroy\n");
-    beingDestroyed = true;
+    {
+        Lock xx(mutex);
+        beingDestroyed = true;
+    }
     while(true) {
         ChannelProcessListNode *node = channelProcessList.getHead();
         if(node==0) break;
@@ -118,48 +121,63 @@ void PVServiceBase::destroy()
 
 void PVServiceBase::addChannelProcess(ChannelProcess & channelProcess)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelProcessListNode *node = new ChannelProcessListNode(channelProcess);
     channelProcessList.addTail(*node);
 }
 
 void PVServiceBase::addChannelGet(ChannelGet &channelGet)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelGetListNode *node = new ChannelGetListNode(channelGet);
     channelGetList.addTail(*node);
 }
 
 void PVServiceBase::addChannelPut(ChannelPut &channelPut)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelPutListNode *node = new ChannelPutListNode(channelPut);
     channelPutList.addTail(*node);
 }
 
 void PVServiceBase::addChannelPutGet(ChannelPutGet &channelPutGet)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelPutGetListNode *node = new ChannelPutGetListNode(channelPutGet);
     channelPutGetList.addTail(*node);
 }
 
 void PVServiceBase::addChannelMonitor(Monitor &monitor)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelMonitorListNode *node = new ChannelMonitorListNode(monitor);
     channelMonitorList.addTail(*node);
 }
 
 void PVServiceBase::addChannelRPC(ChannelRPC &channelRPC)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelRPCListNode *node = new ChannelRPCListNode(channelRPC);
     channelRPCList.addTail(*node);
 }
 
 void PVServiceBase::addChannelArray(ChannelArray &channelArray)
 {
+    Lock xx(mutex);
+    if(beingDestroyed) return;
     ChannelArrayListNode *node = new ChannelArrayListNode(channelArray);
     channelArrayList.addTail(*node);
 }
 
 void PVServiceBase::removeChannelProcess(ChannelProcess &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelProcessListNode *node = channelProcessList.getHead();
     while(node!=0) {
@@ -175,6 +193,7 @@ void PVServiceBase::removeChannelProcess(ChannelProcess &ref)
 
 void PVServiceBase::removeChannelGet(ChannelGet &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelGetListNode *node = channelGetList.getHead();
     while(node!=0) {
@@ -190,6 +209,7 @@ void PVServiceBase::removeChannelGet(ChannelGet &ref)
 
 void PVServiceBase::removeChannelPut(ChannelPut &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelPutListNode *node = channelPutList.getHead();
     while(node!=0) {
@@ -205,6 +225,7 @@ void PVServiceBase::removeChannelPut(ChannelPut &ref)
 
 void PVServiceBase::removeChannelPutGet(ChannelPutGet &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelPutGetListNode *node = channelPutGetList.getHead();
     while(node!=0) {
@@ -220,6 +241,7 @@ void PVServiceBase::removeChannelPutGet(ChannelPutGet &ref)
 
 void PVServiceBase::removeChannelMonitor(Monitor &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelMonitorListNode *node = channelMonitorList.getHead();
     while(node!=0) {
@@ -235,6 +257,7 @@ void PVServiceBase::removeChannelMonitor(Monitor &ref)
 
 void PVServiceBase::removeChannelRPC(ChannelRPC &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelRPCListNode *node = channelRPCList.getHead();
     while(node!=0) {
@@ -250,6 +273,7 @@ void PVServiceBase::removeChannelRPC(ChannelRPC &ref)
 
 void PVServiceBase::removeChannelArray(ChannelArray &ref)
 {
+    Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelArrayListNode *node = channelArrayList.getHead();
     while(node!=0) {
@@ -414,12 +438,12 @@ ChannelArray::shared_pointer PVServiceBase::createChannelArray(
 
 void PVServiceBase::printInfo()
 {
-    printf("PVServiceBase provides access to servers\n");
+    printf("PVServiceBase provides access to service\n");
 }
 
 void PVServiceBase::printInfo(StringBuilder out)
 {
-    *out += "PVServiceBase provides access to servers";
+    *out += "PVServiceBase provides access to service";
 }
 
 }}

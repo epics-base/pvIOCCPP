@@ -19,6 +19,7 @@
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
+#include <pv/lock.h>
 #include <pv/pvAccess.h>
 
 namespace epics { namespace pvIOC { 
@@ -126,6 +127,7 @@ private:
     epics::pvData::LinkedList<epics::pvAccess::ChannelRPC> channelRPCList;
     epics::pvData::LinkedList<epics::pvAccess::ChannelArray> channelArrayList;
     bool beingDestroyed;
+    epics::pvData::Mutex mutex;
 };
 
 class PVServiceBaseProvider : public epics::pvAccess::ChannelProvider {
@@ -167,8 +169,8 @@ private:
     epics::pvData::String providerName;
     PVServiceBaseProvider::shared_pointer channelProviderPtr;
     epics::pvData::LinkedList<PVServiceBase> channelList;
-    epics::pvData::Mutex mutex;
     bool beingDestroyed;
+    epics::pvData::Mutex mutex;
 };
 
 }}

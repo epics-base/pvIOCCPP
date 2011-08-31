@@ -26,7 +26,7 @@
 #include <pv/pvData.h>
 #include <pv/pvAccess.h>
 
-#include <pv/exampleChannel.h>
+#include <pv/exampleService.h>
 
 namespace epics { namespace pvIOC { 
 

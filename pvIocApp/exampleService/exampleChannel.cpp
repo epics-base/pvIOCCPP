@@ -12,7 +12,7 @@
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
 
-#include <pv/exampleChannel.h>
+#include <pv/exampleService.h>
 
 namespace epics { namespace pvIOC { 
 

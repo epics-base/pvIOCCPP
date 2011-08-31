@@ -9,7 +9,7 @@
 #include <memory>
 
 
-#include <pv/exampleChannel.h>
+#include <pv/exampleService.h>
 
 namespace epics { namespace pvIOC { 
 
@@ -72,6 +72,7 @@ void ExamplePVTop::getData(PVStructure *pvStructure,BitSet *bitSet)
     bitSet->clear();
     PVDouble *pv0 = pvTop->getDoubleField("value");
     PVDouble *pv1 = pvStructure->getDoubleField("value");
+    Lock xx(mutex);
     double val0 = pv0->get();
     double val1 = pv1->get();
     if(val0!=val1) {
@@ -84,6 +85,7 @@ void ExamplePVTop::putData(PVStructure *pvStructure)
 {
     PVDouble *pv0 = pvTop->getDoubleField("value");
     PVDouble *pv1 = pvStructure->getDoubleField("value");
+    Lock xx(mutex);
     pv0->put(pv1->get());
 }
 
