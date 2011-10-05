@@ -74,11 +74,14 @@ void ExampleChannelGet::destroy() {
 
 void ExampleChannelGet::get(bool lastRequest)
 {
+    {
+    Lock lock(dataMutex);
     examplePVTop->getData(pvTop.get(),bitSet.get());
     if(firstTime) {
         firstTime = false;
         bitSet->clear();
         bitSet->set(0);
+    }
     }
     channelGetRequester->getDone(Status::OK);
     if(lastRequest) destroy();

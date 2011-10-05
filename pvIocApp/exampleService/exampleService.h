@@ -97,6 +97,8 @@ public:
         epics::pvData::MessageType messageType);
     virtual void destroy();
     virtual void get(bool lastRequest);
+    virtual void lock();
+    virtual void unlock();
 private:
     ExampleChannelGet::shared_pointer getPtrSelf()
     {
@@ -108,6 +110,7 @@ private:
     epics::pvAccess::ChannelGetRequester::shared_pointer channelGetRequester;
     epics::pvData::PVStructure::shared_pointer pvTop;
     epics::pvData::BitSet::shared_pointer bitSet;
+    epics::pvData::Mutex dataMutex;
 };
 
 class ExampleChannelPut :
@@ -129,6 +132,8 @@ public:
     virtual void destroy();
     virtual void put(bool lastRequest);
     virtual void get();
+    virtual void lock();
+    virtual void unlock();
 private:
     ExampleChannelPut::shared_pointer getPtrSelf()
     {
@@ -139,6 +144,7 @@ private:
     epics::pvAccess::ChannelPutRequester::shared_pointer channelPutRequester;
     epics::pvData::PVStructure::shared_pointer pvTop;
     epics::pvData::BitSet::shared_pointer bitSet;
+    epics::pvData::Mutex dataMutex;
 };
 
 }}

@@ -77,14 +77,20 @@ void ExampleChannelPut::destroy() {
 
 void ExampleChannelPut::put(bool lastRequest)
 {
+    {
+    Lock lock(dataMutex);
     examplePVTop->putData(pvTop.get());
+    }
     channelPutRequester->putDone(Status::OK);
     if(lastRequest) destroy();
 }
 
 void ExampleChannelPut::get()
 {
+    {
+    Lock lock(dataMutex);
     examplePVTop->getData(pvTop.get(),bitSet.get());
+    }
     channelPutRequester->getDone(Status::OK);
 }
 
