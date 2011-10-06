@@ -87,5 +87,15 @@ void ExampleChannelGet::get(bool lastRequest)
     if(lastRequest) destroy();
 }
 
+void ExampleChannelGet::lock()
+{
+    dataMutex.lock();
+}
+
+void ExampleChannelGet::unlock()
+{
+    dataMutex.unlock();
+}
+
 }}
 

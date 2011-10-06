@@ -94,5 +94,15 @@ void ExampleChannelPut::get()
     channelPutRequester->getDone(Status::OK);
 }
 
+void ExampleChannelPut::lock()
+{
+    dataMutex.lock();
+}
+
+void ExampleChannelPut::unlock()
+{
+    dataMutex.unlock();
+}
+
 }}
 
