@@ -403,10 +403,7 @@ ChannelRPC::shared_pointer PVServiceBase::createChannelRPC(
 {
     Status status(Status::STATUSTYPE_ERROR,
         String("ChannelRPC not supported"));
-    channelRPCRequester->channelRPCConnect(status,
-     ChannelRPC::shared_pointer(),
-     PVStructure::shared_pointer(),
-     BitSet::shared_pointer());
+    channelRPCRequester->channelRPCConnect(status,ChannelRPC::shared_pointer());
     return ChannelRPC::shared_pointer();
 }
 
