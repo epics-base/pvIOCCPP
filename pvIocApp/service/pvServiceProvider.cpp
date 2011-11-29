@@ -59,12 +59,13 @@ PVServiceProvider::PVServiceProvider()
 
 PVServiceProvider::~PVServiceProvider()
 {
-//printf("PVServiceProvider::~PVServiceProvider\n");
+printf("PVServiceProvider::~PVServiceProvider\n");
+pvServiceProvider.reset();
 }
 
 void PVServiceProvider::destroy()
 {
-//printf("PVServiceProvider::destroy\n");
+printf("PVServiceProvider::destroy\n");
     Lock xx(mutex);
     while(true) {
         TopListNode *node = topList.removeHead();

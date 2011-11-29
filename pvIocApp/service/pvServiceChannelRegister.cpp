@@ -30,58 +30,18 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 using namespace epics::pvIOC;
 
-class PVServiceChannelRun : public Runnable {
-public:
-    PVServiceChannelRun();
-    ~PVServiceChannelRun();
-    virtual void run();
-private:
-    Event event;
-    ServerContextImpl::shared_pointer ctx;
-    Thread *thread;
-};
-
-PVServiceChannelRun::PVServiceChannelRun()
-: 
-  event(),
-  ctx(ServerContextImpl::create()),
-  thread(new Thread(String("pvServiceChannel"),lowerPriority,this))
-{}
-
-PVServiceChannelRun::~PVServiceChannelRun()
-{
-    ctx->shutdown();
-    // we need thead.waitForCompletion()
-    event.wait();
-    epicsThreadSleep(1.0);
-    delete thread;
-}
-
-void PVServiceChannelRun::run()
-{
-    ChannelProvider::shared_pointer channelProvider(
-        PVServiceProvider::getPVServiceProvider());
-    registerChannelProvider(channelProvider);
-    ctx->setChannelProviderName(channelProvider->getProviderName());
-    ctx->initialize(getChannelAccess());
-    ctx->printInfo();
-    ctx->run(0);
-    ctx->destroy();
-    event.signal();
-}
-
-static PVServiceChannelRun *myRun = 0;
+static PVServiceChannelCTX *myCTX = 0;
 
 static const iocshFuncDef startPVServiceChannelFuncDef = {
     "startPVServiceChannel", 0, 0};
 
 static void startPVServiceChannelCallFunc(const iocshArgBuf *args)
 {
-    if(myRun!=0) {
+    if(myCTX!=0) {
         printf("PVServiceChannel already started\n");
         return;
     }
-    myRun = new PVServiceChannelRun();
+    myCTX = new PVServiceChannelCTX();
 }
 
 static const iocshFuncDef stopPVServiceChannelFuncDef = {
@@ -90,8 +50,8 @@ static const iocshFuncDef stopPVServiceChannelFuncDef = {
 static void stopPVServiceChannelCallFunc(const iocshArgBuf *args)
 {
    printf("stopPVServiceChannel\n");
-   if(myRun!=0) delete myRun;
-   myRun = 0;
+   if(myCTX!=0) delete myCTX;
+   myCTX = 0;
 }
 
 static void startPVServiceChannelRegister(void)
