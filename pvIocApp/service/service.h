@@ -37,6 +37,7 @@ class ServiceRPC
 {
 public:
     POINTER_DEFINITIONS(ServiceRPC);
+    virtual ~ServiceRPC(){}
     virtual void destroy() = 0;
     virtual void request(
         epics::pvAccess::ChannelRPCRequester::shared_pointer const & channelRPCRequester,

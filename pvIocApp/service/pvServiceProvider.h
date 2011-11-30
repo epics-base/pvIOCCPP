@@ -43,7 +43,7 @@ public:
 class ServicePVTopBase;
 
 class PVServiceProvider :
-    public virtual PVServiceBaseProvider,
+    public PVServiceBaseProvider,
     public std::tr1::enable_shared_from_this<PVServiceProvider>
 {
 public:

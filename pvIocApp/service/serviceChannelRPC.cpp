@@ -22,7 +22,7 @@ class ChannelRPC;
 
 
 class PVTop :
-    public virtual ServicePVTop,
+    public ServicePVTop,
     public std::tr1::enable_shared_from_this<PVTop>
 {
 public:
@@ -44,7 +44,7 @@ private:
 };
 
 class ChannelImpl :
-    public virtual PVServiceBase
+    public PVServiceBase
 {
 public:
     POINTER_DEFINITIONS(ChannelImpl);
@@ -64,7 +64,7 @@ private:
 };
 
 class ChannelRPC :
-  public virtual epics::pvAccess::ChannelRPC,
+  public epics::pvAccess::ChannelRPC,
   public std::tr1::enable_shared_from_this<ChannelRPC>
 {
 public:

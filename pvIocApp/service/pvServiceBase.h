@@ -44,7 +44,7 @@ class PVServiceBaseArray;
  */
 
 class PVServiceBase :
-  public virtual epics::pvAccess::Channel,
+  public epics::pvAccess::Channel,
   public std::tr1::enable_shared_from_this<PVServiceBase>
 {
 public:
@@ -130,7 +130,9 @@ private:
     epics::pvData::Mutex mutex;
 };
 
-class PVServiceBaseProvider : public epics::pvAccess::ChannelProvider {
+class PVServiceBaseProvider :
+    public epics::pvAccess::ChannelProvider
+{
 public:
     POINTER_DEFINITIONS(PVServiceBaseProvider);
     PVServiceBaseProvider(
