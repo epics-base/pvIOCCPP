@@ -1,4 +1,4 @@
-/* pvServerBaseProvider.cpp */
+/* channelBaseProvider.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -17,58 +17,57 @@
 
 #include <pv/support.h>
 #include <pv/pvDatabase.h>
-#include <pv/pvServiceBase.h>
+#include <pv/channelBase.h>
 
-namespace epics { namespace pvIOC { 
+namespace epics { namespace pvAccess { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-typedef LinkedListNode<PVServiceBase> ChannelListNode;
-typedef LinkedList<PVServiceBase> ChannelList;
+typedef LinkedListNode<ChannelBase> ChannelListNode;
+typedef LinkedList<ChannelBase> ChannelList;
 
 
-PVServiceBaseProvider::PVServiceBaseProvider(
+ChannelBaseProvider::ChannelBaseProvider(
     String providerName
 )
 : providerName(providerName),
   beingDestroyed(false)
 {
-printf("PVServiceBaseProvider::PVServiceBaseProvider %s\n",providerName.c_str());
+printf("ChannelBaseProvider::ChannelBaseProvider %s\n",providerName.c_str());
 }
 
-void PVServiceBaseProvider::activate()
+void ChannelBaseProvider::init()
 {
-printf("PVServiceBaseProvider::activate %s\n",providerName.c_str());
-    registerChannelProvider(getChannelProvider());
+    registerChannelProvider(getPtrSelf());
 }
 
-PVServiceBaseProvider::~PVServiceBaseProvider()
+ChannelBaseProvider::~ChannelBaseProvider()
 {
-printf("PVServiceBaseProvider::~PVServiceBaseProvider\n");
+printf("ChannelBaseProvider::~ChannelBaseProvider\n");
 }
 
-void PVServiceBaseProvider::destroy()
+void ChannelBaseProvider::destroy()
 {
-printf("PVServiceBaseProvider::destroy\n");
+printf("ChannelBaseProvider::destroy\n");
     Lock xx(mutex);
     beingDestroyed = true;
-    unregisterChannelProvider(getChannelProvider());
+    unregisterChannelProvider(getPtrSelf());
     while(true) {
         ChannelListNode *node = channelList.removeHead();
         if(node==0) break;
-        PVServiceBase &pvServerBase = node->getObject();
+        ChannelBase &pvServerBase = node->getObject();
         pvServerBase.destroy();
         delete node;
     }
 }
 
-String PVServiceBaseProvider::getProviderName()
+String ChannelBaseProvider::getProviderName()
 {
     return providerName;
 }
 
-void PVServiceBaseProvider::channelFound(
+void ChannelBaseProvider::channelFound(
     bool found,
     ChannelFindRequester::shared_pointer const & channelFindRequester)
 {
@@ -86,7 +85,7 @@ void PVServiceBaseProvider::channelFound(
     }
 }
 
-Channel::shared_pointer PVServiceBaseProvider::createChannel(
+Channel::shared_pointer ChannelBaseProvider::createChannel(
     String channelName,
     ChannelRequester::shared_pointer  const &channelRequester,
     short priority)
@@ -94,7 +93,7 @@ Channel::shared_pointer PVServiceBaseProvider::createChannel(
     return createChannel(channelName,channelRequester,priority,"");
 }
 
-void PVServiceBaseProvider::channelNotCreated(
+void ChannelBaseProvider::channelNotCreated(
     ChannelRequester::shared_pointer const &channelRequester)
 {
     Status notFoundStatus(Status::STATUSTYPE_ERROR,String("pv not found"));
@@ -103,22 +102,23 @@ void PVServiceBaseProvider::channelNotCreated(
         Channel::shared_pointer());
 }
 
-void PVServiceBaseProvider::channelCreated(PVServiceBase::shared_pointer channel)
+void ChannelBaseProvider::channelCreated(Channel::shared_pointer channel)
 {
-printf("PVServiceBaseProvider::channelCreated\n");
+printf("ChannelBaseProvider::channelCreated\n");
     Lock xx(mutex);
-    ChannelListNode *channelListNode = new ChannelListNode(*channel.get());
+    ChannelBase *xxx = static_cast<ChannelBase *>(channel.get());
+    ChannelListNode *channelListNode = new ChannelListNode(*xxx);
     channelList.addTail(*channelListNode);
     channel->getChannelRequester()->channelCreated(Status::OK,channel);
 }
 
-void PVServiceBaseProvider::removeChannel(PVServiceBase &channel)
+void ChannelBaseProvider::removeChannel(ChannelBase &channel)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelListNode *channelListNode = channelList.getHead();
     while(channelListNode!=0) {
-        PVServiceBase *chan = &channelListNode->getObject();
+        ChannelBase *chan = &channelListNode->getObject();
         if(chan==&channel) {
           channelList.remove(*channelListNode);
           delete channelListNode; 
@@ -126,7 +126,7 @@ void PVServiceBaseProvider::removeChannel(PVServiceBase &channel)
         }
         channelListNode = channelList.getNext(*channelListNode);
     }
-    String message("PVServiceBaseProvider::removeChannel ");
+    String message("ChannelBaseProvider::removeChannel ");
     message += channel.getChannelName();
     message += " but channel not in channelList";
     channel.message(message,errorMessage);
