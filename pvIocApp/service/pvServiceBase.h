@@ -130,12 +130,15 @@ private:
     epics::pvData::Mutex mutex;
 };
 
-class PVServiceBaseProvider : public epics::pvAccess::ChannelProvider {
+class PVServiceBaseProvider :
+    public epics::pvAccess::ChannelProvider,
+    public std::tr1::enable_shared_from_this<PVServiceBaseProvider> {
 public:
     POINTER_DEFINITIONS(PVServiceBaseProvider);
     PVServiceBaseProvider(
         epics::pvData::String providerName
     );
+    virtual void activate();
     virtual ~PVServiceBaseProvider();
     virtual epics::pvData::String getProviderName();
     virtual void destroy();
@@ -155,7 +158,7 @@ public:
         epics::pvData::String address) = 0;
     PVServiceBaseProvider::shared_pointer getChannelProvider()
     {
-        return channelProviderPtr;
+        return shared_from_this();
     }
     // following called by derived class
     void channelFound(
@@ -167,7 +170,6 @@ public:
     void removeChannel(PVServiceBase &channel);
 private:
     epics::pvData::String providerName;
-    PVServiceBaseProvider::shared_pointer channelProviderPtr;
     epics::pvData::LinkedList<PVServiceBase> channelList;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;

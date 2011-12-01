@@ -43,8 +43,7 @@ public:
 class ServicePVTopBase;
 
 class PVServiceProvider :
-    public virtual PVServiceBaseProvider,
-    public std::tr1::enable_shared_from_this<PVServiceProvider>
+    public virtual PVServiceBaseProvider
 {
 public:
     POINTER_DEFINITIONS(PVServiceProvider);
@@ -66,7 +65,7 @@ public:
 protected:
     PVServiceProvider::shared_pointer getPtrSelf()
     {
-        return shared_from_this();
+        return std::tr1::dynamic_pointer_cast<PVServiceProvider>(shared_from_this());
     }
 private:
     PVServiceProvider();
