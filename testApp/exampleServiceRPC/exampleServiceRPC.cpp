@@ -19,7 +19,7 @@
 
 #include <pv/ntfield.h>
 #include <pv/nttable.h>
-#include <pv/ntnameValuePair.h>
+#include <pv/ntnameValue.h>
 
 #include <exampleServiceRPC.h>
 
@@ -48,11 +48,11 @@ void ExampleServiceRPC::request(
 {
     String builder;
     builder += "pvArgument ";
-    bool is = NTNameValuePair::isNTNameValuePair(pvArgument.get());
+    bool is = NTNameValue::isNTNameValue(pvArgument.get());
     if(is) {
-        builder += "is a NTNameValuePair\n";
+        builder += "is a NTNameValue\n";
     } else {
-        builder += "is not a NTNameValuePair\n ";
+        builder += "is not a NTNameValue\n ";
     }
     pvArgument->toString(&builder);
     printf("%s\n",builder.c_str());
