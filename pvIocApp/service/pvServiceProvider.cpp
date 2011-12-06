@@ -46,7 +46,6 @@ PVServiceProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
     if(pvServiceProvider.get()==0) {
         pvServiceProvider = PVServiceProvider::shared_pointer(
              new PVServiceProvider());
-        pvServiceProvider->activate();
     }
     return pvServiceProvider;
 }

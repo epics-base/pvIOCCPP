@@ -32,15 +32,11 @@ PVServiceBaseProvider::PVServiceBaseProvider(
     String providerName
 )
 : providerName(providerName),
+  channelProviderPtr(this),
   beingDestroyed(false)
 {
 printf("PVServiceBaseProvider::PVServiceBaseProvider %s\n",providerName.c_str());
-}
-
-void PVServiceBaseProvider::activate()
-{
-printf("PVServiceBaseProvider::activate %s\n",providerName.c_str());
-    registerChannelProvider(getChannelProvider());
+    registerChannelProvider(channelProviderPtr);
 }
 
 PVServiceBaseProvider::~PVServiceBaseProvider()
@@ -53,7 +49,7 @@ void PVServiceBaseProvider::destroy()
 printf("PVServiceBaseProvider::destroy\n");
     Lock xx(mutex);
     beingDestroyed = true;
-    unregisterChannelProvider(getChannelProvider());
+    unregisterChannelProvider(channelProviderPtr);
     while(true) {
         ChannelListNode *node = channelList.removeHead();
         if(node==0) break;
