@@ -1,4 +1,4 @@
-/* pvServiceBase.cpp */
+/* channelBase.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -18,34 +18,32 @@
 #include <pv/support.h>
 #include <pv/pvDatabase.h>
 #include <pv/standardField.h>
-#include <pv/pvServiceBase.h>
+#include <pv/channelBase.h>
 
-namespace epics { namespace pvIOC { 
+namespace epics { namespace pvAccess { 
 
 using namespace epics::pvData;
-using namespace epics::pvAccess;
 
-typedef LinkedListNode<epics::pvAccess::ChannelProcess> ChannelProcessListNode;
-typedef LinkedList<epics::pvAccess::ChannelProcess> ChannelProcessList;
-typedef LinkedListNode<epics::pvAccess::ChannelGet> ChannelGetListNode;
-typedef LinkedList<epics::pvAccess::ChannelGet> ChannelGetList;
-typedef LinkedListNode<epics::pvAccess::ChannelPut> ChannelPutListNode;
-typedef LinkedList<epics::pvAccess::ChannelPut> ChannelPutList;
-typedef LinkedListNode<epics::pvAccess::ChannelPutGet> ChannelPutGetListNode;
-typedef LinkedList<epics::pvAccess::ChannelPutGet> ChannelPutGetList;
+typedef LinkedListNode<ChannelProcess> ChannelProcessListNode;
+typedef LinkedList<ChannelProcess> ChannelProcessList;
+typedef LinkedListNode<ChannelGet> ChannelGetListNode;
+typedef LinkedList<ChannelGet> ChannelGetList;
+typedef LinkedListNode<ChannelPut> ChannelPutListNode;
+typedef LinkedList<ChannelPut> ChannelPutList;
+typedef LinkedListNode<ChannelPutGet> ChannelPutGetListNode;
+typedef LinkedList<ChannelPutGet> ChannelPutGetList;
 typedef LinkedListNode<epics::pvData::Monitor> ChannelMonitorListNode;
 typedef LinkedList<epics::pvData::Monitor> ChannelMonitorList;
-typedef LinkedListNode<epics::pvAccess::ChannelRPC> ChannelRPCListNode;
-typedef LinkedList<epics::pvAccess::ChannelRPC> ChannelRPCList;
-typedef LinkedListNode<epics::pvAccess::ChannelArray> ChannelArrayListNode;
-typedef LinkedList<epics::pvAccess::ChannelArray> ChannelArrayList;
+typedef LinkedListNode<ChannelRPC> ChannelRPCListNode;
+typedef LinkedList<ChannelRPC> ChannelRPCList;
+typedef LinkedListNode<ChannelArray> ChannelArrayListNode;
+typedef LinkedList<ChannelArray> ChannelArrayList;
 
 
-PVServiceBase::PVServiceBase(
-    PVServiceBaseProvider::shared_pointer const & provider,
-        ChannelRequester::shared_pointer const & requester,
-        String name
-    )
+ChannelBase::ChannelBase(
+    ChannelProvider::shared_pointer const & provider,
+    ChannelRequester::shared_pointer const & requester,
+    String name)
 :   provider(provider),
     requester(requester),
     channelName(name),
@@ -58,17 +56,17 @@ PVServiceBase::PVServiceBase(
     channelArrayList(),
     beingDestroyed(false)
 {
-//printf("PVServiceBase::PVServiceBase\n");
+//printf("ChannelBase::ChannelBase\n");
 }
 
-PVServiceBase::~PVServiceBase()
+ChannelBase::~ChannelBase()
 {
-//printf("PVServiceBase::~PVServiceBase\n");
+//printf("ChannelBase::~ChannelBase\n");
 }
 
-void PVServiceBase::destroy()
+void ChannelBase::destroy()
 {
-//printf("PVServiceBase::destroy\n");
+//printf("ChannelBase::destroy\n");
     {
         Lock xx(mutex);
         beingDestroyed = true;
@@ -115,11 +113,11 @@ void PVServiceBase::destroy()
         ChannelArray &channelArray = node->getObject();
         channelArray.destroy();
     }
-    std::tr1::static_pointer_cast<PVServiceBaseProvider>(provider)->removeChannel(*this);
+    std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(*this);
 }
 
 
-void PVServiceBase::addChannelProcess(ChannelProcess & channelProcess)
+void ChannelBase::addChannelProcess(ChannelProcess & channelProcess)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -127,7 +125,7 @@ void PVServiceBase::addChannelProcess(ChannelProcess & channelProcess)
     channelProcessList.addTail(*node);
 }
 
-void PVServiceBase::addChannelGet(ChannelGet &channelGet)
+void ChannelBase::addChannelGet(ChannelGet &channelGet)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -135,7 +133,7 @@ void PVServiceBase::addChannelGet(ChannelGet &channelGet)
     channelGetList.addTail(*node);
 }
 
-void PVServiceBase::addChannelPut(ChannelPut &channelPut)
+void ChannelBase::addChannelPut(ChannelPut &channelPut)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -143,7 +141,7 @@ void PVServiceBase::addChannelPut(ChannelPut &channelPut)
     channelPutList.addTail(*node);
 }
 
-void PVServiceBase::addChannelPutGet(ChannelPutGet &channelPutGet)
+void ChannelBase::addChannelPutGet(ChannelPutGet &channelPutGet)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -151,7 +149,7 @@ void PVServiceBase::addChannelPutGet(ChannelPutGet &channelPutGet)
     channelPutGetList.addTail(*node);
 }
 
-void PVServiceBase::addChannelMonitor(Monitor &monitor)
+void ChannelBase::addChannelMonitor(Monitor &monitor)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -159,7 +157,7 @@ void PVServiceBase::addChannelMonitor(Monitor &monitor)
     channelMonitorList.addTail(*node);
 }
 
-void PVServiceBase::addChannelRPC(ChannelRPC &channelRPC)
+void ChannelBase::addChannelRPC(ChannelRPC &channelRPC)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -167,7 +165,7 @@ void PVServiceBase::addChannelRPC(ChannelRPC &channelRPC)
     channelRPCList.addTail(*node);
 }
 
-void PVServiceBase::addChannelArray(ChannelArray &channelArray)
+void ChannelBase::addChannelArray(ChannelArray &channelArray)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -175,7 +173,7 @@ void PVServiceBase::addChannelArray(ChannelArray &channelArray)
     channelArrayList.addTail(*node);
 }
 
-void PVServiceBase::removeChannelProcess(ChannelProcess &ref)
+void ChannelBase::removeChannelProcess(ChannelProcess &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -191,7 +189,7 @@ void PVServiceBase::removeChannelProcess(ChannelProcess &ref)
     }
 }
 
-void PVServiceBase::removeChannelGet(ChannelGet &ref)
+void ChannelBase::removeChannelGet(ChannelGet &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -207,7 +205,7 @@ void PVServiceBase::removeChannelGet(ChannelGet &ref)
     }
 }
 
-void PVServiceBase::removeChannelPut(ChannelPut &ref)
+void ChannelBase::removeChannelPut(ChannelPut &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -223,7 +221,7 @@ void PVServiceBase::removeChannelPut(ChannelPut &ref)
     }
 }
 
-void PVServiceBase::removeChannelPutGet(ChannelPutGet &ref)
+void ChannelBase::removeChannelPutGet(ChannelPutGet &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -239,7 +237,7 @@ void PVServiceBase::removeChannelPutGet(ChannelPutGet &ref)
     }
 }
 
-void PVServiceBase::removeChannelMonitor(Monitor &ref)
+void ChannelBase::removeChannelMonitor(Monitor &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -255,7 +253,7 @@ void PVServiceBase::removeChannelMonitor(Monitor &ref)
     }
 }
 
-void PVServiceBase::removeChannelRPC(ChannelRPC &ref)
+void ChannelBase::removeChannelRPC(ChannelRPC &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -271,7 +269,7 @@ void PVServiceBase::removeChannelRPC(ChannelRPC &ref)
     }
 }
 
-void PVServiceBase::removeChannelArray(ChannelArray &ref)
+void ChannelBase::removeChannelArray(ChannelArray &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -287,49 +285,49 @@ void PVServiceBase::removeChannelArray(ChannelArray &ref)
     }
 }
 
-String PVServiceBase::getRequesterName()
+String ChannelBase::getRequesterName()
 {
     return requester->getRequesterName();
 }
 
-void PVServiceBase::message(
+void ChannelBase::message(
         String message,
         MessageType messageType)
 {
     requester->message(message,messageType);
 }
 
-ChannelProvider::shared_pointer const & PVServiceBase::getProvider()
+ChannelProvider::shared_pointer const & ChannelBase::getProvider()
 {
     return provider;
 }
 
-String PVServiceBase::getRemoteAddress()
+String ChannelBase::getRemoteAddress()
 {
     return String("local");
 }
 
-Channel::ConnectionState PVServiceBase::getConnectionState()
+Channel::ConnectionState ChannelBase::getConnectionState()
 {
     return Channel::CONNECTED;
 }
 
-String PVServiceBase::getChannelName()
+String ChannelBase::getChannelName()
 {
     return channelName;
 }
 
-ChannelRequester::shared_pointer const & PVServiceBase::getChannelRequester()
+ChannelRequester::shared_pointer const & ChannelBase::getChannelRequester()
 {
     return requester;
 }
 
-bool PVServiceBase::isConnected()
+bool ChannelBase::isConnected()
 {
     return true;
 }
 
-void PVServiceBase::getField(GetFieldRequester::shared_pointer const &requester,
+void ChannelBase::getField(GetFieldRequester::shared_pointer const &requester,
         String subField)
 {
     Status status(Status::STATUSTYPE_ERROR,
@@ -337,13 +335,13 @@ void PVServiceBase::getField(GetFieldRequester::shared_pointer const &requester,
     requester->getDone(status,FieldConstPtr());
 }
 
-AccessRights PVServiceBase::getAccessRights(
+AccessRights ChannelBase::getAccessRights(
         PVField::shared_pointer const &pvField)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-ChannelProcess::shared_pointer PVServiceBase::createChannelProcess(
+ChannelProcess::shared_pointer ChannelBase::createChannelProcess(
         ChannelProcessRequester::shared_pointer const & channelProcessRequester,
         PVStructure::shared_pointer const & pvRequest)
 {
@@ -355,7 +353,7 @@ ChannelProcess::shared_pointer PVServiceBase::createChannelProcess(
     return ChannelProcess::shared_pointer();
 }
 
-ChannelGet::shared_pointer PVServiceBase::createChannelGet(
+ChannelGet::shared_pointer ChannelBase::createChannelGet(
         ChannelGetRequester::shared_pointer const &channelGetRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -369,7 +367,7 @@ ChannelGet::shared_pointer PVServiceBase::createChannelGet(
     return ChannelGet::shared_pointer();
 }
 
-ChannelPut::shared_pointer PVServiceBase::createChannelPut(
+ChannelPut::shared_pointer ChannelBase::createChannelPut(
         ChannelPutRequester::shared_pointer const &channelPutRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -383,7 +381,7 @@ ChannelPut::shared_pointer PVServiceBase::createChannelPut(
     return ChannelPut::shared_pointer();
 }
 
-ChannelPutGet::shared_pointer PVServiceBase::createChannelPutGet(
+ChannelPutGet::shared_pointer ChannelBase::createChannelPutGet(
         ChannelPutGetRequester::shared_pointer const &channelPutGetRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -397,7 +395,7 @@ ChannelPutGet::shared_pointer PVServiceBase::createChannelPutGet(
     return ChannelPutGet::shared_pointer();
 }
 
-ChannelRPC::shared_pointer PVServiceBase::createChannelRPC(
+ChannelRPC::shared_pointer ChannelBase::createChannelRPC(
         ChannelRPCRequester::shared_pointer const & channelRPCRequester,
         PVStructure::shared_pointer const & pvRequest)
 {
@@ -407,7 +405,7 @@ ChannelRPC::shared_pointer PVServiceBase::createChannelRPC(
     return ChannelRPC::shared_pointer();
 }
 
-Monitor::shared_pointer PVServiceBase::createMonitor(
+Monitor::shared_pointer ChannelBase::createMonitor(
         MonitorRequester::shared_pointer const &monitorRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -420,7 +418,7 @@ Monitor::shared_pointer PVServiceBase::createMonitor(
     return Monitor::shared_pointer();
 }
 
-ChannelArray::shared_pointer PVServiceBase::createChannelArray(
+ChannelArray::shared_pointer ChannelBase::createChannelArray(
         ChannelArrayRequester::shared_pointer const &channelArrayRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -433,14 +431,14 @@ ChannelArray::shared_pointer PVServiceBase::createChannelArray(
     return ChannelArray::shared_pointer();
 }
 
-void PVServiceBase::printInfo()
+void ChannelBase::printInfo()
 {
-    printf("PVServiceBase provides access to service\n");
+    printf("ChannelBase provides access to service\n");
 }
 
-void PVServiceBase::printInfo(StringBuilder out)
+void ChannelBase::printInfo(StringBuilder out)
 {
-    *out += "PVServiceBase provides access to service";
+    *out += "ChannelBase provides access to service";
 }
 
 }}
