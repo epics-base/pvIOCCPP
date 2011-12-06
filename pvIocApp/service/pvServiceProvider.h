@@ -22,7 +22,7 @@
 #include <pv/noDefaultMethods.h>
 #include <pv/pvAccess.h>
 #include <pv/serverContext.h>
-#include <pv/channelBase.h>
+#include <pv/pvServiceBase.h>
 
 namespace epics { namespace pvIOC { 
 
@@ -34,20 +34,20 @@ public:
     POINTER_DEFINITIONS(ServicePVTop);
     virtual ~ServicePVTop(){}
     virtual epics::pvData::String getName() = 0;
-    virtual epics::pvAccess::ChannelBase::shared_pointer createChannel(
+    virtual PVServiceBase::shared_pointer createChannel(
         epics::pvAccess::ChannelRequester::shared_pointer const &requester,
-        epics::pvAccess::ChannelProvider::shared_pointer const &provider) = 0;
+        std::tr1::shared_ptr<PVServiceProvider> const &provider) = 0;
     virtual void destroy() = 0;
 };
 
 class ServicePVTopBase;
 
 class PVServiceProvider :
-    public epics::pvAccess::ChannelBaseProvider
+    public virtual PVServiceBaseProvider
 {
 public:
     POINTER_DEFINITIONS(PVServiceProvider);
-    static epics::pvAccess::ChannelBaseProvider::shared_pointer getPVServiceProvider();
+    static PVServiceProvider::shared_pointer getPVServiceProvider();
     virtual ~PVServiceProvider();
     virtual void destroy();
     virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
@@ -62,6 +62,11 @@ public:
         epics::pvData::String address);
     void addRecord(ServicePVTop::shared_pointer servicePVTop);
     void removeRecord(ServicePVTop::shared_pointer servicePVTop);
+protected:
+    PVServiceProvider::shared_pointer getPtrSelf()
+    {
+        return std::tr1::dynamic_pointer_cast<PVServiceProvider>(shared_from_this());
+    }
 private:
     PVServiceProvider();
     epics::pvData::LinkedList<ServicePVTopBase> topList;

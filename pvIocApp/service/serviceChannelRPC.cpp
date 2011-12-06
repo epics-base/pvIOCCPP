@@ -22,7 +22,7 @@ class ChannelRPC;
 
 
 class PVTop :
-    public ServicePVTop,
+    public virtual ServicePVTop,
     public std::tr1::enable_shared_from_this<PVTop>
 {
 public:
@@ -30,9 +30,9 @@ public:
     PVTop(String channelName,ServiceRPC::shared_pointer const &serviceRPC);
     virtual ~PVTop();
     virtual String getName();
-    virtual ChannelBase::shared_pointer createChannel(
+    virtual PVServiceBase::shared_pointer createChannel(
         ChannelRequester::shared_pointer const &requester,
-        ChannelProvider::shared_pointer const &provider);
+        PVServiceProvider::shared_pointer const &provider);
     virtual void destroy();
 private:
     PVTop::shared_pointer getPtrSelf()
@@ -44,12 +44,12 @@ private:
 };
 
 class ChannelImpl :
-    public ChannelBase
+    public virtual PVServiceBase
 {
 public:
     POINTER_DEFINITIONS(ChannelImpl);
     ChannelImpl(
-        ChannelProvider::shared_pointer const & channelProvider,
+        PVServiceProvider::shared_pointer const & channelProvider,
         ChannelRequester::shared_pointer const & requester,
         String name,
         ServiceRPC::shared_pointer const &serviceRPC);
@@ -64,13 +64,13 @@ private:
 };
 
 class ChannelRPC :
-  public epics::pvAccess::ChannelRPC,
+  public virtual epics::pvAccess::ChannelRPC,
   public std::tr1::enable_shared_from_this<ChannelRPC>
 {
 public:
     POINTER_DEFINITIONS(ChannelRPC);
     ChannelRPC(
-        ChannelBase::shared_pointer const & channel,
+        PVServiceBase::shared_pointer const & channel,
         ChannelRPCRequester::shared_pointer const &channelRPCRequester,
         ServiceRPC::shared_pointer const &serviceRPC);
     virtual ~ChannelRPC();
@@ -89,7 +89,7 @@ private:
     {
         return shared_from_this();
     }
-    ChannelBase::shared_pointer channel;
+    PVServiceBase::shared_pointer channel;
     ChannelRPCRequester::shared_pointer channelRPCRequester;
     ServiceRPC::shared_pointer serviceRPC;
     epics::pvData::Mutex dataMutex;
@@ -108,11 +108,11 @@ printf("PVTop::~PVTop()\n");
 
 String PVTop::getName() {return channelName;}
 
-ChannelBase::shared_pointer PVTop::createChannel(
+PVServiceBase::shared_pointer PVTop::createChannel(
     ChannelRequester::shared_pointer const &requester,
-    ChannelProvider::shared_pointer const &provider)
+    PVServiceProvider::shared_pointer const &provider)
 {
-    return ChannelBase::shared_pointer(
+    return PVServiceBase::shared_pointer(
         new ChannelImpl(provider,requester,channelName,serviceRPC));
 }
 
@@ -122,11 +122,11 @@ printf("void PVTop::destroy()\n");
 }
 
 ChannelImpl::ChannelImpl(
-    ChannelProvider::shared_pointer const & channelProvider,
+    PVServiceProvider::shared_pointer const & channelProvider,
     ChannelRequester::shared_pointer const & requester,
     String name,
     ServiceRPC::shared_pointer const &serviceRPC)
-: ChannelBase(channelProvider,requester,name),
+: PVServiceBase(channelProvider,requester,name),
   serviceRPC(serviceRPC)
 {
 }
@@ -150,7 +150,7 @@ void ChannelImpl::printInfo(){}
 void ChannelImpl::printInfo(StringBuilder out){}
 
 ChannelRPC::ChannelRPC(
-    ChannelBase::shared_pointer const & channel,
+    PVServiceBase::shared_pointer const & channel,
     ChannelRPCRequester::shared_pointer const &channelRPCRequester,
     ServiceRPC::shared_pointer const &serviceRPC)
 : channel(channel),
@@ -204,12 +204,11 @@ ServiceChannelRPC::ServiceChannelRPC(
     ServiceRPC::shared_pointer const & serviceRPC)
 : serviceRPC(serviceRPC)
 {
-    ChannelBaseProvider::shared_pointer serviceProvider
+    PVServiceProvider::shared_pointer serviceProvider
         = PVServiceProvider::getPVServiceProvider();
     PVTop::shared_pointer  pvTop = PVTop::shared_pointer(
         new PVTop(channelName,serviceRPC));
-    PVServiceProvider* xxx = static_cast<PVServiceProvider*>(serviceProvider.get());
-    xxx->addRecord(pvTop);
+    serviceProvider->addRecord(pvTop);
 }
 
 ServiceChannelRPC::~ServiceChannelRPC()

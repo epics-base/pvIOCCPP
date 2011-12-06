@@ -1,4 +1,4 @@
-/* channelBase.cpp */
+/* pvServiceBase.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -18,32 +18,34 @@
 #include <pv/support.h>
 #include <pv/pvDatabase.h>
 #include <pv/standardField.h>
-#include <pv/channelBase.h>
+#include <pv/pvServiceBase.h>
 
-namespace epics { namespace pvAccess { 
+namespace epics { namespace pvIOC { 
 
 using namespace epics::pvData;
+using namespace epics::pvAccess;
 
-typedef LinkedListNode<ChannelProcess> ChannelProcessListNode;
-typedef LinkedList<ChannelProcess> ChannelProcessList;
-typedef LinkedListNode<ChannelGet> ChannelGetListNode;
-typedef LinkedList<ChannelGet> ChannelGetList;
-typedef LinkedListNode<ChannelPut> ChannelPutListNode;
-typedef LinkedList<ChannelPut> ChannelPutList;
-typedef LinkedListNode<ChannelPutGet> ChannelPutGetListNode;
-typedef LinkedList<ChannelPutGet> ChannelPutGetList;
+typedef LinkedListNode<epics::pvAccess::ChannelProcess> ChannelProcessListNode;
+typedef LinkedList<epics::pvAccess::ChannelProcess> ChannelProcessList;
+typedef LinkedListNode<epics::pvAccess::ChannelGet> ChannelGetListNode;
+typedef LinkedList<epics::pvAccess::ChannelGet> ChannelGetList;
+typedef LinkedListNode<epics::pvAccess::ChannelPut> ChannelPutListNode;
+typedef LinkedList<epics::pvAccess::ChannelPut> ChannelPutList;
+typedef LinkedListNode<epics::pvAccess::ChannelPutGet> ChannelPutGetListNode;
+typedef LinkedList<epics::pvAccess::ChannelPutGet> ChannelPutGetList;
 typedef LinkedListNode<epics::pvData::Monitor> ChannelMonitorListNode;
 typedef LinkedList<epics::pvData::Monitor> ChannelMonitorList;
-typedef LinkedListNode<ChannelRPC> ChannelRPCListNode;
-typedef LinkedList<ChannelRPC> ChannelRPCList;
-typedef LinkedListNode<ChannelArray> ChannelArrayListNode;
-typedef LinkedList<ChannelArray> ChannelArrayList;
+typedef LinkedListNode<epics::pvAccess::ChannelRPC> ChannelRPCListNode;
+typedef LinkedList<epics::pvAccess::ChannelRPC> ChannelRPCList;
+typedef LinkedListNode<epics::pvAccess::ChannelArray> ChannelArrayListNode;
+typedef LinkedList<epics::pvAccess::ChannelArray> ChannelArrayList;
 
 
-ChannelBase::ChannelBase(
-    ChannelProvider::shared_pointer const & provider,
-    ChannelRequester::shared_pointer const & requester,
-    String name)
+PVServiceBase::PVServiceBase(
+    PVServiceBaseProvider::shared_pointer const & provider,
+        ChannelRequester::shared_pointer const & requester,
+        String name
+    )
 :   provider(provider),
     requester(requester),
     channelName(name),
@@ -56,17 +58,17 @@ ChannelBase::ChannelBase(
     channelArrayList(),
     beingDestroyed(false)
 {
-//printf("ChannelBase::ChannelBase\n");
+//printf("PVServiceBase::PVServiceBase\n");
 }
 
-ChannelBase::~ChannelBase()
+PVServiceBase::~PVServiceBase()
 {
-//printf("ChannelBase::~ChannelBase\n");
+//printf("PVServiceBase::~PVServiceBase\n");
 }
 
-void ChannelBase::destroy()
+void PVServiceBase::destroy()
 {
-//printf("ChannelBase::destroy\n");
+//printf("PVServiceBase::destroy\n");
     {
         Lock xx(mutex);
         beingDestroyed = true;
@@ -113,11 +115,11 @@ void ChannelBase::destroy()
         ChannelArray &channelArray = node->getObject();
         channelArray.destroy();
     }
-    std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(*this);
+    std::tr1::static_pointer_cast<PVServiceBaseProvider>(provider)->removeChannel(*this);
 }
 
 
-void ChannelBase::addChannelProcess(ChannelProcess & channelProcess)
+void PVServiceBase::addChannelProcess(ChannelProcess & channelProcess)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -125,7 +127,7 @@ void ChannelBase::addChannelProcess(ChannelProcess & channelProcess)
     channelProcessList.addTail(*node);
 }
 
-void ChannelBase::addChannelGet(ChannelGet &channelGet)
+void PVServiceBase::addChannelGet(ChannelGet &channelGet)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -133,7 +135,7 @@ void ChannelBase::addChannelGet(ChannelGet &channelGet)
     channelGetList.addTail(*node);
 }
 
-void ChannelBase::addChannelPut(ChannelPut &channelPut)
+void PVServiceBase::addChannelPut(ChannelPut &channelPut)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -141,7 +143,7 @@ void ChannelBase::addChannelPut(ChannelPut &channelPut)
     channelPutList.addTail(*node);
 }
 
-void ChannelBase::addChannelPutGet(ChannelPutGet &channelPutGet)
+void PVServiceBase::addChannelPutGet(ChannelPutGet &channelPutGet)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -149,7 +151,7 @@ void ChannelBase::addChannelPutGet(ChannelPutGet &channelPutGet)
     channelPutGetList.addTail(*node);
 }
 
-void ChannelBase::addChannelMonitor(Monitor &monitor)
+void PVServiceBase::addChannelMonitor(Monitor &monitor)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -157,7 +159,7 @@ void ChannelBase::addChannelMonitor(Monitor &monitor)
     channelMonitorList.addTail(*node);
 }
 
-void ChannelBase::addChannelRPC(ChannelRPC &channelRPC)
+void PVServiceBase::addChannelRPC(ChannelRPC &channelRPC)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -165,7 +167,7 @@ void ChannelBase::addChannelRPC(ChannelRPC &channelRPC)
     channelRPCList.addTail(*node);
 }
 
-void ChannelBase::addChannelArray(ChannelArray &channelArray)
+void PVServiceBase::addChannelArray(ChannelArray &channelArray)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -173,7 +175,7 @@ void ChannelBase::addChannelArray(ChannelArray &channelArray)
     channelArrayList.addTail(*node);
 }
 
-void ChannelBase::removeChannelProcess(ChannelProcess &ref)
+void PVServiceBase::removeChannelProcess(ChannelProcess &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -189,7 +191,7 @@ void ChannelBase::removeChannelProcess(ChannelProcess &ref)
     }
 }
 
-void ChannelBase::removeChannelGet(ChannelGet &ref)
+void PVServiceBase::removeChannelGet(ChannelGet &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -205,7 +207,7 @@ void ChannelBase::removeChannelGet(ChannelGet &ref)
     }
 }
 
-void ChannelBase::removeChannelPut(ChannelPut &ref)
+void PVServiceBase::removeChannelPut(ChannelPut &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -221,7 +223,7 @@ void ChannelBase::removeChannelPut(ChannelPut &ref)
     }
 }
 
-void ChannelBase::removeChannelPutGet(ChannelPutGet &ref)
+void PVServiceBase::removeChannelPutGet(ChannelPutGet &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -237,7 +239,7 @@ void ChannelBase::removeChannelPutGet(ChannelPutGet &ref)
     }
 }
 
-void ChannelBase::removeChannelMonitor(Monitor &ref)
+void PVServiceBase::removeChannelMonitor(Monitor &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -253,7 +255,7 @@ void ChannelBase::removeChannelMonitor(Monitor &ref)
     }
 }
 
-void ChannelBase::removeChannelRPC(ChannelRPC &ref)
+void PVServiceBase::removeChannelRPC(ChannelRPC &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -269,7 +271,7 @@ void ChannelBase::removeChannelRPC(ChannelRPC &ref)
     }
 }
 
-void ChannelBase::removeChannelArray(ChannelArray &ref)
+void PVServiceBase::removeChannelArray(ChannelArray &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
@@ -285,49 +287,49 @@ void ChannelBase::removeChannelArray(ChannelArray &ref)
     }
 }
 
-String ChannelBase::getRequesterName()
+String PVServiceBase::getRequesterName()
 {
     return requester->getRequesterName();
 }
 
-void ChannelBase::message(
+void PVServiceBase::message(
         String message,
         MessageType messageType)
 {
     requester->message(message,messageType);
 }
 
-ChannelProvider::shared_pointer const & ChannelBase::getProvider()
+ChannelProvider::shared_pointer const & PVServiceBase::getProvider()
 {
     return provider;
 }
 
-String ChannelBase::getRemoteAddress()
+String PVServiceBase::getRemoteAddress()
 {
     return String("local");
 }
 
-Channel::ConnectionState ChannelBase::getConnectionState()
+Channel::ConnectionState PVServiceBase::getConnectionState()
 {
     return Channel::CONNECTED;
 }
 
-String ChannelBase::getChannelName()
+String PVServiceBase::getChannelName()
 {
     return channelName;
 }
 
-ChannelRequester::shared_pointer const & ChannelBase::getChannelRequester()
+ChannelRequester::shared_pointer const & PVServiceBase::getChannelRequester()
 {
     return requester;
 }
 
-bool ChannelBase::isConnected()
+bool PVServiceBase::isConnected()
 {
     return true;
 }
 
-void ChannelBase::getField(GetFieldRequester::shared_pointer const &requester,
+void PVServiceBase::getField(GetFieldRequester::shared_pointer const &requester,
         String subField)
 {
     Status status(Status::STATUSTYPE_ERROR,
@@ -335,13 +337,13 @@ void ChannelBase::getField(GetFieldRequester::shared_pointer const &requester,
     requester->getDone(status,FieldConstPtr());
 }
 
-AccessRights ChannelBase::getAccessRights(
+AccessRights PVServiceBase::getAccessRights(
         PVField::shared_pointer const &pvField)
 {
     throw std::logic_error(String("Not Implemented"));
 }
 
-ChannelProcess::shared_pointer ChannelBase::createChannelProcess(
+ChannelProcess::shared_pointer PVServiceBase::createChannelProcess(
         ChannelProcessRequester::shared_pointer const & channelProcessRequester,
         PVStructure::shared_pointer const & pvRequest)
 {
@@ -353,7 +355,7 @@ ChannelProcess::shared_pointer ChannelBase::createChannelProcess(
     return ChannelProcess::shared_pointer();
 }
 
-ChannelGet::shared_pointer ChannelBase::createChannelGet(
+ChannelGet::shared_pointer PVServiceBase::createChannelGet(
         ChannelGetRequester::shared_pointer const &channelGetRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -367,7 +369,7 @@ ChannelGet::shared_pointer ChannelBase::createChannelGet(
     return ChannelGet::shared_pointer();
 }
 
-ChannelPut::shared_pointer ChannelBase::createChannelPut(
+ChannelPut::shared_pointer PVServiceBase::createChannelPut(
         ChannelPutRequester::shared_pointer const &channelPutRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -381,7 +383,7 @@ ChannelPut::shared_pointer ChannelBase::createChannelPut(
     return ChannelPut::shared_pointer();
 }
 
-ChannelPutGet::shared_pointer ChannelBase::createChannelPutGet(
+ChannelPutGet::shared_pointer PVServiceBase::createChannelPutGet(
         ChannelPutGetRequester::shared_pointer const &channelPutGetRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -395,7 +397,7 @@ ChannelPutGet::shared_pointer ChannelBase::createChannelPutGet(
     return ChannelPutGet::shared_pointer();
 }
 
-ChannelRPC::shared_pointer ChannelBase::createChannelRPC(
+ChannelRPC::shared_pointer PVServiceBase::createChannelRPC(
         ChannelRPCRequester::shared_pointer const & channelRPCRequester,
         PVStructure::shared_pointer const & pvRequest)
 {
@@ -405,7 +407,7 @@ ChannelRPC::shared_pointer ChannelBase::createChannelRPC(
     return ChannelRPC::shared_pointer();
 }
 
-Monitor::shared_pointer ChannelBase::createMonitor(
+Monitor::shared_pointer PVServiceBase::createMonitor(
         MonitorRequester::shared_pointer const &monitorRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -418,7 +420,7 @@ Monitor::shared_pointer ChannelBase::createMonitor(
     return Monitor::shared_pointer();
 }
 
-ChannelArray::shared_pointer ChannelBase::createChannelArray(
+ChannelArray::shared_pointer PVServiceBase::createChannelArray(
         ChannelArrayRequester::shared_pointer const &channelArrayRequester,
         PVStructure::shared_pointer const &pvRequest)
 {
@@ -431,14 +433,14 @@ ChannelArray::shared_pointer ChannelBase::createChannelArray(
     return ChannelArray::shared_pointer();
 }
 
-void ChannelBase::printInfo()
+void PVServiceBase::printInfo()
 {
-    printf("ChannelBase provides access to service\n");
+    printf("PVServiceBase provides access to service\n");
 }
 
-void ChannelBase::printInfo(StringBuilder out)
+void PVServiceBase::printInfo(StringBuilder out)
 {
-    *out += "ChannelBase provides access to service";
+    *out += "PVServiceBase provides access to service";
 }
 
 }}

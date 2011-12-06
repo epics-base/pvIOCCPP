@@ -24,7 +24,7 @@ namespace epics { namespace pvIOC {
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-static ChannelBaseProvider::shared_pointer pvServiceProvider;
+static PVServiceProvider::shared_pointer pvServiceProvider;
 
 class ServicePVTopBase
 {
@@ -38,21 +38,21 @@ public:
 typedef LinkedListNode<ServicePVTopBase> TopListNode;
 typedef LinkedList<ServicePVTopBase> TopList;
 
-ChannelBaseProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
+PVServiceProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
 {
     static Mutex mutex;
     Lock xx(mutex);
 
     if(pvServiceProvider.get()==0) {
-        pvServiceProvider = ChannelBaseProvider::shared_pointer(
-            new PVServiceProvider());
-        pvServiceProvider->init();
+        pvServiceProvider = PVServiceProvider::shared_pointer(
+             new PVServiceProvider());
+        pvServiceProvider->activate();
     }
     return pvServiceProvider;
 }
 
 PVServiceProvider::PVServiceProvider()
-: ChannelBaseProvider("pvService"),
+: PVServiceBaseProvider("pvService"),
   topList()
 {
 //printf("PVServiceProvider::PVServiceProvider\n");
@@ -61,7 +61,6 @@ PVServiceProvider::PVServiceProvider()
 PVServiceProvider::~PVServiceProvider()
 {
 printf("PVServiceProvider::~PVServiceProvider\n");
-destroy();
 pvServiceProvider.reset();
 }
 
@@ -75,7 +74,6 @@ printf("PVServiceProvider::destroy\n");
         ServicePVTopBase &pvTop = node->getObject();
         pvTop.servicePVTop->destroy();
         delete node;
-        delete &pvTop;
     }
 }
 
@@ -111,17 +109,15 @@ Channel::shared_pointer PVServiceProvider::createChannel(
 //printf("channelName %s getName %s\n",channelName.c_str(),pvTop->getName().c_str());
         if((pvTop->getName().compare(channelName)==0)) {
 //printf("calling pvTop.createChannel\n");
-            ChannelBase::shared_pointer channel =
-                 pvTop->createChannel(channelRequester,
-                      static_cast<ChannelProvider::shared_pointer>(
-                          getPtrSelf()));
+            PVServiceBase::shared_pointer channel =
+                 pvTop->createChannel(channelRequester,getPtrSelf());
 //printf("calling channelCreated(channel) %p\n",channel.get());
             channelCreated(channel);
             return channel;
         }
         node = topList.getNext(*node);
     }
-    ChannelBaseProvider::channelNotCreated(channelRequester);
+    PVServiceBaseProvider::channelNotCreated(channelRequester);
     return Channel::shared_pointer();
 }
 
