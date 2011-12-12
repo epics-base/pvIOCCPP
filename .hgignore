@@ -1,8 +1,11 @@
 QtC-pvData.creator.user
-syntax: glob
+
 bin
 lib
+doc
 include
+documentation/html
+./O.*
+
 db
 dbd
-O.*
