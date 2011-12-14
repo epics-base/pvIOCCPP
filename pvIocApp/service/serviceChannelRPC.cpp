@@ -157,6 +157,7 @@ ChannelRPC::ChannelRPC(
   channelRPCRequester(channelRPCRequester),
   serviceRPC(serviceRPC)
 {
+    channel->addChannelRPC(*this);
 }
  
 ChannelRPC::~ChannelRPC()
