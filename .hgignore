@@ -6,6 +6,7 @@ doc
 include
 documentation/html
 ./O.*
+./envPaths
 
 db
 dbd
