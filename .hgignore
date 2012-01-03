@@ -8,5 +8,7 @@ documentation/html
 ./O.*
 ./envPaths
 
+configure/RELEASE.local
+configure/CONFIG_SITE.local
 db
 dbd
