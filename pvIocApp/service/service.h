@@ -22,6 +22,14 @@
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
 #include <pv/lock.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/standardField.h>
+#include <pv/standardPVField.h>
+#include <pv/alarm.h>
+#include <pv/pvAlarm.h>
+#include <pv/timeStamp.h>
+#include <pv/pvTimeStamp.h>
 #include <pv/pvAccess.h>
 
 namespace epics { namespace pvIOC { 

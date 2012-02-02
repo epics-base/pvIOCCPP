@@ -25,14 +25,14 @@
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
 <h2 class="nocount" id="L50">EPICS v4 Working Group, Working Draft,
-20-Dec-2011</h2>
+02-Feb-2012</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
       href="http://epics-pvdata.sourceforge.net/pvIOCCPP_20111220.html">pvIOCCPP_20111220.html</a></dd>
   <dt>Latest version:</dt>
     <dd><a
-      href="http://epics-pvdata.sourceforge.net/pvIOCCPP_20111220.html">pvIOCCPP_20111220.html</a></dd>
+      href="http://epics-pvdata.sourceforge.net/pvIOCCPP_20111220.html">pvIOCCPP.html</a></dd>
   <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
 </dl>
@@ -40,8 +40,9 @@
 </div>
 
 <h2 class="nocount" id="L72">Abstract</h2>
-<p>pvIOCCPP is the Java implementation of pvIOC, which is one of a related
-set of products:</p>
+
+<p>pvIOCCPP is the Java implementation of pvIOC, which is one of a related set
+of products:</p>
 <dl>
   <dt><a
   href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataCPP.html">pvData</a></dt>
@@ -61,6 +62,7 @@ set of products:</p>
       server is provided so that the records can be accesed via the network.
     </dd>
 </dl>
+
 <p>Each of the products has a Java and a C++ implementation.</p>
 
 <p>The products are all part of the <a
@@ -68,9 +70,9 @@ href="http://epics-pvdata.sourceforge.net/">V4</a> implementation of <a
 href="http://www.aps.anl.gov/epics/">Experimental Physics and Industrial
 Control System.</a></p>
 
-<h2 class="nocount" id="L80">Status of this Document</h2>
+<h2 class="nocount" id="L104">Status of this Document</h2>
 
-<p>This is the 20-Dec-2011 version of the C++ implementation of pvIOC. Only a
+<p>This is the 02-Feb-2012 version of the C++ implementation of pvIOC. Only a
 partial C++ implementation of pvIOC is implemented. This document only
 describes what is implemented. </p>
 
@@ -78,31 +80,37 @@ describes what is implemented. </p>
 
 <div class="toc">
 <ul>
-  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 20-Dec-2011</a></li>
+  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 02-Feb-2012</a></li>
   <li><a href="#L72">Abstract</a></li>
-  <li><a href="#L80">Status of this Document</a></li>
-  <li><a href="#L88">Preface</a></li>
-  <li><a href="#L143">exampleServiceRPC</a></li>
-  <li><a href="#L223">service</a>
+  <li><a href="#L104">Status of this Document</a></li>
+  <li><a href="#L112">Preface</a></li>
+  <li><a href="#L167">exampleServiceRPC</a>
     <ul>
-      <li><a href="#L249">channelBaseProvider</a></li>
-      <li><a href="#L291">channelBase</a></li>
-      <li><a href="#L372">pvServiceProvider</a></li>
+      <li><a href="#L185">ServiceRPC</a></li>
+      <li><a href="#L217">exampleServiceRPC</a></li>
+      <li><a href="#L301">exampleClient</a></li>
     </ul>
   </li>
-  <li><a href="#L398">V3Channel</a>
+  <li><a href="#L360">service</a>
     <ul>
-      <li><a href="#L402">Introduction</a></li>
-      <li><a href="#L412">Remaining tasks</a></li>
-      <li><a href="#L437">Getting started</a></li>
-      <li><a href="#L470">Implementation</a>
+      <li><a href="#L386">channelBaseProvider</a></li>
+      <li><a href="#L428">channelBase</a></li>
+      <li><a href="#L509">pvServiceProvider</a></li>
+    </ul>
+  </li>
+  <li><a href="#L535">V3Channel</a>
+    <ul>
+      <li><a href="#L539">Introduction</a></li>
+      <li><a href="#L549">Remaining tasks</a></li>
+      <li><a href="#L574">Getting started</a></li>
+      <li><a href="#L607">Implementation</a>
         <ul>
-          <li><a href="#L502">Main Concepts</a></li>
-          <li><a href="#L517">V3Channel</a></li>
-          <li><a href="#L666">V3Util</a></li>
-          <li><a href="#L778">V3Array</a></li>
-          <li><a href="#L819">V3CAMonitor</a></li>
-          <li><a href="#L966">V3CAContext</a></li>
+          <li><a href="#L639">Main Concepts</a></li>
+          <li><a href="#L654">V3Channel</a></li>
+          <li><a href="#L803">V3Util</a></li>
+          <li><a href="#L915">V3Array</a></li>
+          <li><a href="#L956">V3CAMonitor</a></li>
+          <li><a href="#L1103">V3CAContext</a></li>
         </ul>
       </li>
     </ul>
@@ -111,7 +119,7 @@ describes what is implemented. </p>
 </div>
 <hr />
 
-<h2 style="text-align: center" id="L88">Preface</h2>
+<h2 style="text-align: center" id="L112">Preface</h2>
 <hr />
 
 <p>This product is available via an <a
@@ -152,7 +160,7 @@ project is work in progress.</p>
 inside a V3 IOC. It is currently named javaIOC.</p>
 <hr />
 
-<h2 style="text-align: center" id="L143">exampleServiceRPC</h2>
+<h2 style="text-align: center" id="L167">exampleServiceRPC</h2>
 <hr />
 
 <p>Currently the only C++ support for services is support for channelRPC, i. e.
@@ -169,6 +177,12 @@ the command:</p>
 <p>To execute it as part of a V3 IOC do the following:</p>
 <pre>cd iocBoot/testV3Channel
  ../../bin/&lt;arch&gt;/testV3Channel st.cmd</pre>
+
+<p>Once the example service is running the example client can be executed, in
+another window, via the command:</p>
+<pre>    bin/&lt;arch&gt;/exampleClient</pre>
+
+<h3 id="L185">ServiceRPC</h3>
 
 <p>The service support is described in service.h</p>
 <pre>class ServiceRPC
@@ -215,6 +229,8 @@ care of all other pvAccess requirements. It has the methods:</p>
     <dd>Can be called to destroy the service.</dd>
 </dl>
 
+<h3 id="L217">exampleServiceRPC</h3>
+
 <p>The example is in testApp/exampleServiceRPC. </p>
 
 <p>exampleServiceRPC.h contains:</p>
@@ -258,57 +274,113 @@ void ExampleServiceRPC::request(
     epics::pvData::PVStructure::shared_pointer const &amp; pvArgument)
 {
     String builder;
+    PVString *pvfunction = pvArgument-&gt;getStringField("function");
+    PVStringArray *pvnames = static_cast&lt;PVStringArray *&gt;
+        (pvArgument-&gt;getScalarArrayField("names",pvString));
+    PVStringArray *pvvalues = static_cast&lt;PVStringArray *&gt;
+        (pvArgument-&gt;getScalarArrayField("values",pvString));
     builder += "pvArgument ";
-    bool is = NTNameValuePair::isNTNameValuePair(pvArgument.get());
+    bool is = true;
+    if(pvfunction==0) is = false;
+    if(pvnames==0) is = false;
+    if(pvvalues==0) is = false;
     if(is) {
-        builder += "is a NTNameValuePair\n";
+        builder += "is a NTNameValue\n";
     } else {
-        builder += "is not a NTNameValuePair\n ";
+        builder += "is not a NTNameValue\n ";
     }
-    pvArgument-&gt;toString(&amp;builder);
-    printf("%s\n",builder.c_str());
+pvArgument-&gt;toString(&amp;builder);
+printf("%s\n",builder.c_str());
+    StandardField *standardField = getStandardField();
+    StandardPVField *standardPVField = getStandardPVField();
     FieldCreate * fieldCreate = getFieldCreate();
-    NTField *ntField = NTField::get();
-    PVNTField *pvntField = PVNTField::get();
-    int n = 2;
-    FieldConstPtr fields[2];
-    fields[0] = fieldCreate-&gt;createScalarArray("position",pvDouble);
-    fields[1] = ntField-&gt;createAlarmArray("alarms");
-    PVStructure::shared_pointer pvStructure = NTTable::create(
-        true,true,true,n,fields);
-    NTTable ntTable(pvStructure);
-    PVDoubleArray *pvPositions
-        = static_cast&lt;PVDoubleArray *&gt;(ntTable.getPVField(0));
+    PVDataCreate * pvDataCreate = getPVDataCreate();
+    int n = 5;
+    FieldConstPtrArray fields = new FieldConstPtr[5];
+    fields[0] = standardField-&gt;alarm();
+    fields[1] = standardField-&gt;timeStamp();
+    fields[2] = fieldCreate-&gt;createScalarArray("label",pvString);
+    fields[3] = fieldCreate-&gt;createScalarArray("position",pvDouble);
+    fields[4] = fieldCreate-&gt;createStructureArray(
+        "alarms",standardField-&gt;alarm());
+    PVStructure::shared_pointer pvStructure = PVStructure::shared_pointer(
+        pvDataCreate-&gt;createPVStructure(0,"NTTable",n,fields));
+    PVTimeStamp pvTimeStamp;
+    TimeStamp timeStamp;
+    pvTimeStamp.attach(pvStructure-&gt;getStructureField("timeStamp"));
+    timeStamp.getCurrent();
+    pvTimeStamp.set(timeStamp);
+    String label[2];
+    for(int i=0; i&lt;2; i++) {
+        FieldConstPtr field = fields[i + 3];
+        label[i] = field-&gt;getFieldName();
+    }
+    PVStringArray *pvLabel = static_cast&lt;PVStringArray *&gt;
+        (pvStructure-&gt;getScalarArrayField("label",pvString));
+    pvLabel-&gt;put(0,2,label,0);
+    PVDoubleArray *pvPositions = static_cast&lt;PVDoubleArray *&gt;
+        (pvStructure-&gt;getScalarArrayField("position",pvDouble));
     double positions[2];
     positions[0] = 1.0;
     positions[1] = 2.0;
-    pvPositions-&gt;put(0,n,positions,0);
-    PVStructureArray *pvAlarms
-        = static_cast&lt;PVStructureArray *&gt;(ntTable.getPVField(1));
+    pvPositions-&gt;put(0,2,positions,0);
+    PVStructureArray *pvAlarms = static_cast&lt;PVStructureArray *&gt;
+        (pvStructure-&gt;getStructureArrayField("alarms"));
     PVAlarm pvAlarm;
     Alarm alarm;
     PVStructurePtr palarms[n];
-    for(int i=0; i&lt;n; i++) {
-        palarms[i] = pvntField-&gt;createAlarm(0);
+    for(int i=0; i&lt;2; i++) {
+        palarms[i] = standardPVField-&gt;alarm(0);
         pvAlarm.attach(palarms[i]);
         alarm.setMessage("test");
         alarm.setSeverity(majorAlarm);
         alarm.setStatus(clientStatus);
         pvAlarm.set(alarm);
     }
-    pvAlarms-&gt;put(0,n,palarms,0);
-    String labels[n];
+    pvAlarms-&gt;put(0,2,palarms,0);
+    String labels[2];
     labels[0] = pvPositions-&gt;getField()-&gt;getFieldName();
     labels[1] = pvAlarms-&gt;getField()-&gt;getFieldName();
-    PVStringArray *label = ntTable.getLabel();
-    label-&gt;put(0,n,labels,0);
+    pvLabel-&gt;put(0,2,labels,0);
+builder.clear();
+pvStructure-&gt;toString(&amp;builder);
+printf("%s\n",builder.c_str());
     channelRPCRequester-&gt;requestDone(Status::OK,pvStructure);
 }</pre>
 
-<p>The only interesting method is request. The example shows how to see if the
-argument is a NTNameValuePair. It creates an NTTable to return to the client.
-Note that channelRPCRequester-&gt;requestDone(Status::OK,pvStructure) must be
-called.</p>
+<p>The only interesting method is request. The example first looks to see if
+the argument has the following fields</p>
+<dl>
+  <dt>function</dt>
+    <dd>A string field that represents what the server should do,</dd>
+  <dt>names</dt>
+    <dd>An array of string names.</dd>
+  <dt>values</dt>
+    <dd>An array of vales</dd>
+</dl>
+
+<p>The idea is that the client passes a function name and a set of name,value
+pairs as arguments,</p>
+
+<p>The creates structure that represents a table. It has fields:</p>
+<dl>
+  <dt>alarm</dt>
+    <dd>An alarm field is used to report problems to the client,</dd>
+  <dt>timeStamp</dt>
+    <dd>The timeStamp for the request.</dd>
+  <dt>label</dt>
+    <dd>An array of string that is a header for each column of the table. This
+      field is followed by a set of scalarArray or structureArray fields. The
+      number of fields is equal to the lengh of label. Each array field has the
+      same length. For the example there are two additional fields.</dd>
+  <dt>position</dt>
+    <dd>An array for doubles that represents some kind of position</dd>
+  <dt>alarms</dt>
+    <dd>An array of alarms. </dd>
+</dl>
+
+<p>This structure is returned to the client. Note that
+channelRPCRequester-&gt;requestDone(Status::OK,pvStructure) must be called.</p>
 
 <p>The Make file shows how to build as both a standalone application as as part
 of a V3 IOC.\</p>
@@ -384,9 +456,140 @@ epicsExportRegistrar(startExampleServiceRegister);</pre>
 
 <p>Again any service can provide similar code. Just change ExampleService to
 something else.</p>
+
+<h3 id="L301">exampleClient</h3>
+
+<p>An example client that calls the exampleServerRPC is also in
+pvIOCCPP/testApp/exampleServiceRPC.</p>
+
+<p>In order to make the example simpler there is also code that implement an
+easy to use interface to channelRPC. The interface is defined in
+ezchannelRPC.h:</p>
+<pre>class EZChannelRPC :
+    public ChannelRequester,
+    public ChannelRPCRequester,
+    public std::tr1::enable_shared_from_this&lt;EZChannelRPC&gt;
+{
+public:
+    POINTER_DEFINITIONS(EZChannelRPC);
+    EZChannelRPC(
+        epics::pvData::String channelName);
+    EZChannelRPC(
+        epics::pvData::String channelName,
+        epics::pvData::PVStructure::shared_pointer pvRequest);
+    virtual ~EZChannelRPC();
+    void destroy();
+    bool connect(double timeout);
+    void issueConnect();
+    bool waitConnect(double timeout);
+    epics::pvData::PVStructure::shared_pointer  request(
+        epics::pvData::PVStructure::shared_pointer const &amp; pvArgument,
+        bool lastRequest);
+    void  issueRequest(
+        epics::pvData::PVStructure::shared_pointer const &amp; pvArgument,
+        bool lastRequest);
+    epics::pvData::PVStructure::shared_pointer  waitRequest();
+    epics::pvData::String getMessage();
+ ...
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt>EZChannelRPC</dt>
+    <dd>The constructor. The only required argument is the name of the
+    service.</dd>
+  <dt>destroy</dt>
+    <dd>This breaks the connection to the server.</dd>
+  <dt>connect</dt>
+    <dd>Connect to the server. This calls issueConnect and waitConnect. This it
+      blocks until connected of timeout occurs. If false is returned then
+      getMessage can be called to find out why the request failed.</dd>
+  <dt>issueConnect</dt>
+    <dd>Make a connect request by do not block. waitConnect must be called to
+      get the result</dd>
+  <dt>waitConnect</dt>
+    <dd>This blocks until connected of timeout occurs. If false is returned
+      then getMessage can be called to find out why the request failed.</dd>
+  <dt>request</dt>
+    <dd>This makes a channelRPC request. pvArgument is the argument for the
+      request. This method just calls issueRequest and waitRequest. Thus it
+      blocks. If false is returned then getMessage can be called to find out
+      why the request failed.</dd>
+  <dt>issueRequest</dt>
+    <dd>Makes a channelRPC request and returns immediately. waitRequest must be
+      called to get the result.</dd>
+  <dt>waitRequest</dt>
+    <dd>Wait for the channelRPC to complete. If false is returned then
+      getMessage can be called to find out why the request failed.</dd>
+</dl>
+
+<p>An effort is being started to develop an easy to use interface to pvAccess.
+When this facility is available something like ezchannelRPC will be part of
+it.</p>
+
+<p>The code for the client example is in
+pvIOCCPP/testApp/exampleServiceRPC/exampleClient.cpp. The following is the code
+that makes the request to the server:</p>
+<pre>void exampleClient()
+{
+    String builder;
+    FieldCreate * fieldCreate = getFieldCreate();
+    PVDataCreate * pvDataCreate = getPVDataCreate();
+
+    // Create an argument to pass to service
+    int n = 3;
+    FieldConstPtrArray fields = new FieldConstPtr[5];
+    fields[0] = fieldCreate-&gt;createScalar("function",pvString);
+    fields[1] = fieldCreate-&gt;createScalarArray("names",pvString);
+    fields[2] = fieldCreate-&gt;createScalarArray("values",pvString);
+    PVStructure::shared_pointer pvArgument = PVStructure::shared_pointer(
+        pvDataCreate-&gt;createPVStructure(0,"NTNameValue",n,fields));
+    PVString *pvfunction = pvArgument-&gt;getStringField("function");
+    PVStringArray *pvnames = static_cast&lt;PVStringArray *&gt;
+        (pvArgument-&gt;getScalarArrayField("names",pvString));
+    PVStringArray *pvvalues = static_cast&lt;PVStringArray *&gt;
+        (pvArgument-&gt;getScalarArrayField("values",pvString));
+    pvfunction-&gt;put("example");
+    int nnameValue = 2;
+    String names[] = {"name0","name1"};
+    String values[] = {"value0","value1"};
+    pvnames-&gt;put(0,2,names,0);
+    pvvalues-&gt;put(0,2,values,0);
+
+    // create a channelRPC and connect
+    EZChannelRPC::shared_pointer channelRPC =
+         EZChannelRPC::shared_pointer(new EZChannelRPC("serviceRPC"));
+    bool result = channelRPC-&gt;connect(1.0);
+    if(!result) {dump(channelRPC); return;}
+
+    //make a request
+    PVStructure::shared_pointer pvResponse
+        = channelRPC-&gt;request(pvArgument,false);
+    if(pvResponse.get()==0) {dump(channelRPC); return;}
+builder.clear();
+pvResponse-&gt;toString(&amp;builder);
+printf("\nresponse\n%s\n",builder.c_str());
+
+    // now look for expected data from service
+    PVInt *pvSeverity = pvResponse-&gt;getIntField("alarm.severity");
+    if(pvSeverity==0) exit(1);
+    if(pvSeverity-&gt;get()!=0) {
+        printf("alarm severity not 0\n");
+    }
+    PVDoubleArray * pvposition = static_cast&lt;PVDoubleArray *&gt;
+        (pvResponse-&gt;getScalarArrayField("position",pvDouble));
+    if(pvposition!=0) {
+        builder.clear();
+        pvposition-&gt;toString(&amp;builder);
+        printf("\nposition\n%s\n",builder.c_str());
+
+    }
+    // can look for other data
+    channelRPC-&gt;destroy();
+}</pre>
 <hr />
 
-<h2 style="text-align: center" id="L223">service</h2>
+<h2 style="text-align: center" id="L360">service</h2>
 <hr />
 
 <p>Service provides three classes that can be used by service support:</p>
@@ -412,7 +615,7 @@ channelBase.h. PVServiceProvider is described in pvServiceProvider.h. The
 following provides a brief description. Look at the header files for complete
 details.</p>
 
-<h3 id="L249">channelBaseProvider</h3>
+<h3 id="L386">channelBaseProvider</h3>
 
 <p>channelBaseProvider takes care of "lifetime" issues. It registers the
 provider, keeps a list of all channels the service provider creates and
@@ -483,7 +686,7 @@ public:
       channelBaseProvider is destroyed.</dd>
 </dl>
 
-<h3 id="L291">channelBase</h3>
+<h3 id="L428">channelBase</h3>
 
 <p>This implements all the Channel methods. This a service only needs the
 implement the methods it supports. For example a service may only implement
@@ -602,7 +805,7 @@ interfaces. The service may also want to implement the printInfo methods.</p>
     <dd>This is called when a channelArray is destroyed.</dd>
 </dl>
 
-<h3 id="L372">pvServiceProvider</h3>
+<h3 id="L509">pvServiceProvider</h3>
 
 <p>This is a complete implementation of ChannelProvider. The code that uses it
 must implement interface ServicePVTop. The code must also create a top level
@@ -631,10 +834,10 @@ public:
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="L398">V3Channel</h2>
+<h2 style="text-align: center" id="L535">V3Channel</h2>
 <hr />
 
-<h3 id="L402">Introduction</h3>
+<h3 id="L539">Introduction</h3>
 
 <p>V3Channel provides access to V3 records. It can be used accesss V3 records
 by other code in the same IOC or by pvAccess network clients via remote
@@ -668,7 +871,7 @@ like:</p>
 <p>The channelName can be either just a record name or a "recordName.XXX" where
 XXX is the V3 field name, e. g. "SCAN".</p>
 
-<h3 id="L412">Remaining tasks</h3>
+<h3 id="L549">Remaining tasks</h3>
 The main remaining tasks are: 
 <dl>
   <dt>Access Security</dt>
@@ -690,7 +893,7 @@ The main remaining tasks are:
       control should be included.</dd>
 </dl>
 
-<h3 id="L437">Getting started</h3>
+<h3 id="L574">Getting started</h3>
 
 <p>NOTE: pvIOCCP has a zip file example/example.zip that provides an example
 IOC application that provides V3Channel support. To use it copy and unzip and
@@ -725,7 +928,7 @@ include "pvIOC.dbd"
     </dd>
 </dl>
 
-<h3 id="L470">Implementation</h3>
+<h3 id="L607">Implementation</h3>
 
 <p>The implementation consists of the following header files:</p>
 <dl>
@@ -755,7 +958,7 @@ remainder of this section gives a brief description of each of these software
 components with an emphasis on how data is converted between pvData and data in
 V3 records.</p>
 
-<h4 id="L502">Main Concepts</h4>
+<h4 id="L639">Main Concepts</h4>
 
 <p>In epics V3 there are two interfaces for accessing data:</p>
 <dl>
@@ -771,7 +974,7 @@ V3 records.</p>
       effects". For example writing to the SCAN field has side effects.</dd>
 </dl>
 
-<h4 id="L517">V3Channel</h4>
+<h4 id="L654">V3Channel</h4>
 
 <p>This defines two interfaces:</p>
 <dl>
@@ -932,7 +1135,7 @@ private:
     <dd>This just prints a short message.</dd>
 </dl>
 
-<h4 id="L666">V3Util</h4>
+<h4 id="L803">V3Util</h4>
 
 <p>This does most of the work related to transfering data between a PVStructure
 and a V3 record. All methods are static and are called by V3ChannelGet,
@@ -1019,7 +1222,7 @@ public:
     accessed.</dd>
 </dl>
 
-<h4 id="L778">V3Array</h4>
+<h4 id="L915">V3Array</h4>
 
 <p>This creates special implementations of PVByteArray, ... , PVStringArray
 that access the corresponding array types in the V3 record. Except for
@@ -1063,7 +1266,7 @@ extern V3ValueArrayCreate *getV3ValueArrayCreate();</pre>
       supports.</dd>
 </dl>
 
-<h4 id="L819">V3CAMonitor</h4>
+<h4 id="L956">V3CAMonitor</h4>
 
 <p>In V3 dbEvent is what implements db_post_event, which is what is called when
 a field value changes in a V3 record. But dbEvent just passes this to V3CA.
@@ -1206,7 +1409,7 @@ private:
       should always return true.</dd>
 </dl>
 
-<h4 id="L966">V3CAContext</h4>
+<h4 id="L1103">V3CAContext</h4>
 
 <p>CAV3Monitor calls CAV3 in order to monitor changes to the V3 records. In
 order to do this it must call ca_context_create(ca_enable_preemptive_callback).

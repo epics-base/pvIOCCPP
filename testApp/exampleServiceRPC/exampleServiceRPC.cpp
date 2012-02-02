@@ -17,10 +17,6 @@
 #include <stdexcept>
 #include <memory>
 
-#include <pv/ntfield.h>
-#include <pv/nttable.h>
-#include <pv/ntnameValue.h>
-
 #include <exampleServiceRPC.h>
 
 
@@ -47,56 +43,80 @@ void ExampleServiceRPC::request(
     epics::pvData::PVStructure::shared_pointer const & pvArgument)
 {
     String builder;
+    PVString *pvfunction = pvArgument->getStringField("function");
+    PVStringArray *pvnames = static_cast<PVStringArray *>
+        (pvArgument->getScalarArrayField("names",pvString));
+    PVStringArray *pvvalues = static_cast<PVStringArray *>
+        (pvArgument->getScalarArrayField("values",pvString));
     builder += "pvArgument ";
-    bool is = NTNameValue::isNTNameValue(pvArgument.get());
+    bool is = true;
+    if(pvfunction==0) is = false;
+    if(pvnames==0) is = false;
+    if(pvvalues==0) is = false;
     if(is) {
         builder += "is a NTNameValue\n";
     } else {
         builder += "is not a NTNameValue\n ";
     }
-    pvArgument->toString(&builder);
-    printf("%s\n",builder.c_str());
+pvArgument->toString(&builder);
+printf("%s\n",builder.c_str());
+    StandardField *standardField = getStandardField();
+    StandardPVField *standardPVField = getStandardPVField();
     FieldCreate * fieldCreate = getFieldCreate();
-    NTField *ntField = NTField::get();
-    PVNTField *pvntField = PVNTField::get();
-    int n = 2;
-    FieldConstPtr fields[2];
-    fields[0] = fieldCreate->createScalarArray("position",pvDouble);
-    fields[1] = ntField->createAlarmArray("alarms");
-    PVStructure::shared_pointer pvStructure = NTTable::create(
-        true,true,true,n,fields);
-//builder.clear();
-//pvStructure->toString(&builder);
-//printf("%s\n",builder.c_str());
-//builder.clear();
-//pvStructure->getStructure()->toString(&builder);
-//printf("%s\n",builder.c_str());
-    NTTable ntTable(pvStructure);
-    PVDoubleArray *pvPositions
-        = static_cast<PVDoubleArray *>(ntTable.getPVField(0));
+    PVDataCreate * pvDataCreate = getPVDataCreate();
+    int n = 5;
+    FieldConstPtrArray fields = new FieldConstPtr[5];
+    fields[0] = standardField->alarm();
+    fields[1] = standardField->timeStamp();
+    fields[2] = fieldCreate->createScalarArray("label",pvString);
+    fields[3] = fieldCreate->createScalarArray("position",pvDouble);
+    fields[4] = fieldCreate->createStructureArray(
+        "alarms",standardField->alarm());
+    PVStructure::shared_pointer pvStructure = PVStructure::shared_pointer(
+        pvDataCreate->createPVStructure(0,"NTTable",n,fields));
+    PVTimeStamp pvTimeStamp;
+    TimeStamp timeStamp;
+    pvTimeStamp.attach(pvStructure->getStructureField("timeStamp"));
+    timeStamp.getCurrent();
+    pvTimeStamp.set(timeStamp);
+    String label[2];
+    for(int i=0; i<2; i++) {
+        FieldConstPtr field = fields[i + 3];
+        label[i] = field->getFieldName();
+    }
+    PVStringArray *pvLabel = static_cast<PVStringArray *>
+        (pvStructure->getScalarArrayField("label",pvString));
+    pvLabel->put(0,2,label,0);
+    PVDoubleArray *pvPositions = static_cast<PVDoubleArray *>
+        (pvStructure->getScalarArrayField("position",pvDouble));
     double positions[2];
     positions[0] = 1.0;
     positions[1] = 2.0;
-    pvPositions->put(0,n,positions,0);
-    PVStructureArray *pvAlarms
-        = static_cast<PVStructureArray *>(ntTable.getPVField(1));
+    pvPositions->put(0,2,positions,0);
+    PVStructureArray *pvAlarms = static_cast<PVStructureArray *>
+        (pvStructure->getStructureArrayField("alarms"));
     PVAlarm pvAlarm;
     Alarm alarm;
     PVStructurePtr palarms[n];
-    for(int i=0; i<n; i++) {
-        palarms[i] = pvntField->createAlarm(0);
+    for(int i=0; i<2; i++) {
+        palarms[i] = standardPVField->alarm(0);
         pvAlarm.attach(palarms[i]);
         alarm.setMessage("test");
         alarm.setSeverity(majorAlarm);
         alarm.setStatus(clientStatus);
         pvAlarm.set(alarm);
     }
-    pvAlarms->put(0,n,palarms,0);
-    String labels[n];
+    pvAlarms->put(0,2,palarms,0);
+    String labels[2];
     labels[0] = pvPositions->getField()->getFieldName();
     labels[1] = pvAlarms->getField()->getFieldName();
-    PVStringArray *label = ntTable.getLabel();
-    label->put(0,n,labels,0);
+    pvLabel->put(0,2,labels,0);
+builder.clear();
+pvStructure->toString(&builder);
+printf("%s\n",builder.c_str());
+//builder.clear();
+//pvStructure->getStructure()->toString(&builder);
+//printf("%s\n",builder.c_str());
     channelRPCRequester->requestDone(Status::OK,pvStructure);
 }
 
