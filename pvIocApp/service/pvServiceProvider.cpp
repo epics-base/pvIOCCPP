@@ -26,6 +26,20 @@ using namespace epics::pvAccess;
 
 static ChannelBaseProvider::shared_pointer pvServiceProvider;
 
+static void unregister(void *)
+{
+printf("PVServiceProvider::unregister\n");
+     unregisterChannelProvider(pvServiceProvider);
+     pvServiceProvider.reset();
+}
+
+static void initStatic(void *)
+{
+    epicsAtExit(&unregister,0);
+}
+
+static epicsThreadOnceId initOnce = EPICS_THREAD_ONCE_INIT;
+
 class ServicePVTopBase
 {
 public:
@@ -44,6 +58,7 @@ ChannelBaseProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
     Lock xx(mutex);
 
     if(pvServiceProvider.get()==0) {
+        epicsThreadOnce(&initOnce, &initStatic, 0);
         pvServiceProvider = ChannelBaseProvider::shared_pointer(
             new PVServiceProvider());
         pvServiceProvider->init();

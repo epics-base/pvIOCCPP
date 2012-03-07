@@ -16,7 +16,7 @@ using namespace epics::pvData;
 static void deleteStatic(void *)
 {
 // If the following is called python will crash.
-//    ClientFactory::stop();
+    ClientFactory::stop();
 }
 
 static void initStatic(void *) {

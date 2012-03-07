@@ -10,6 +10,8 @@
 #include <memory>
 #include <iostream>
 
+#include <pv/CDRMonitor.h>
+#include <epicsExit.h>
 #include <cantProceed.h>
 #include <epicsStdio.h>
 #include <epicsMutex.h>
@@ -32,7 +34,7 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 using namespace epics::pvIOC;
 
-int main(int argc,char *argv[])
+void example()
 {
     PVServiceChannelCTX::shared_pointer myCTX
         = PVServiceChannelCTX::shared_pointer(new PVServiceChannelCTX());
@@ -49,6 +51,17 @@ int main(int argc,char *argv[])
         if(str.compare("exit")==0) break;
         
     }
-    return(0);
+}
+
+int main(int argc,char *argv[])
+{
+    example();
+printf("calling epicsExitCallAtExits\n");
+    epicsExitCallAtExits();
+printf("calling epicsThreadSleep\n");
+    epicsThreadSleep(1.0);
+printf("calling CDRMonitor::get\n");
+    CDRMonitor::get().show(stdout,true);
+    return 0;
 }
 
