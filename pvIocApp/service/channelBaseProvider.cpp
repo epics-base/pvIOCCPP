@@ -73,7 +73,7 @@ void ChannelBaseProvider::channelFound(
 {
     if(found) {
         channelFindRequester->channelFindResult(
-            Status::OK,
+            Status::Ok,
             ChannelFind::shared_pointer(),
             true);
     } else {
@@ -109,7 +109,7 @@ printf("ChannelBaseProvider::channelCreated\n");
     ChannelBase *xxx = static_cast<ChannelBase *>(channel.get());
     ChannelListNode *channelListNode = new ChannelListNode(*xxx);
     channelList.addTail(*channelListNode);
-    channel->getChannelRequester()->channelCreated(Status::OK,channel);
+    channel->getChannelRequester()->channelCreated(Status::Ok,channel);
 }
 
 void ChannelBaseProvider::removeChannel(ChannelBase &channel)

@@ -345,7 +345,7 @@ printf("%s\n",builder.c_str());
 builder.clear();
 pvStructure-&gt;toString(&amp;builder);
 printf("%s\n",builder.c_str());
-    channelRPCRequester-&gt;requestDone(Status::OK,pvStructure);
+    channelRPCRequester-&gt;requestDone(Status::Ok,pvStructure);
 }</pre>
 
 <p>The only interesting method is request. The example first looks to see if
@@ -380,7 +380,7 @@ pairs as arguments,</p>
 </dl>
 
 <p>This structure is returned to the client. Note that
-channelRPCRequester-&gt;requestDone(Status::OK,pvStructure) must be called.</p>
+channelRPCRequester-&gt;requestDone(Status::Ok,pvStructure) must be called.</p>
 
 <p>The Make file shows how to build as both a standalone application as as part
 of a V3 IOC.\</p>
@@ -1013,7 +1013,7 @@ private:
       database. If not it calls
       channelRequester-&gt;channelCreated(notFoundStatus,0) and returns null.
       If it is in the V3 database it creates a new V3Channel, calls init, calls
-      channelRequester-&gt;channelCreated(Status::OK,v3Channel) and returns the
+      channelRequester-&gt;channelCreated(Status::Ok,v3Channel) and returns the
       newly created V3Channel.</dd>
 </dl>
 

@@ -146,7 +146,7 @@ private:
     epics::pvData::String channelName;
     epics::pvData::PVStructure::shared_pointer pvRequest;
     epics::pvData::String requesterName;
-    bool isOK;
+    bool isOk;
     epics::pvData::Event event;
     epics::pvData::Mutex mutex;
     epics::pvData::String lastMessage;

@@ -117,7 +117,7 @@ printf("%s\n",builder.c_str());
 //builder.clear();
 //pvStructure->getStructure()->toString(&builder);
 //printf("%s\n",builder.c_str());
-    channelRPCRequester->requestDone(Status::OK,pvStructure);
+    channelRPCRequester->requestDone(Status::Ok,pvStructure);
 }
 
 }}
