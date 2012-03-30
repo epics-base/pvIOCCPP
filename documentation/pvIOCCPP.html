@@ -41,7 +41,7 @@
 
 <h2 class="nocount" id="L72">Abstract</h2>
 
-<p>pvIOCCPP is the Java implementation of pvIOC, which is one of a related set
+<p>pvIOCCPP is the C++ implementation of pvIOC, which is one of a related set
 of products:</p>
 <dl>
   <dt><a
@@ -156,8 +156,8 @@ understand the next section. The remaining sections describe implementation.</p>
 <p>These are described in this document. Everything else that appears in this
 project is work in progress.</p>
 
-<p>A complete Java implementation of pvIOC is available but it can not be used
-inside a V3 IOC. It is currently named javaIOC.</p>
+<p>A complete Java implementation of pvIOC (pvIOCJava) is available but it can not be used
+inside a V3 IOC.</p>
 <hr />
 
 <h2 style="text-align: center" id="L167">exampleServiceRPC</h2>
@@ -880,7 +880,7 @@ The main remaining tasks are:
       of CAV3 so V3Channel will be able to implement access security without
       going through V3CA but this has not been done.</dd>
   <dt>Monitor Algorithm</dt>
-    <dd>The javaIOC supports an extensible set of monitor algorithms. It
+    <dd>pvIOCJava supports an extensible set of monitor algorithms. It
       provides support for onChange and onPercentChange but allows additional
       algorithms. This same support will be implemented by pvIOCCP.</dd>
   <dt>Alarm Limits</dt>

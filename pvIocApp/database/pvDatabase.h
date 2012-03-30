@@ -68,6 +68,7 @@ typedef std::map<epics::pvData::String,epics::pvData::PVStructurePtr> StructureM
 
 class PVListener {
 public:
+    virtual ~PVListener();
     virtual void dataPut(PVRecordField &pvRecordField) = 0;
     virtual void dataPut(
         PVRecordStructure &requested,
@@ -79,6 +80,7 @@ public:
 
 class PVRecordClient {
 public:
+    virtual ~PVRecordClient();
     virtual void detach(PVRecord &pvRecord) = 0;
 };
 
@@ -90,6 +92,7 @@ public:
     PVRecord(
         epics::pvData::String recordName,
         std::auto_ptr<epics::pvData::PVStructure> pvStructure);
+    ~PVRecord();
     void destroy();
     virtual epics::pvData::String getRequesterName();
     virtual void message(epics::pvData::String message, epics::pvData::MessageType);
@@ -116,7 +119,6 @@ public:
     void detachClients();
     int getNumberClients();
 private:
-    ~PVRecord();
     static epics::pvData::int32 numberRecords;
     epics::pvData::String recordName;
     std::auto_ptr<epics::pvData::PVStructure> pvStructure;
