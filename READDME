@@ -1,8 +1,43 @@
-testAPP is not being build.
-It depends on normativeTypes which is just starting development.
-In order to build testAPP the following must be done:
+v3Channel
+=========
 
-clone and build a working version of normativeTypes.
-edit configure/Makefile. Edit the line that defines NT
-edit the top level makefile. It has comments about what to do.
+v3Channel is a PVAccess server that runs in the V3 IOC.
+This allows you to get, put and monitor V3 records over pvAccess.
+
+To run the example:
+
+make
+testApp/st.sh
+
+Then try 'pvget TESTDOUBLE' from another shell. 
+The pvget command line tool is part of the pvAccessCPP.
+
+Linking to v3Channel 
+====================
+
+To use the v3Channel library with your v3 IOC:
+
+1) add the v3Channel dbd to your IOC, for example in testV3ChannelInclude.dbd:
+
+include "base.dbd"
+include "v3Channel.dbd"
+
+2) add the EPICSv4 libraries, for example in testApp/testV3Channel/src/Makefile:
+
+testV3Channel_LIBS += pvIOC pvData pvAccess
+testV3Channel_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+3) start v3Channel in your st.cmd, for example in iocBoot/testV3Channel/st.cmd:
+
+iocInit()
+
+epicsThreadSleep(2.0)
+startV3Channel
+
+
+
+
+
+
+
 

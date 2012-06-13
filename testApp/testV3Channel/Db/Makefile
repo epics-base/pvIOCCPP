@@ -16,6 +16,7 @@ DB += dbString.db
 DB += dbStringArray.db
 DB += dbEnum.db
 DB += dbCounter.db
+DB += test.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
