@@ -10,12 +10,6 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------------------
 # Create and install (or just install)
 # databases, templates, substitutions like this
-DB += dbScalar.db
-DB += dbArray.db
-DB += dbString.db
-DB += dbStringArray.db
-DB += dbEnum.db
-DB += dbCounter.db
 DB += test.db
 
 #----------------------------------------------------
