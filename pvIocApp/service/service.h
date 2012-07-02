@@ -49,7 +49,7 @@ public:
     virtual void destroy() = 0;
     virtual void request(
         epics::pvAccess::ChannelRPCRequester::shared_pointer const & channelRPCRequester,
-        epics::pvData::PVStructure::shared_pointer const & pvArgument) = 0;
+        epics::pvData::PVStructurePtr const & pvArgument) = 0;
 };
 
 class ServiceChannelRPC :

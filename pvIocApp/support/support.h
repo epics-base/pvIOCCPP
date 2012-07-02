@@ -52,12 +52,12 @@ class PVReplace;
 class PVRecordCreate;
 class PVDatabaseFactory;
 
-typedef Support * const SupportPtr;
+typedef std::tr1::shared_ptr<Support> SupportPtr;
 
 class SupportStateFunc {
 public:
     static SupportState getSupportState(int value);
-    static std::auto_ptr<epics::pvData::PVEnumerated>  getSupportState(
+    static epics::pvData::PVEnumeratedPtr getSupportState(epics::pvData::PVField Ptr const &pvField);
         epics::pvData::PVField &pvField);
     static const char * name(SupportState state);
     static epics::pvData::String supportStateNames[];
@@ -65,17 +65,22 @@ public:
 
 class ProcessCallbackRequester : public epics::pvData::Requester {
 public:
+    POINTER_DEFINITIONS(ProcessCallbackRequester);
+    virtual ~ProcessCallbackRequester(){}
     virtual void processCallback() = 0;
 };
 
 class ProcessContinueRequester {
 public:
+    POINTER_DEFINITIONS(ProcessContinueRequester);
+    virtual ~ProcessContinueRequester(){}
     virtual void processContinue() = 0;
 
 };
 
 class RecordProcessRequester : public epics::pvData::Requester {
 public:
+    POINTER_DEFINITIONS(RecordProcessRequester);
     virtual ~RecordProcessRequester(){}
     virtual void becomeProcessor() = 0;
     virtual void canNotProcess(epics::pvData::String reason) = 0;
@@ -86,6 +91,7 @@ public:
 
 class SupportProcessRequester {
 public:
+    POINTER_DEFINITIONS(SupportProcessRequester);
     virtual ~SupportProcessRequester() {}
     virtual void supportProcessDone(RequestResult requestResult) = 0;
 };
@@ -94,9 +100,9 @@ class ProcessToken : private epics::pvData::NoDefaultMethods {
 public:
     ~ProcessToken() {}
 private:
-    ProcessToken(RecordProcessRequester &recordProcessRequester)
+    ProcessToken(RecordProcessRequesterPtr const &recordProcessRequester)
     : recordProcessRequester(recordProcessRequester) {}
-    RecordProcessRequester &recordProcessRequester;
+    RecordProcessRequesterPtr recordProcessRequester;
     friend class RecordProcess;
 };
 

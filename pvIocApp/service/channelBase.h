@@ -62,8 +62,7 @@ public:
     virtual epics::pvData::String getRemoteAddress();
     virtual Channel::ConnectionState getConnectionState();
     virtual epics::pvData::String getChannelName();
-    virtual ChannelRequester::shared_pointer const &
-       getChannelRequester();
+    virtual ChannelRequester::shared_pointer const & getChannelRequester();
     virtual bool isConnected();
     virtual void getField(
         GetFieldRequester::shared_pointer const &requester,
@@ -94,20 +93,20 @@ public:
     virtual void printInfo();
     virtual void printInfo(epics::pvData::StringBuilder out);
     // following called by derived classes
-    void addChannelProcess(ChannelProcess &);
-    void addChannelGet(ChannelGet &);
-    void addChannelPut(ChannelPut &);
-    void addChannelPutGet(ChannelPutGet &);
-    void addChannelMonitor(epics::pvData::Monitor &);
-    void addChannelRPC(ChannelRPC &);
-    void addChannelArray(ChannelArray &);
-    void removeChannelProcess(ChannelProcess &);
-    void removeChannelGet(ChannelGet &);
-    void removeChannelPut(ChannelPut &);
-    void removeChannelPutGet(ChannelPutGet &);
-    void removeChannelMonitor(epics::pvData::Monitor &);
-    void removeChannelRPC(ChannelRPC &);
-    void removeChannelArray(ChannelArray &);
+    void addChannelProcess(ChannelProcess::shared_pointer const &);
+    void addChannelGet(ChannelGet::shared_pointer const &);
+    void addChannelPut(ChannelPut::shared_pointer const &);
+    void addChannelPutGet(ChannelPutGet::shared_pointer const &);
+    void addChannelMonitor(epics::pvData::Monitor::shared_pointer const &);
+    void addChannelRPC(ChannelRPC::shared_pointer const &);
+    void addChannelArray(ChannelArray::shared_pointer const &);
+    void removeChannelProcess(ChannelProcess::shared_pointer const &);
+    void removeChannelGet(ChannelGet::shared_pointer const &);
+    void removeChannelPut(ChannelPut::shared_pointer const &);
+    void removeChannelPutGet(ChannelPutGet::shared_pointer const &);
+    void removeChannelMonitor(epics::pvData::Monitor::shared_pointer const &);
+    void removeChannelRPC(ChannelRPC::shared_pointer const &);
+    void removeChannelArray(ChannelArray::shared_pointer const &);
 protected:
     ChannelBase::shared_pointer getPtrSelf()
     {
@@ -117,13 +116,13 @@ private:
     ChannelProvider::shared_pointer  provider;
     ChannelRequester::shared_pointer requester;
     epics::pvData::String channelName;
-    epics::pvData::LinkedList<ChannelProcess> channelProcessList;
-    epics::pvData::LinkedList<ChannelGet> channelGetList;
-    epics::pvData::LinkedList<ChannelPut> channelPutList;
-    epics::pvData::LinkedList<ChannelPutGet> channelPutGetList;
-    epics::pvData::LinkedList<epics::pvData::Monitor> channelMonitorList;
-    epics::pvData::LinkedList<ChannelRPC> channelRPCList;
-    epics::pvData::LinkedList<ChannelArray> channelArrayList;
+    epics::pvData::LinkedList<ChannelProcess::shared_pointer> channelProcessList;
+    epics::pvData::LinkedList<ChannelGet::shared_pointer> channelGetList;
+    epics::pvData::LinkedList<ChannelPut::shared_pointer> channelPutList;
+    epics::pvData::LinkedList<ChannelPutGet::shared_pointer> channelPutGetList;
+    epics::pvData::LinkedList<epics::pvData::Monitor::shared_pointer> channelMonitorList;
+    epics::pvData::LinkedList<ChannelRPC::shared_pointer> channelRPCList;
+    epics::pvData::LinkedList<ChannelArray::shared_pointer> channelArrayList;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
 };
@@ -143,16 +142,13 @@ public:
     virtual void destroy();
     virtual ChannelFind::shared_pointer channelFind(
         epics::pvData::String channelName,
-        ChannelFindRequester::shared_pointer const &
-            channelFindRequester) = 0;
+        ChannelFindRequester::shared_pointer const & channelFindRequester) = 0;
     virtual Channel::shared_pointer createChannel(
         epics::pvData::String channelName,
-        ChannelRequester::shared_pointer const &requester,
-        short priority);
+        ChannelRequester::shared_pointer const &requester, short priority);
     virtual Channel::shared_pointer createChannel(
         epics::pvData::String channelName,
-        ChannelRequester::shared_pointer  const &
-             channelRequester,
+        ChannelRequester::shared_pointer  const & channelRequester,
         short priority,
         epics::pvData::String address) = 0;
     // following called by derived class
@@ -161,8 +157,8 @@ public:
         ChannelFindRequester::shared_pointer const & requester);
     void channelNotCreated(
         ChannelRequester::shared_pointer const & requester);
-    void channelCreated(Channel::shared_pointer channel);
-    void removeChannel(ChannelBase &channel);
+    void channelCreated(Channel::shared_pointer const &channel);
+    void removeChannel(ChannelBase::shared_pointer const &channel);
 protected:
     ChannelBaseProvider::shared_pointer getPtrSelf()
     {
@@ -170,7 +166,7 @@ protected:
     }
 private:
     epics::pvData::String providerName;
-    epics::pvData::LinkedList<ChannelBase> channelList;
+    epics::pvData::LinkedList<ChannelBase::shared_pointer> channelList;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
 };

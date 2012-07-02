@@ -15,8 +15,6 @@
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
 
-#include <pv/support.h>
-#include <pv/pvDatabase.h>
 #include <pv/standardField.h>
 #include <pv/channelBase.h>
 
