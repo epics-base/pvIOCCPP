@@ -24,6 +24,7 @@ namespace epics { namespace pvIOC {
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
+using std::tr1::static_pointer_cast;
 
 ExampleServiceRPC::ExampleServiceRPC()
 {}
@@ -43,10 +44,10 @@ void ExampleServiceRPC::request(
     epics::pvData::PVStructure::shared_pointer const & pvArgument)
 {
     String builder;
-    PVString *pvfunction = pvArgument->getStringField("function");
-    PVStringArray *pvnames = static_cast<PVStringArray *>
+    PVStringPtr pvfunction = pvArgument->getStringField("function");
+    PVStringArrayPtr pvnames = static_pointer_cast<PVStringArray>
         (pvArgument->getScalarArrayField("names",pvString));
-    PVStringArray *pvvalues = static_cast<PVStringArray *>
+    PVStringArrayPtr pvvalues = static_pointer_cast<PVStringArray>
         (pvArgument->getScalarArrayField("values",pvString));
     builder += "pvArgument ";
     bool is = true;
@@ -60,56 +61,68 @@ void ExampleServiceRPC::request(
     }
 pvArgument->toString(&builder);
 printf("%s\n",builder.c_str());
-    StandardField *standardField = getStandardField();
-    StandardPVField *standardPVField = getStandardPVField();
-    FieldCreate * fieldCreate = getFieldCreate();
-    PVDataCreate * pvDataCreate = getPVDataCreate();
-    int n = 5;
-    FieldConstPtrArray fields = new FieldConstPtr[5];
-    fields[0] = standardField->alarm();
-    fields[1] = standardField->timeStamp();
-    fields[2] = fieldCreate->createScalarArray("label",pvString);
-    fields[3] = fieldCreate->createScalarArray("position",pvDouble);
-    fields[4] = fieldCreate->createStructureArray(
-        "alarms",standardField->alarm());
-    PVStructure::shared_pointer pvStructure = PVStructure::shared_pointer(
-        pvDataCreate->createPVStructure(0,"NTTable",n,fields));
+    StandardFieldPtr standardField = getStandardField();
+    StandardPVFieldPtr standardPVField = getStandardPVField();
+    FieldCreatePtr  fieldCreate = getFieldCreate();
+    PVDataCreatePtr  pvDataCreate = getPVDataCreate();
+    size_t n = 5;
+    FieldConstPtrArray fields;
+    StringArray names;
+    fields.reserve(n);
+    names.reserve(n);
+    names.push_back("alarm");
+    names.push_back("timeStamp");
+    names.push_back("label");
+    names.push_back("position");
+    names.push_back("alarms");
+    fields.push_back(standardField->alarm());
+    fields.push_back(standardField->timeStamp());
+    fields.push_back(fieldCreate->createScalarArray(pvString));
+    fields.push_back(fieldCreate->createScalarArray(pvDouble));
+    fields.push_back(fieldCreate->createStructureArray(standardField->alarm()));
+    StructureConstPtr structure = fieldCreate->createStructure(names,fields);
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
     PVTimeStamp pvTimeStamp;
     TimeStamp timeStamp;
     pvTimeStamp.attach(pvStructure->getStructureField("timeStamp"));
     timeStamp.getCurrent();
     pvTimeStamp.set(timeStamp);
-    String label[2];
+    StringArray label;
+    label.reserve(2);
     for(int i=0; i<2; i++) {
-        FieldConstPtr field = fields[i + 3];
-        label[i] = field->getFieldName();
+        label.push_back(names[i+3]);
     }
-    PVStringArray *pvLabel = static_cast<PVStringArray *>
+    PVStringArrayPtr pvLabel = static_pointer_cast<PVStringArray>
         (pvStructure->getScalarArrayField("label",pvString));
     pvLabel->put(0,2,label,0);
-    PVDoubleArray *pvPositions = static_cast<PVDoubleArray *>
+    PVDoubleArrayPtr pvPositions = static_pointer_cast<PVDoubleArray>
         (pvStructure->getScalarArrayField("position",pvDouble));
     double positions[2];
     positions[0] = 1.0;
     positions[1] = 2.0;
     pvPositions->put(0,2,positions,0);
-    PVStructureArray *pvAlarms = static_cast<PVStructureArray *>
+    PVStructureArrayPtr pvAlarms = static_pointer_cast<PVStructureArray>
         (pvStructure->getStructureArrayField("alarms"));
     PVAlarm pvAlarm;
     Alarm alarm;
-    PVStructurePtr palarms[n];
-    for(int i=0; i<2; i++) {
-        palarms[i] = standardPVField->alarm(0);
+    PVStructurePtrArray palarms;
+    size_t na=2;
+    palarms.reserve(na);
+    for(size_t i=0; i<na; i++) {
+        palarms.push_back(pvDataCreate->createPVStructure(standardField->alarm()));
+    }
+    for(size_t i=0; i<na; i++) {
         pvAlarm.attach(palarms[i]);
         alarm.setMessage("test");
         alarm.setSeverity(majorAlarm);
         alarm.setStatus(clientStatus);
         pvAlarm.set(alarm);
     }
-    pvAlarms->put(0,2,palarms,0);
+    PVStructurePtr *xxx = &palarms[0];
+    pvAlarms->put(0,2,xxx,0);
     String labels[2];
-    labels[0] = pvPositions->getField()->getFieldName();
-    labels[1] = pvAlarms->getField()->getFieldName();
+    labels[0] = pvPositions->getFieldName();
+    labels[1] = pvAlarms->getFieldName();
     pvLabel->put(0,2,labels,0);
 builder.clear();
 pvStructure->toString(&builder);

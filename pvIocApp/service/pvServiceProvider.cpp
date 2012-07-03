@@ -15,8 +15,6 @@
 #include <epicsExit.h>
 #include <dbAccess.h>
 
-#include <pv/support.h>
-#include <pv/pvDatabase.h>
 #include <pv/pvServiceProvider.h>
 
 namespace epics { namespace pvIOC { 

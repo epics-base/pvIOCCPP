@@ -21,22 +21,16 @@
 namespace epics { namespace pvAccess { 
 
 using namespace epics::pvData;
+using std::tr1::static_pointer_cast;
+using std::tr1::dynamic_pointer_cast;
 
-typedef LinkedListNode<ChannelProcess> ChannelProcessListNode;
-typedef LinkedList<ChannelProcess> ChannelProcessList;
-typedef LinkedListNode<ChannelGet> ChannelGetListNode;
-typedef LinkedList<ChannelGet> ChannelGetList;
-typedef LinkedListNode<ChannelPut> ChannelPutListNode;
-typedef LinkedList<ChannelPut> ChannelPutList;
-typedef LinkedListNode<ChannelPutGet> ChannelPutGetListNode;
-typedef LinkedList<ChannelPutGet> ChannelPutGetList;
-typedef LinkedListNode<epics::pvData::Monitor> ChannelMonitorListNode;
-typedef LinkedList<epics::pvData::Monitor> ChannelMonitorList;
-typedef LinkedListNode<ChannelRPC> ChannelRPCListNode;
-typedef LinkedList<ChannelRPC> ChannelRPCList;
-typedef LinkedListNode<ChannelArray> ChannelArrayListNode;
-typedef LinkedList<ChannelArray> ChannelArrayList;
-
+typedef LinkedListNode<ChannelProcess::shared_pointer> ChannelProcessListNode;
+typedef LinkedListNode<ChannelGet::shared_pointer> ChannelGetListNode;
+typedef LinkedListNode<ChannelPut::shared_pointer> ChannelPutListNode;
+typedef LinkedListNode<ChannelPutGet::shared_pointer> ChannelPutGetListNode;
+typedef LinkedListNode<epics::pvData::Monitor::shared_pointer> ChannelMonitorListNode;
+typedef LinkedListNode<ChannelRPC::shared_pointer> ChannelRPCListNode;
+typedef LinkedListNode<ChannelArray::shared_pointer> ChannelArrayListNode;
 
 ChannelBase::ChannelBase(
     ChannelProvider::shared_pointer const & provider,
@@ -72,112 +66,119 @@ void ChannelBase::destroy()
     while(true) {
         ChannelProcessListNode *node = channelProcessList.getHead();
         if(node==0) break;
-        ChannelProcess &channelProcess = node->getObject();
-        channelProcess.destroy();
+        ChannelProcess::shared_pointer &channelProcess = node->getObject();
+        channelProcess->destroy();
     }
     while(true) {
         ChannelGetListNode *node = channelGetList.getHead();
         if(node==0) break;
-        ChannelGet &channelGet = node->getObject();
-        channelGet.destroy();
+        ChannelGet::shared_pointer &channelGet = node->getObject();
+        channelGet->destroy();
     }
     while(true) {
         ChannelPutListNode *node = channelPutList.getHead();
         if(node==0) break;
-        ChannelPut &channelPut = node->getObject();
-        channelPut.destroy();
+        ChannelPut::shared_pointer &channelPut = node->getObject();
+        channelPut->destroy();
     }
     while(true) {
         ChannelPutGetListNode *node = channelPutGetList.getHead();
         if(node==0) break;
-        ChannelPutGet &channelPutGet = node->getObject();
-        channelPutGet.destroy();
+        ChannelPutGet::shared_pointer &channelPutGet = node->getObject();
+        channelPutGet->destroy();
     }
     while(true) {
         ChannelMonitorListNode *node = channelMonitorList.getHead();
         if(node==0) break;
-        Monitor &channelMonitor = node->getObject();
-        channelMonitor.destroy();
+        Monitor::shared_pointer &channelMonitor = node->getObject();
+        channelMonitor->destroy();
     }
     while(true) {
         ChannelRPCListNode *node = channelRPCList.getHead();
         if(node==0) break;
-        ChannelRPC &channelRPC = node->getObject();
-        channelRPC.destroy();
+        ChannelRPC::shared_pointer &channelRPC = node->getObject();
+        channelRPC->destroy();
     }
     while(true) {
         ChannelArrayListNode *node = channelArrayList.getHead();
         if(node==0) break;
-        ChannelArray &channelArray = node->getObject();
-        channelArray.destroy();
+        ChannelArray::shared_pointer &channelArray = node->getObject();
+        channelArray->destroy();
     }
-    std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(*this);
+    std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(ChannelBase::shared_pointer(this));
 }
 
 
-void ChannelBase::addChannelProcess(ChannelProcess & channelProcess)
+void ChannelBase::addChannelProcess(ChannelProcess::shared_pointer const & channelProcess)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelProcessListNode *node = new ChannelProcessListNode(channelProcess);
+    ChannelProcess::shared_pointer xxx = channelProcess;
+    ChannelProcessListNode *node = new ChannelProcessListNode(xxx);
     channelProcessList.addTail(*node);
 }
 
-void ChannelBase::addChannelGet(ChannelGet &channelGet)
+void ChannelBase::addChannelGet(ChannelGet::shared_pointer const &channelGet)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelGetListNode *node = new ChannelGetListNode(channelGet);
+    ChannelGet::shared_pointer xxx = channelGet;
+    ChannelGetListNode *node = new ChannelGetListNode(xxx);
     channelGetList.addTail(*node);
 }
 
-void ChannelBase::addChannelPut(ChannelPut &channelPut)
+void ChannelBase::addChannelPut(ChannelPut::shared_pointer const &channelPut)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelPutListNode *node = new ChannelPutListNode(channelPut);
+    ChannelPut::shared_pointer xxx = channelPut;
+    ChannelPutListNode *node = new ChannelPutListNode(xxx);
     channelPutList.addTail(*node);
 }
 
-void ChannelBase::addChannelPutGet(ChannelPutGet &channelPutGet)
+void ChannelBase::addChannelPutGet(ChannelPutGet::shared_pointer const &channelPutGet)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelPutGetListNode *node = new ChannelPutGetListNode(channelPutGet);
+    ChannelPutGet::shared_pointer xxx = channelPutGet;
+    ChannelPutGetListNode *node = new ChannelPutGetListNode(xxx);
     channelPutGetList.addTail(*node);
 }
 
-void ChannelBase::addChannelMonitor(Monitor &monitor)
+void ChannelBase::addChannelMonitor(Monitor::shared_pointer const &monitor)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelMonitorListNode *node = new ChannelMonitorListNode(monitor);
+    Monitor::shared_pointer xxx = monitor;
+    ChannelMonitorListNode *node = new ChannelMonitorListNode(xxx);
     channelMonitorList.addTail(*node);
 }
 
-void ChannelBase::addChannelRPC(ChannelRPC &channelRPC)
+void ChannelBase::addChannelRPC(ChannelRPC::shared_pointer const &channelRPC)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelRPCListNode *node = new ChannelRPCListNode(channelRPC);
+    ChannelRPC::shared_pointer xxx = channelRPC;
+    ChannelRPCListNode *node = new ChannelRPCListNode(xxx);
     channelRPCList.addTail(*node);
 }
 
-void ChannelBase::addChannelArray(ChannelArray &channelArray)
+void ChannelBase::addChannelArray(ChannelArray::shared_pointer const &channelArray)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
-    ChannelArrayListNode *node = new ChannelArrayListNode(channelArray);
+    ChannelArray::shared_pointer xxx = channelArray;
+    ChannelArrayListNode *node = new ChannelArrayListNode(xxx);
     channelArrayList.addTail(*node);
 }
 
-void ChannelBase::removeChannelProcess(ChannelProcess &ref)
+void ChannelBase::removeChannelProcess(ChannelProcess::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelProcessListNode *node = channelProcessList.getHead();
     while(node!=0) {
-        ChannelProcess * xxx = &node->getObject();
+        ChannelProcess::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelProcessList.remove(*node);
             delete node;
@@ -187,13 +188,13 @@ void ChannelBase::removeChannelProcess(ChannelProcess &ref)
     }
 }
 
-void ChannelBase::removeChannelGet(ChannelGet &ref)
+void ChannelBase::removeChannelGet(ChannelGet::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelGetListNode *node = channelGetList.getHead();
     while(node!=0) {
-        ChannelGet * xxx = &node->getObject();
+        ChannelGet::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelGetList.remove(*node);
             delete node;
@@ -203,13 +204,13 @@ void ChannelBase::removeChannelGet(ChannelGet &ref)
     }
 }
 
-void ChannelBase::removeChannelPut(ChannelPut &ref)
+void ChannelBase::removeChannelPut(ChannelPut::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelPutListNode *node = channelPutList.getHead();
     while(node!=0) {
-        ChannelPut * xxx = &node->getObject();
+        ChannelPut::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelPutList.remove(*node);
             delete node;
@@ -219,13 +220,13 @@ void ChannelBase::removeChannelPut(ChannelPut &ref)
     }
 }
 
-void ChannelBase::removeChannelPutGet(ChannelPutGet &ref)
+void ChannelBase::removeChannelPutGet(ChannelPutGet::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelPutGetListNode *node = channelPutGetList.getHead();
     while(node!=0) {
-        ChannelPutGet * xxx = &node->getObject();
+        ChannelPutGet::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelPutGetList.remove(*node);
             delete node;
@@ -235,13 +236,13 @@ void ChannelBase::removeChannelPutGet(ChannelPutGet &ref)
     }
 }
 
-void ChannelBase::removeChannelMonitor(Monitor &ref)
+void ChannelBase::removeChannelMonitor(Monitor::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelMonitorListNode *node = channelMonitorList.getHead();
     while(node!=0) {
-        Monitor * xxx = &node->getObject();
+        Monitor::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelMonitorList.remove(*node);
             delete node;
@@ -251,13 +252,13 @@ void ChannelBase::removeChannelMonitor(Monitor &ref)
     }
 }
 
-void ChannelBase::removeChannelRPC(ChannelRPC &ref)
+void ChannelBase::removeChannelRPC(ChannelRPC::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelRPCListNode *node = channelRPCList.getHead();
     while(node!=0) {
-        ChannelRPC * xxx = &node->getObject();
+        ChannelRPC::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelRPCList.remove(*node);
             delete node;
@@ -267,13 +268,13 @@ void ChannelBase::removeChannelRPC(ChannelRPC &ref)
     }
 }
 
-void ChannelBase::removeChannelArray(ChannelArray &ref)
+void ChannelBase::removeChannelArray(ChannelArray::shared_pointer const &ref)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelArrayListNode *node = channelArrayList.getHead();
     while(node!=0) {
-        ChannelArray * xxx = &node->getObject();
+        ChannelArray::shared_pointer * xxx = &node->getObject();
         if(xxx==&ref) {
             channelArrayList.remove(*node);
             delete node;
@@ -409,9 +410,10 @@ Monitor::shared_pointer ChannelBase::createMonitor(
 {
     Status status(Status::STATUSTYPE_ERROR,
         String("ChannelMonitor not supported"));
+    Monitor::shared_pointer thisPointer = dynamic_pointer_cast<Monitor>(getPtrSelf());
     monitorRequester->monitorConnect(
         status,
-        Monitor::shared_pointer(),
+        thisPointer,
         StructureConstPtr());
     return Monitor::shared_pointer();
 }

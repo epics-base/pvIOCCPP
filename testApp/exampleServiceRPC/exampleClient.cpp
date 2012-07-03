@@ -21,6 +21,7 @@
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
+using std::tr1::static_pointer_cast;
 
 
 static FILE *fd = 0;
@@ -34,29 +35,40 @@ static void dump(EZChannelRPC::shared_pointer const & channelRPC)
 void exampleClient()
 {
     String builder;
-    FieldCreate * fieldCreate = getFieldCreate();
-    PVDataCreate * pvDataCreate = getPVDataCreate();
+    FieldCreatePtr fieldCreate = getFieldCreate();
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
 
     // Create an argument to pass to service
-    int n = 3;
-    FieldConstPtrArray fields = new FieldConstPtr[5];
-    fields[0] = fieldCreate->createScalar("function",pvString);
-    fields[1] = fieldCreate->createScalarArray("names",pvString);
-    fields[2] = fieldCreate->createScalarArray("values",pvString);
-    PVStructure::shared_pointer pvArgument = PVStructure::shared_pointer(
-        pvDataCreate->createPVStructure(0,"NTNameValue",n,fields));
-    PVString *pvfunction = pvArgument->getStringField("function");
-    PVStringArray *pvnames = static_cast<PVStringArray *>
+    size_t n = 3;
+    FieldConstPtrArray fields;
+    StringArray fieldNames;
+    fields.reserve(n);
+    fieldNames.reserve(n);
+    fieldNames.push_back("function");
+    fieldNames.push_back("names");
+    fieldNames.push_back("values");
+    fields.push_back(fieldCreate->createScalar(pvString));
+    fields.push_back(fieldCreate->createScalarArray(pvString));
+    fields.push_back(fieldCreate->createScalarArray(pvString));
+    StructureConstPtr structure = fieldCreate->createStructure(fieldNames,fields);
+    PVStructurePtr pvArgument = pvDataCreate->createPVStructure(structure);
+    PVStringPtr pvfunction = pvArgument->getStringField("function");
+    PVStringArrayPtr pvnames = static_pointer_cast<PVStringArray>
         (pvArgument->getScalarArrayField("names",pvString));
-    PVStringArray *pvvalues = static_cast<PVStringArray *>
+    PVStringArrayPtr pvvalues = static_pointer_cast<PVStringArray>
         (pvArgument->getScalarArrayField("values",pvString));
     pvfunction->put("example");
-    int nnameValue = 2;
-    String names[] = {"name0","name1"};
-    String values[] = {"value0","value1"};
+    size_t  nnameValue = 2;
+    StringArray names;
+    names.reserve(nnameValue);
+    StringArray values;
+    values.reserve(nnameValue);
+    names.push_back("name0");
+    names.push_back("name1");
+    values.push_back("value0");
+    values.push_back("value1");
     pvnames->put(0,2,names,0);
     pvvalues->put(0,2,values,0);
-
     // create a channelRPC and connect
     EZChannelRPC::shared_pointer channelRPC = 
          EZChannelRPC::shared_pointer(new EZChannelRPC("serviceRPC"));
@@ -73,12 +85,12 @@ pvResponse->toString(&builder);
 printf("\nresponse\n%s\n",builder.c_str());
 
     // now look for expected data from service
-    PVInt *pvSeverity = pvResponse->getIntField("alarm.severity");
+    PVIntPtr pvSeverity = pvResponse->getIntField("alarm.severity");
     if(pvSeverity==0) exit(1);
     if(pvSeverity->get()!=0) {
         printf("alarm severity not 0\n");
     }
-    PVDoubleArray * pvposition = static_cast<PVDoubleArray *>
+    PVDoubleArrayPtr  pvposition = static_pointer_cast<PVDoubleArray>
         (pvResponse->getScalarArrayField("position",pvDouble));
     if(pvposition!=0) {
         builder.clear();

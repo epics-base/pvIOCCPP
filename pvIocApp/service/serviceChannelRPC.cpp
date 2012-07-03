@@ -157,7 +157,7 @@ ChannelRPC::ChannelRPC(
   channelRPCRequester(channelRPCRequester),
   serviceRPC(serviceRPC)
 {
-    channel->addChannelRPC(*this);
+    channel->addChannelRPC(ChannelRPC::shared_pointer(this));
 }
  
 ChannelRPC::~ChannelRPC()
@@ -177,7 +177,7 @@ void ChannelRPC::message(String message,MessageType messageType)
 
 void ChannelRPC::destroy() {
 printf("ChannelRPC::destroy()\n");
-    channel->removeChannelRPC(*this);
+    channel->removeChannelRPC(ChannelRPC::shared_pointer(this));
 }
 
 void ChannelRPC::request(

@@ -157,7 +157,7 @@ public:
         ChannelFindRequester::shared_pointer const & requester);
     void channelNotCreated(
         ChannelRequester::shared_pointer const & requester);
-    void channelCreated(Channel::shared_pointer const &channel);
+    void channelCreated(ChannelBase::shared_pointer const &channel);
     void removeChannel(ChannelBase::shared_pointer const &channel);
 protected:
     ChannelBaseProvider::shared_pointer getPtrSelf()

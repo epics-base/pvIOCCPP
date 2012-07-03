@@ -29,7 +29,8 @@ static epicsThreadOnceId initOnce = EPICS_THREAD_ONCE_INIT;
 EZChannelRPC::EZChannelRPC(
     String channelName)
 : channelName(channelName),
-  pvRequest(getCreateRequest()->createRequest("record[process=true]field()")),
+  pvRequest(getCreateRequest()->createRequest(
+        "record[process=true]field()",ChannelRequester::shared_pointer(this))),
   requesterName("ezchannelRPC"),
   isOk(true)
 {
@@ -148,7 +149,7 @@ String EZChannelRPC::getRequesterName(){ return requesterName;}
 
 void EZChannelRPC::message(String message,MessageType messageType)
 {
-    lastMessage = epics::pvData::messageTypeName[messageType];
+    lastMessage = getMessageTypeName(messageType);
     lastMessage += " " + message;
 }
 

@@ -22,7 +22,6 @@
 #include <pv/pvAccess.h>
 #include <pv/serverContext.h>
 
-#include <pv/pvDatabase.h>
 #include <exampleServiceRPC.h>
 
 using namespace epics::pvData;

@@ -15,18 +15,15 @@
 #include <epicsExit.h>
 #include <dbAccess.h>
 
-#include <pv/support.h>
-#include <pv/pvDatabase.h>
 #include <pv/channelBase.h>
 
 namespace epics { namespace pvAccess { 
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
+using std::tr1::static_pointer_cast;
 
-typedef LinkedListNode<ChannelBase> ChannelListNode;
-typedef LinkedList<ChannelBase> ChannelList;
-
+typedef LinkedListNode<ChannelBase::shared_pointer> ChannelListNode;
 
 ChannelBaseProvider::ChannelBaseProvider(
     String providerName
@@ -56,8 +53,8 @@ printf("ChannelBaseProvider::destroy\n");
     while(true) {
         ChannelListNode *node = channelList.removeHead();
         if(node==0) break;
-        ChannelBase &pvServerBase = node->getObject();
-        pvServerBase.destroy();
+        ChannelBase::shared_pointer &pvServerBase = node->getObject();
+        pvServerBase->destroy();
         delete node;
     }
 }
@@ -102,23 +99,23 @@ void ChannelBaseProvider::channelNotCreated(
         Channel::shared_pointer());
 }
 
-void ChannelBaseProvider::channelCreated(Channel::shared_pointer channel)
+void ChannelBaseProvider::channelCreated(ChannelBase::shared_pointer const &channel)
 {
 printf("ChannelBaseProvider::channelCreated\n");
     Lock xx(mutex);
-    ChannelBase *xxx = static_cast<ChannelBase *>(channel.get());
-    ChannelListNode *channelListNode = new ChannelListNode(*xxx);
+    ChannelBase::shared_pointer xxx = channel;
+    ChannelListNode *channelListNode = new ChannelListNode(xxx);
     channelList.addTail(*channelListNode);
     channel->getChannelRequester()->channelCreated(Status::Ok,channel);
 }
 
-void ChannelBaseProvider::removeChannel(ChannelBase &channel)
+void ChannelBaseProvider::removeChannel(ChannelBase::shared_pointer  const &channel)
 {
     Lock xx(mutex);
     if(beingDestroyed) return;
     ChannelListNode *channelListNode = channelList.getHead();
     while(channelListNode!=0) {
-        ChannelBase *chan = &channelListNode->getObject();
+        ChannelBase::shared_pointer  *chan = &channelListNode->getObject();
         if(chan==&channel) {
           channelList.remove(*channelListNode);
           delete channelListNode; 
@@ -127,9 +124,9 @@ void ChannelBaseProvider::removeChannel(ChannelBase &channel)
         channelListNode = channelList.getNext(*channelListNode);
     }
     String message("ChannelBaseProvider::removeChannel ");
-    message += channel.getChannelName();
+    message += channel->getChannelName();
     message += " but channel not in channelList";
-    channel.message(message,errorMessage);
+    channel->message(message,errorMessage);
 }
 
 }}
