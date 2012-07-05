@@ -105,7 +105,7 @@ void ChannelBase::destroy()
         ChannelArray::shared_pointer &channelArray = node->getObject();
         channelArray->destroy();
     }
-    std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(ChannelBase::shared_pointer(this));
+    std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(getPtrSelf());
 }
 
 

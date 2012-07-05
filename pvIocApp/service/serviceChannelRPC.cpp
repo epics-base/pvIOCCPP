@@ -18,7 +18,7 @@ using namespace epics::pvAccess;
 
 class PVTop;
 class ChannelImpl;
-class ChannelRPC;
+class ChannelRPCImpl;
 
 
 class PVTop :
@@ -63,17 +63,17 @@ private:
     ServiceRPC::shared_pointer serviceRPC;
 };
 
-class ChannelRPC :
+class ChannelRPCImpl :
   public epics::pvAccess::ChannelRPC,
-  public std::tr1::enable_shared_from_this<ChannelRPC>
+  public std::tr1::enable_shared_from_this<ChannelRPCImpl>
 {
 public:
-    POINTER_DEFINITIONS(ChannelRPC);
-    ChannelRPC(
+    POINTER_DEFINITIONS(ChannelRPCImpl);
+    ChannelRPCImpl(
         ChannelBase::shared_pointer const & channel,
         ChannelRPCRequester::shared_pointer const &channelRPCRequester,
         ServiceRPC::shared_pointer const &serviceRPC);
-    virtual ~ChannelRPC();
+    virtual ~ChannelRPCImpl();
     bool init(PVStructure::shared_pointer const & pvRequest);
     virtual String getRequesterName();
     virtual void message(
@@ -85,7 +85,7 @@ public:
     virtual void lock();
     virtual void unlock();
 private:
-    ChannelRPC::shared_pointer getPtrSelf()
+    ChannelRPCImpl::shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }
@@ -129,6 +129,7 @@ ChannelImpl::ChannelImpl(
 : ChannelBase(channelProvider,requester,name),
   serviceRPC(serviceRPC)
 {
+printf("ChannelImpl::ChannelImpl()\n");
 }
 
 ChannelImpl::~ChannelImpl()
@@ -140,7 +141,8 @@ epics::pvAccess::ChannelRPC::shared_pointer ChannelImpl::createChannelRPC(
     ChannelRPCRequester::shared_pointer const &channelRPCRequester,
     PVStructure::shared_pointer const &pvRequest)
 {
-    ChannelRPC *channel = new ChannelRPC(getPtrSelf(),channelRPCRequester,serviceRPC);
+printf("ChannelImpl::createChannelRPC\n");
+    ChannelRPC *channel = new ChannelRPCImpl(getPtrSelf(),channelRPCRequester,serviceRPC);
     ChannelRPC::shared_pointer channelRPC(channel);
     channelRPCRequester->channelRPCConnect(Status::Ok,channelRPC);
     return channelRPC;
@@ -149,7 +151,7 @@ epics::pvAccess::ChannelRPC::shared_pointer ChannelImpl::createChannelRPC(
 void ChannelImpl::printInfo(){}
 void ChannelImpl::printInfo(StringBuilder out){}
 
-ChannelRPC::ChannelRPC(
+ChannelRPCImpl::ChannelRPCImpl(
     ChannelBase::shared_pointer const & channel,
     ChannelRPCRequester::shared_pointer const &channelRPCRequester,
     ServiceRPC::shared_pointer const &serviceRPC)
@@ -157,32 +159,36 @@ ChannelRPC::ChannelRPC(
   channelRPCRequester(channelRPCRequester),
   serviceRPC(serviceRPC)
 {
-    channel->addChannelRPC(ChannelRPC::shared_pointer(this));
+printf("ChannelRPCImpl::ChannelRPCImpl\n");
+    channel->addChannelRPC(getPtrSelf());
+//    channel->addChannelRPC(ChannelRPCImpl::shared_pointer(this));
+printf("after addChannelRPC\n");
 }
  
-ChannelRPC::~ChannelRPC()
+ChannelRPCImpl::~ChannelRPCImpl()
 {
-printf("ChannelRPC::~ChannelRPC()\n");
+printf("ChannelRPCImpl::~ChannelRPCImpl()\n");
 }
 
-String ChannelRPC::getRequesterName() 
+String ChannelRPCImpl::getRequesterName() 
 {
     return channelRPCRequester->getRequesterName();
 }
 
-void ChannelRPC::message(String message,MessageType messageType)
+void ChannelRPCImpl::message(String message,MessageType messageType)
 {
     channelRPCRequester->message(message,messageType);
 }
 
-void ChannelRPC::destroy() {
+void ChannelRPCImpl::destroy() {
 printf("ChannelRPC::destroy()\n");
-    channel->removeChannelRPC(ChannelRPC::shared_pointer(this));
+    channel->removeChannelRPC(getPtrSelf());
 }
 
-void ChannelRPC::request(
+void ChannelRPCImpl::request(
         PVStructure::shared_pointer const & pvArgument,bool lastRequest)
 {
+printf("ChannelRPCImpl::request\n");
     {
         Lock lock(dataMutex);
         serviceRPC->request(channelRPCRequester,pvArgument);
@@ -190,12 +196,12 @@ void ChannelRPC::request(
     if(lastRequest) destroy();
 }
 
-void ChannelRPC::lock()
+void ChannelRPCImpl::lock()
 {
     dataMutex.lock();
 }
 
-void ChannelRPC::unlock()
+void ChannelRPCImpl::unlock()
 {
     dataMutex.unlock();
 }

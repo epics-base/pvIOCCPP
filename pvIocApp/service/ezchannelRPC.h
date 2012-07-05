@@ -144,7 +144,7 @@ private:
         return shared_from_this();
     }
     epics::pvData::String channelName;
-    epics::pvData::PVStructure::shared_pointer pvRequest;
+    epics::pvData::PVStructurePtr pvRequest;
     epics::pvData::String requesterName;
     bool isOk;
     epics::pvData::Event event;
@@ -153,7 +153,7 @@ private:
     Channel::shared_pointer channel;
     Channel::ConnectionState connectionState;
     ChannelRPC::shared_pointer channelRPC;
-    epics::pvData::PVStructure::shared_pointer pvResponse;
+    epics::pvData::PVStructurePtr pvResponse;
 };
 
 }}

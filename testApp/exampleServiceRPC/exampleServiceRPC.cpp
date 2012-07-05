@@ -27,7 +27,9 @@ using namespace epics::pvAccess;
 using std::tr1::static_pointer_cast;
 
 ExampleServiceRPC::ExampleServiceRPC()
-{}
+{
+printf("ExampleServiceRPC::ExampleServiceRPC()\n");
+}
 
 ExampleServiceRPC::~ExampleServiceRPC()
 {
@@ -43,6 +45,7 @@ void ExampleServiceRPC::request(
     ChannelRPCRequester::shared_pointer const & channelRPCRequester,
     epics::pvData::PVStructure::shared_pointer const & pvArgument)
 {
+printf("ExampleServiceRPC::request\n");
     String builder;
     PVStringPtr pvfunction = pvArgument->getStringField("function");
     PVStringArrayPtr pvnames = static_pointer_cast<PVStringArray>

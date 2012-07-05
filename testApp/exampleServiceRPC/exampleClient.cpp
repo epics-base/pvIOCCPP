@@ -17,7 +17,7 @@
 #include <epicsExit.h>
 
 #include <pv/CDRMonitor.h>
-#include "ezchannelRPC.h"
+#include <pv/ezchannelRPC.h>
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;
@@ -70,12 +70,13 @@ void exampleClient()
     pvnames->put(0,2,names,0);
     pvvalues->put(0,2,values,0);
     // create a channelRPC and connect
-    EZChannelRPC::shared_pointer channelRPC = 
-         EZChannelRPC::shared_pointer(new EZChannelRPC("serviceRPC"));
+    EZChannelRPC::shared_pointer channelRPC(new EZChannelRPC("serviceRPC"));
+printf("calling connect\n");
     bool result = channelRPC->connect(1.0);
     if(!result) {dump(channelRPC); return;}
 
     //make a request
+printf("calling request\n");
     PVStructure::shared_pointer pvResponse
         = channelRPC->request(pvArgument,false);
     if(pvResponse.get()==0) {dump(channelRPC); return;}
@@ -119,9 +120,6 @@ int main(int argc,char *argv[])
     ClientFactory::start();
     exampleClient();
     ClientFactory::stop();
-    epicsThreadSleep(2.0);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(stdout,true);
     return (0);
 }
 

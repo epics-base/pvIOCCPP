@@ -9,7 +9,6 @@ exampleServiceRPC_LIBS += pvIOC pvAccess pvData Com
 
 PROD_HOST += exampleClient
 exampleClient_SRCS += exampleClient.cpp
-exampleClient_SRCS += ezchannelRPC.cpp
 exampleClient_LIBS += pvIOC pvAccess pvData Com
 
 
