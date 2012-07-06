@@ -10,9 +10,6 @@
 #include <memory>
 #include <iostream>
 
-#include <pv/CDRMonitor.h>
-#include <epicsExit.h>
-#include <cantProceed.h>
 #include <epicsStdio.h>
 #include <epicsMutex.h>
 #include <epicsEvent.h>
@@ -55,12 +52,6 @@ void example()
 int main(int argc,char *argv[])
 {
     example();
-printf("calling epicsExitCallAtExits\n");
-    epicsExitCallAtExits();
-printf("calling epicsThreadSleep\n");
-    epicsThreadSleep(1.0);
-printf("calling CDRMonitor::get\n");
-    CDRMonitor::get().show(stdout,true);
     return 0;
 }
 

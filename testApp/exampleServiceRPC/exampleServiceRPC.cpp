@@ -28,42 +28,38 @@ using std::tr1::static_pointer_cast;
 
 ExampleServiceRPC::ExampleServiceRPC()
 {
-printf("ExampleServiceRPC::ExampleServiceRPC()\n");
 }
 
 ExampleServiceRPC::~ExampleServiceRPC()
 {
-printf("ExampleServiceRPC::~ExampleServiceRPC()\n");
 }
 
 void ExampleServiceRPC::destroy()
 {
-printf("ExampleServiceRPC::destroy()\n");
 }
 
 void ExampleServiceRPC::request(
     ChannelRPCRequester::shared_pointer const & channelRPCRequester,
     epics::pvData::PVStructure::shared_pointer const & pvArgument)
 {
-printf("ExampleServiceRPC::request\n");
-    String builder;
+    String buffer;
     PVStringPtr pvfunction = pvArgument->getStringField("function");
     PVStringArrayPtr pvnames = static_pointer_cast<PVStringArray>
         (pvArgument->getScalarArrayField("names",pvString));
     PVStringArrayPtr pvvalues = static_pointer_cast<PVStringArray>
         (pvArgument->getScalarArrayField("values",pvString));
-    builder += "pvArgument ";
+    buffer += "pvArgument ";
     bool is = true;
     if(pvfunction==0) is = false;
     if(pvnames==0) is = false;
     if(pvvalues==0) is = false;
     if(is) {
-        builder += "is a NTNameValue\n";
+        buffer += "is a NTNameValue\n";
     } else {
-        builder += "is not a NTNameValue\n ";
+        buffer += "is not a NTNameValue\n ";
     }
-pvArgument->toString(&builder);
-printf("%s\n",builder.c_str());
+    pvArgument->toString(&buffer);
+    printf("%s\n",buffer.c_str());
     StandardFieldPtr standardField = getStandardField();
     StandardPVFieldPtr standardPVField = getStandardPVField();
     FieldCreatePtr  fieldCreate = getFieldCreate();
@@ -122,17 +118,20 @@ printf("%s\n",builder.c_str());
         pvAlarm.set(alarm);
     }
     PVStructurePtr *xxx = &palarms[0];
+for(size_t i=0; i<na; i++) {
+buffer.clear();
+xxx[i]->toString(&buffer);
+printf("xxx[%d]\n%s\n",i,buffer.c_str());
+}
+
     pvAlarms->put(0,2,xxx,0);
     String labels[2];
     labels[0] = pvPositions->getFieldName();
     labels[1] = pvAlarms->getFieldName();
     pvLabel->put(0,2,labels,0);
-builder.clear();
-pvStructure->toString(&builder);
-printf("%s\n",builder.c_str());
-//builder.clear();
-//pvStructure->getStructure()->toString(&builder);
-//printf("%s\n",builder.c_str());
+    buffer.clear();
+    pvStructure->toString(&buffer);
+    printf("%s\n",buffer.c_str());
     channelRPCRequester->requestDone(Status::Ok,pvStructure);
 }
 

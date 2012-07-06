@@ -144,6 +144,7 @@ epics::pvAccess::ChannelRPC::shared_pointer ChannelImpl::createChannelRPC(
 printf("ChannelImpl::createChannelRPC\n");
     ChannelRPC *channel = new ChannelRPCImpl(getPtrSelf(),channelRPCRequester,serviceRPC);
     ChannelRPC::shared_pointer channelRPC(channel);
+    addChannelRPC(channelRPC);
     channelRPCRequester->channelRPCConnect(Status::Ok,channelRPC);
     return channelRPC;
 }
@@ -160,9 +161,6 @@ ChannelRPCImpl::ChannelRPCImpl(
   serviceRPC(serviceRPC)
 {
 printf("ChannelRPCImpl::ChannelRPCImpl\n");
-    channel->addChannelRPC(getPtrSelf());
-//    channel->addChannelRPC(ChannelRPCImpl::shared_pointer(this));
-printf("after addChannelRPC\n");
 }
  
 ChannelRPCImpl::~ChannelRPCImpl()
