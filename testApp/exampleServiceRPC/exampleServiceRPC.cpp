@@ -117,14 +117,7 @@ void ExampleServiceRPC::request(
         alarm.setStatus(clientStatus);
         pvAlarm.set(alarm);
     }
-    PVStructurePtr *xxx = &palarms[0];
-for(size_t i=0; i<na; i++) {
-buffer.clear();
-xxx[i]->toString(&buffer);
-printf("xxx[%d]\n%s\n",i,buffer.c_str());
-}
-
-    pvAlarms->put(0,2,xxx,0);
+    pvAlarms->put(0,2,palarms,0);
     String labels[2];
     labels[0] = pvPositions->getFieldName();
     labels[1] = pvAlarms->getFieldName();
