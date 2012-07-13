@@ -22,6 +22,8 @@
 #include <pv/lock.h>
 #include <pv/pvAccess.h>
 
+#include <set>
+
 namespace epics { namespace pvAccess { 
 
 class ChannelBaseProvider;
@@ -116,13 +118,13 @@ private:
     ChannelProvider::shared_pointer  provider;
     ChannelRequester::shared_pointer requester;
     epics::pvData::String channelName;
-    epics::pvData::LinkedList<ChannelProcess::shared_pointer> channelProcessList;
-    epics::pvData::LinkedList<ChannelGet::shared_pointer> channelGetList;
-    epics::pvData::LinkedList<ChannelPut::shared_pointer> channelPutList;
-    epics::pvData::LinkedList<ChannelPutGet::shared_pointer> channelPutGetList;
-    epics::pvData::LinkedList<epics::pvData::Monitor::shared_pointer> channelMonitorList;
-    epics::pvData::LinkedList<ChannelRPC::shared_pointer> channelRPCList;
-    epics::pvData::LinkedList<ChannelArray::shared_pointer> channelArrayList;
+    std::set<ChannelProcess::shared_pointer> channelProcessList;
+    std::set<ChannelGet::shared_pointer> channelGetList;
+    std::set<ChannelPut::shared_pointer> channelPutList;
+    std::set<ChannelPutGet::shared_pointer> channelPutGetList;
+    std::set<epics::pvData::Monitor::shared_pointer> channelMonitorList;
+    std::set<ChannelRPC::shared_pointer> channelRPCList;
+    std::set<ChannelArray::shared_pointer> channelArrayList;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
 };
@@ -166,6 +168,7 @@ protected:
     }
 private:
     epics::pvData::String providerName;
+    // TODO change to std::set
     epics::pvData::LinkedList<ChannelBase::shared_pointer> channelList;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
