@@ -114,7 +114,7 @@ Channel::shared_pointer PVServiceProvider::createChannel(
         if(top->getName().compare(channelName)==0) {
             ChannelProvider::shared_pointer xxx = getPtrSelf();
             ChannelBase::shared_pointer channel =
-                 top>createChannel(channelRequester,xxx);
+                 top->createChannel(channelRequester,xxx);
             channelCreated(channel);
             topBase->channelList.insert(channel);
             return channel;
@@ -151,7 +151,8 @@ void PVServiceProvider::removeRecord(
     ServicePVTop::shared_pointer servicePVTop)
 {
     Lock xx(mutex);
-    topList.erase(servicePVTop);
+    // TODO maybe static_pointer_cast is OK here...
+    topList.erase(std::tr1::dynamic_pointer_cast<ServicePVTopBase>(servicePVTop));
 }
 
 }}
