@@ -10,13 +10,13 @@
 #include <cstring>
 #include <stdexcept>
 #include <memory>
+#include <set>
 
 #include <pv/lock.h>
 #include <pv/thread.h>
 #include <pv/event.h>
 #include <pv/status.h>
 #include <pv/monitor.h>
-#include <pv/linkedList.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
@@ -27,6 +27,12 @@
 namespace epics { namespace pvIOC { 
 
 class PVServiceProvider;
+class ServicePVTop;
+class ServicePVTopBase;
+
+typedef std::tr1::shared_ptr<ServicePVTop> ServicePVTopPtr;
+typedef std::tr1::shared_ptr<ServicePVTopBase> ServicePVTopBasePtr;
+typedef std::set<ServicePVTopBasePtr> ServicePVTopBaseList;
 
 class ServicePVTop 
 {
@@ -40,7 +46,6 @@ public:
     virtual void destroy() = 0;
 };
 
-class ServicePVTopBase;
 
 class PVServiceProvider :
     public epics::pvAccess::ChannelBaseProvider
@@ -64,7 +69,7 @@ public:
     void removeRecord(ServicePVTop::shared_pointer servicePVTop);
 private:
     PVServiceProvider();
-    epics::pvData::LinkedList<ServicePVTopBase> topList;
+    ServicePVTopBaseList topList;
     epics::pvData::Mutex mutex;
 };
 

@@ -15,7 +15,6 @@
 
 #include <pv/status.h>
 #include <pv/monitor.h>
-#include <pv/linkedList.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
@@ -36,6 +35,8 @@ class ChannelBasePutGet;
 class ChannelBaseMonitor;
 class ChannelBaseRPC;
 class ChannelBaseArray;
+typedef std::tr1::shared_ptr<ChannelBase> ChannelBasePtr;
+typedef std::set<ChannelBasePtr> ChannelBaseList;
 
 /* ChannelBase is a base class for implementing Channel
  * ChannelBase implements all Channel methods.
@@ -168,8 +169,7 @@ protected:
     }
 private:
     epics::pvData::String providerName;
-    // TODO change to std::set
-    epics::pvData::LinkedList<ChannelBase::shared_pointer> channelList;
+    ChannelBaseList channelList;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
 };

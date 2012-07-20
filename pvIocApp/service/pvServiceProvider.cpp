@@ -44,11 +44,8 @@ public:
     ServicePVTopBase(ServicePVTop::shared_pointer servicePVTop)
     : servicePVTop(servicePVTop){}
     ServicePVTop::shared_pointer servicePVTop;
-    epics::pvData::LinkedList<epics::pvAccess::Channel::shared_pointer> channelList;
+    std::set<epics::pvAccess::Channel::shared_pointer> channelList;
 };
-
-typedef LinkedListNode<ServicePVTopBase> TopListNode;
-typedef LinkedList<ServicePVTopBase> TopList;
 
 ChannelBaseProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
 {
@@ -65,10 +62,8 @@ ChannelBaseProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
 }
 
 PVServiceProvider::PVServiceProvider()
-: ChannelBaseProvider("pvService"),
-  topList()
+: ChannelBaseProvider("pvService")
 {
-//printf("PVServiceProvider::PVServiceProvider\n");
 }
 
 PVServiceProvider::~PVServiceProvider()
@@ -80,32 +75,28 @@ pvServiceProvider.reset();
 
 void PVServiceProvider::destroy()
 {
-printf("PVServiceProvider::destroy\n");
     Lock xx(mutex);
-    while(true) {
-        TopListNode *node = topList.removeHead();
-        if(node==0) break;
-        ServicePVTopBase &pvTop = node->getObject();
-        pvTop.servicePVTop->destroy();
-        delete node;
-        delete &pvTop;
+    ServicePVTopBaseList::iterator iter;
+    for(iter = topList.begin(); iter!=topList.end(); ++iter) {
+        ServicePVTopBasePtr top = *iter;
+        top->servicePVTop->destroy();
     }
+    topList.clear();
 }
 
 ChannelFind::shared_pointer PVServiceProvider::channelFind(
     String name,
     ChannelFindRequester::shared_pointer const &channelFindRequester)
 {
-//printf("PVServiceProvider::channelFind\n");
-    TopListNode *node = topList.getHead();
+    ServicePVTopBaseList::iterator iter;
     bool result = false;
-    while(node!=0) {
-        ServicePVTopBase &pvTop = node->getObject();
-        if((pvTop.servicePVTop->getName().compare(name)==0)) {
+    for(iter = topList.begin(); iter!=topList.end(); ++iter) {
+        ServicePVTopBasePtr topBase = *iter;
+        ServicePVTopPtr top = topBase->servicePVTop;
+        if(top->getName().compare(name)==0) {
             result = true;
             break;
         }
-        node = topList.getNext(*node);
     }
     channelFound(result,channelFindRequester);
     return ChannelFind::shared_pointer();
@@ -116,24 +107,33 @@ Channel::shared_pointer PVServiceProvider::createChannel(
     short priority,
     String address)
 {
-//printf("PVServiceProvider::createChannel\n");
-    TopListNode *node = topList.getHead();
-    while(node!=0) {
-        ServicePVTopBase &pvTopBase = node->getObject();
-        ServicePVTop::shared_pointer pvTop = pvTopBase.servicePVTop;
-//printf("channelName %s getName %s\n",channelName.c_str(),pvTop->getName().c_str());
-        if((pvTop->getName().compare(channelName)==0)) {
-//printf("calling pvTop.createChannel\n");
+    ServicePVTopBaseList::iterator iter;
+    for(iter = topList.begin(); iter!=topList.end(); ++iter) {
+        ServicePVTopBasePtr topBase = *iter;
+        ServicePVTopPtr top = topBase->servicePVTop;
+        if(top->getName().compare(channelName)==0) {
+            ChannelProvider::shared_pointer xxx = getPtrSelf();
             ChannelBase::shared_pointer channel =
-                 pvTop->createChannel(channelRequester,
-                      static_cast<ChannelProvider::shared_pointer>(
-                          getPtrSelf()));
-//printf("calling channelCreated(channel) %p\n",channel.get());
+                 top>createChannel(channelRequester,xxx);
             channelCreated(channel);
+            topBase->channelList.insert(channel);
             return channel;
         }
-        node = topList.getNext(*node);
     }
+//    TopListNode *node = topList.getHead();
+//    while(node!=0) {
+//        ServicePVTopBase &pvTopBase = node->getObject();
+//        ServicePVTop::shared_pointer pvTop = pvTopBase.servicePVTop;
+//        if((pvTop->getName().compare(channelName)==0)) {
+//            ChannelBase::shared_pointer channel =
+//                 pvTop->createChannel(channelRequester,
+//                      static_cast<ChannelProvider::shared_pointer>(
+//                          getPtrSelf()));
+//            channelCreated(channel);
+//            return channel;
+//        }
+//        node = topList.getNext(*node);
+//    }
     ChannelBaseProvider::channelNotCreated(channelRequester);
     return Channel::shared_pointer();
 }
@@ -143,26 +143,15 @@ void PVServiceProvider::addRecord(
 {
 //printf("PVServiceProvider::addRecord\n");
     Lock xx(mutex);
-    ServicePVTopBase *servicePVTopBase = new ServicePVTopBase(servicePVTop);
-    TopListNode *node = new TopListNode(*servicePVTopBase);
-    topList.addTail(*node);
+    ServicePVTopBasePtr topBase(new ServicePVTopBase(servicePVTop));
+    topList.insert(topBase);
 }
 
 void PVServiceProvider::removeRecord(
     ServicePVTop::shared_pointer servicePVTop)
 {
-//printf("PVServiceProvider::removeRecord\n");
     Lock xx(mutex);
-    TopListNode *node = topList.getHead();
-    while(node!=0) {
-        ServicePVTopBase &pvTop = node->getObject();
-        if(&pvTop.servicePVTop==&servicePVTop) {
-            topList.remove(*node);
-            delete node;
-            return;
-        }
-        node = topList.getNext(*node);
-    }
+    topList.erase(servicePVTop);
 }
 
 }}
