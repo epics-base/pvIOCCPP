@@ -65,8 +65,8 @@ public:
              channelRequester,
         short priority,
         epics::pvData::String address);
-    void addRecord(ServicePVTop::shared_pointer servicePVTop);
-    void removeRecord(ServicePVTop::shared_pointer servicePVTop);
+    void addRecord(ServicePVTop::shared_pointer const & servicePVTop);
+    void removeRecord(ServicePVTop::shared_pointer & servicePVTop);
 private:
     PVServiceProvider();
     ServicePVTopBaseList topList;

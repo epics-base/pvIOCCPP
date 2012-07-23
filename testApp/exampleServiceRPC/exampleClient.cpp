@@ -16,7 +16,6 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include <pv/CDRMonitor.h>
 #include <pv/ezchannelRPC.h>
 
 using namespace epics::pvData;

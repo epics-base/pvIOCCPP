@@ -28,6 +28,8 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 using namespace epics::pvIOC;
 
+static ServiceChannelRPC::shared_pointer serviceChannelRPC;
+
 /* define arguments for the following command:
  * startExampleService channelName
  */
@@ -46,8 +48,8 @@ static void startExampleService(const iocshArgBuf *args)
     }
     ExampleServiceRPC::shared_pointer example
         = ExampleServiceRPC::shared_pointer(new ExampleServiceRPC());
-    ServiceChannelRPC *serviceChannelRPC
-        = new ServiceChannelRPC("serviceRPC",example);
+    serviceChannelRPC = ServiceChannelRPC::shared_pointer(
+        new ServiceChannelRPC("serviceRPC",example));
 }
 
 static void startExampleServiceRegister(void)

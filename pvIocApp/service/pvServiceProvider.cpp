@@ -88,6 +88,7 @@ ChannelFind::shared_pointer PVServiceProvider::channelFind(
     String name,
     ChannelFindRequester::shared_pointer const &channelFindRequester)
 {
+    Lock xx(mutex);
     ServicePVTopBaseList::iterator iter;
     bool result = false;
     for(iter = topList.begin(); iter!=topList.end(); ++iter) {
@@ -107,6 +108,7 @@ Channel::shared_pointer PVServiceProvider::createChannel(
     short priority,
     String address)
 {
+    Lock xx(mutex);
     ServicePVTopBaseList::iterator iter;
     for(iter = topList.begin(); iter!=topList.end(); ++iter) {
         ServicePVTopBasePtr topBase = *iter;
@@ -120,26 +122,12 @@ Channel::shared_pointer PVServiceProvider::createChannel(
             return channel;
         }
     }
-//    TopListNode *node = topList.getHead();
-//    while(node!=0) {
-//        ServicePVTopBase &pvTopBase = node->getObject();
-//        ServicePVTop::shared_pointer pvTop = pvTopBase.servicePVTop;
-//        if((pvTop->getName().compare(channelName)==0)) {
-//            ChannelBase::shared_pointer channel =
-//                 pvTop->createChannel(channelRequester,
-//                      static_cast<ChannelProvider::shared_pointer>(
-//                          getPtrSelf()));
-//            channelCreated(channel);
-//            return channel;
-//        }
-//        node = topList.getNext(*node);
-//    }
     ChannelBaseProvider::channelNotCreated(channelRequester);
     return Channel::shared_pointer();
 }
 
 void PVServiceProvider::addRecord(
-    ServicePVTop::shared_pointer servicePVTop)
+    ServicePVTop::shared_pointer const & servicePVTop)
 {
 //printf("PVServiceProvider::addRecord\n");
     Lock xx(mutex);
@@ -148,11 +136,18 @@ void PVServiceProvider::addRecord(
 }
 
 void PVServiceProvider::removeRecord(
-    ServicePVTop::shared_pointer servicePVTop)
+    ServicePVTop::shared_pointer & servicePVTop)
 {
     Lock xx(mutex);
-    // TODO maybe static_pointer_cast is OK here...
-    topList.erase(std::tr1::dynamic_pointer_cast<ServicePVTopBase>(servicePVTop));
+    ServicePVTopBaseList::iterator iter;
+    for(iter = topList.begin(); iter!=topList.end(); ++iter) {
+        ServicePVTopBasePtr topBase = *iter;
+        ServicePVTopPtr top = topBase->servicePVTop;
+        if(top==servicePVTop) {
+            topList.erase(topBase);
+            return;
+        }
+    }
 }
 
 }}
