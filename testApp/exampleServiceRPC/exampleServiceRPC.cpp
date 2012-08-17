@@ -125,7 +125,7 @@ void ExampleServiceRPC::request(
     buffer.clear();
     pvStructure->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    channelRPCRequester->requestDone(Status::Ok,pvStructure);
+    channelRPCRequester->requestDone(Status::OK,pvStructure);
 }
 
 }}

@@ -67,7 +67,7 @@ void ChannelBaseProvider::channelFound(
 {
     if(found) {
         channelFindRequester->channelFindResult(
-            Status::Ok,
+            Status::OK,
             ChannelFind::shared_pointer(),
             true);
     } else {
@@ -101,7 +101,7 @@ void ChannelBaseProvider::channelCreated(ChannelBasePtr const &channel)
 printf("ChannelBaseProvider::channelCreated\n");
     Lock xx(mutex);
     channelList.insert(channel);
-    channel->getChannelRequester()->channelCreated(Status::Ok,channel);
+    channel->getChannelRequester()->channelCreated(Status::OK,channel);
 }
 
 void ChannelBaseProvider::removeChannel(ChannelBase::shared_pointer  const &channel)

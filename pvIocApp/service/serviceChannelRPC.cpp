@@ -145,7 +145,7 @@ printf("ChannelImpl::createChannelRPC\n");
     ChannelRPC *channel = new ChannelRPCImpl(getPtrSelf(),channelRPCRequester,serviceRPC);
     ChannelRPC::shared_pointer channelRPC(channel);
     addChannelRPC(channelRPC);
-    channelRPCRequester->channelRPCConnect(Status::Ok,channelRPC);
+    channelRPCRequester->channelRPCConnect(Status::OK,channelRPC);
     return channelRPC;
 }
 

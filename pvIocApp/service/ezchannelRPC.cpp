@@ -30,7 +30,7 @@ EZChannelRPC::EZChannelRPC(
     String channelName)
 : channelName(channelName),
   requesterName("ezchannelRPC"),
-  isOk(true)
+  isOK(true)
 {
     epicsThreadOnce(&initOnce, &initStatic, 0);
 }
@@ -41,7 +41,7 @@ EZChannelRPC::EZChannelRPC(
 : channelName(channelName),
   pvRequest(pvRequest),
   requesterName("ezchannelRPC"),
-  isOk(true)
+  isOK(true)
 {
     epicsThreadOnce(&initOnce, &initStatic, 0);
 }
@@ -91,7 +91,7 @@ bool EZChannelRPC::waitConnect(double timeOut) {
     if(!ok) return ok;
     channelRPC = channel->createChannelRPC(getPtrSelf(),pvRequest);
     event.wait();
-    return isOk;
+    return isOK;
 }
 
 epics::pvData::PVStructure::shared_pointer EZChannelRPC::request(
@@ -120,7 +120,7 @@ epics::pvData::PVStructure::shared_pointer EZChannelRPC::waitRequest()
     bool ok = event.wait();
 //printf("wait returned %s\n",(ok==true ? "true" : "false"));
     if(!ok) {
-        isOk = false;
+        isOK = false;
         lastMessage = "event.wait failed\n";
         pvResponse = epics::pvData::PVStructure::shared_pointer();
     }
@@ -135,9 +135,9 @@ void EZChannelRPC::channelCreated(
     Channel::shared_pointer const & channel)
 {
 //printf("EZChannelRPC::channelCreate\n");
-    isOk = status.isOk();
+    isOK = status.isOK();
     this->channel = channel;
-    if(!isOk) {
+    if(!isOK) {
         String message = Status::StatusTypeName[status.getType()];
         message += " " + status.getMessage();
         lastMessage = message;
@@ -167,8 +167,8 @@ void EZChannelRPC::channelRPCConnect(
     ChannelRPC::shared_pointer const & channelRPC)
 {
     this->channelRPC = channelRPC;
-    if(!status.isOk()) {
-        isOk = false;
+    if(!status.isOK()) {
+        isOK = false;
         String message = Status::StatusTypeName[status.getType()];
         message += " " + status.getMessage();
         lastMessage = message;
@@ -182,8 +182,8 @@ void EZChannelRPC::requestDone(
 {
 //printf("EZChannelRPC::requestDone\n");
     this->pvResponse = pvResponse;
-    if(!status.isOk()) {
-        isOk = false;
+    if(!status.isOK()) {
+        isOK = false;
         String message = Status::StatusTypeName[status.getType()];
         message += " " + status.getMessage();
         lastMessage = message;
