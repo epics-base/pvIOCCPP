@@ -27,7 +27,7 @@ static void initStatic(void *) {
 static epicsThreadOnceId initOnce = EPICS_THREAD_ONCE_INIT;
 
 EZChannelRPC::EZChannelRPC(
-    String channelName)
+    String const &channelName)
 : channelName(channelName),
   requesterName("ezchannelRPC"),
   isOK(true)
@@ -36,7 +36,7 @@ EZChannelRPC::EZChannelRPC(
 }
 
 EZChannelRPC::EZChannelRPC(
-    String channelName,
+    String const &channelName,
     PVStructure::shared_pointer pvRequest)
 : channelName(channelName),
   pvRequest(pvRequest),
@@ -156,7 +156,7 @@ void EZChannelRPC::channelStateChange(
 
 String EZChannelRPC::getRequesterName(){ return requesterName;}
 
-void EZChannelRPC::message(String message,MessageType messageType)
+void EZChannelRPC::message(String const &message,MessageType messageType)
 {
     lastMessage = getMessageTypeName(messageType);
     lastMessage += " " + message;

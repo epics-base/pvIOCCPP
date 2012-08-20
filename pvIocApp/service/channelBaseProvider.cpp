@@ -24,7 +24,7 @@ using namespace epics::pvAccess;
 using std::tr1::static_pointer_cast;
 
 ChannelBaseProvider::ChannelBaseProvider(
-    String providerName
+    String const &providerName
 )
 : providerName(providerName),
   beingDestroyed(false)

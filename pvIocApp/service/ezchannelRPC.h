@@ -56,13 +56,13 @@ public:
      * The channelName is the name of the channelRPC server.
      */
     EZChannelRPC(
-        epics::pvData::String channelName);
+        epics::pvData::String const &channelName);
     /** Constructor
      * The channelName is the name of the channelRPC server.
      * pvRequest is a request structure to pass to the server.
      */
     EZChannelRPC(
-        epics::pvData::String channelName,
+        epics::pvData::String const &channelName,
         epics::pvData::PVStructure::shared_pointer pvRequest);
     /**
      * Destructor
@@ -130,7 +130,7 @@ public:
         Channel::ConnectionState connectionState);
     virtual epics::pvData::String getRequesterName();
     virtual void message(
-        epics::pvData::String message,
+        epics::pvData::String const & message,
         epics::pvData::MessageType messageType);
     virtual void channelRPCConnect(
         const epics::pvData::Status& status,

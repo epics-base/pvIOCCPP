@@ -60,7 +60,7 @@ public:
      * Create a pvAccess Channel that implements an RPC service.
      */
     ServiceChannelRPC(
-        epics::pvData::String channelName,
+        epics::pvData::String const &channelName,
         ServiceRPC::shared_pointer const & serviceRPC);
     virtual ~ServiceChannelRPC();
     /**

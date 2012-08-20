@@ -205,7 +205,7 @@ void ChannelRPCImpl::unlock()
 }
   
 ServiceChannelRPC::ServiceChannelRPC(
-    String channelName,
+    String const &channelName,
     ServiceRPC::shared_pointer const & serviceRPC)
 : serviceRPC(serviceRPC)
 {

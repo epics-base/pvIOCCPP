@@ -59,7 +59,7 @@ public:
     virtual void destroy();
     virtual epics::pvData::String getRequesterName();
     virtual void message(
-        epics::pvData::String message,
+        epics::pvData::String const & message,
         epics::pvData::MessageType messageType);
     virtual ChannelProvider::shared_pointer const & getProvider();
     virtual epics::pvData::String getRemoteAddress();
@@ -137,7 +137,7 @@ class ChannelBaseProvider :
 public:
     POINTER_DEFINITIONS(ChannelBaseProvider);
     ChannelBaseProvider(
-        epics::pvData::String providerName
+        epics::pvData::String const &providerName
     );
     void init();
     virtual ~ChannelBaseProvider();

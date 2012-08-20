@@ -10,22 +10,35 @@
   <link rel="stylesheet" type="text/css"
   href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
   <style type="text/css">
-/*<![CDATA[*/
+  /*<![CDATA[*/
      .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
      table { margin-left: auto; margin-right: auto }
      .diagram { text-align: center; margin: 2.5em 0 }
-     body { margin-right: 10% }
-/*]]>*/</style>
+     span.opt { color: grey }
+     span.nterm { font-style:italic }
+     span.term { font-family:courier }
+     span.user { font-family:courier }
+     span.user:before { content:"<" }
+     span.user:after { content:">" }
+     .nonnorm { font-style:italic }
+     p.ed { color: #AA0000 }
+     span.ed { color: #AA0000 }
+     p.ed.priv { display: inline; }
+     span.ed.priv { display: inline; }
+  /*]]>*/</style>
+  <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript"
+  src="http://epics-pvdata.sourceforge.net/script/tocgen.js">
+  </script>
 </head>
 
 <body>
 
 <div class="head">
 <h1>EPICS pvIOCCPP</h1>
-<!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
+<!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount" id="L50">EPICS v4 Working Group, Working Draft,
-02-Feb-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 20-Aug-2012</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
@@ -36,114 +49,74 @@
   <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
 </dl>
-<hr />
 </div>
 
-<h2 class="nocount" id="L72">Abstract</h2>
+<h2 class="nocount">Abstract</h2>
 
 <p>pvIOCCPP is the C++ implementation of pvIOC, which is one of a related set
 of products:</p>
 <dl>
-  <dt><a
-  href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataCPP.html">pvData</a></dt>
-    <dd>pvData (Process Variable Daata) defines and implements an efficent way
+  <dt>pvData</dt>
+    <dd>pvData (Process Variable Data) defines and implements an efficent way
       to store, access, and transmit memory resident structured data</dd>
-  <dt><a
-  href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvAccessCPP/raw-file/tip/documentation/pvAccessCPP.html">pvAccess</a></dt>
+  <dt>pvAccess</dt>
     <dd>pvAccess is network support for transmitting pvData.</dd>
-  <dt><a
-  href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCCPP/raw-file/tip/documentation/pvIOCCPP.html">pvIOC</a></dt>
+  <dt>pvIOC</dt>
     <dd>A pvIOC is a network accessable smart real time database. The database
       consists of memory resident records. Each record has a name that is
-      uniquie within the local area network and contains a top level pvData
+      unique within the local area network and contains a top level pvData
       structure. Each field of a record can optionally have support code
       attached to it. The support is called when a request is made to process
       the record. The support code is what makes the record "smart". A pvAccess
       server is provided so that the records can be accesed via the network.
     </dd>
+  <dt>pvService</dt>
+    <dd>A middle layer for implementing services.</dd>
 </dl>
 
 <p>Each of the products has a Java and a C++ implementation.</p>
-
 <p>The products are all part of the <a
 href="http://epics-pvdata.sourceforge.net/">V4</a> implementation of <a
 href="http://www.aps.anl.gov/epics/">Experimental Physics and Industrial
 Control System.</a></p>
 
-<h2 class="nocount" id="L104">Status of this Document</h2>
+<h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 02-Feb-2012 version of the C++ implementation of pvIOC. Only a
-partial C++ implementation of pvIOC is implemented. This document only
-describes what is implemented. </p>
+<p>This is the 20-Aug-2012 version of the C++ implementation of pvIOC.
+This release implements only the following:</p>
+<dl>
+  <dt>service</dt>
+    <dd>Support for implementing services.</dd>
+  <dt>v3Channel</dt>
+    <dd>This provides pvAccess for V3 records.</dd>
+</dl>
+<p>Read the documentation for pvIOCJava to see what a full implementation
+should provide.</p>
 
-<p>Contents</p>
+<h2 class="nocount">TODO</h2>
 
-<div class="toc">
-<ul>
-  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 02-Feb-2012</a></li>
-  <li><a href="#L72">Abstract</a></li>
-  <li><a href="#L104">Status of this Document</a></li>
-  <li><a href="#L112">Preface</a></li>
-  <li><a href="#L167">exampleServiceRPC</a>
-    <ul>
-      <li><a href="#L185">ServiceRPC</a></li>
-      <li><a href="#L217">exampleServiceRPC</a></li>
-      <li><a href="#L301">exampleClient</a></li>
-    </ul>
-  </li>
-  <li><a href="#L360">service</a>
-    <ul>
-      <li><a href="#L386">channelBaseProvider</a></li>
-      <li><a href="#L428">channelBase</a></li>
-      <li><a href="#L509">pvServiceProvider</a></li>
-    </ul>
-  </li>
-  <li><a href="#L535">V3Channel</a>
-    <ul>
-      <li><a href="#L539">Introduction</a></li>
-      <li><a href="#L549">Remaining tasks</a></li>
-      <li><a href="#L574">Getting started</a></li>
-      <li><a href="#L607">Implementation</a>
-        <ul>
-          <li><a href="#L639">Main Concepts</a></li>
-          <li><a href="#L654">V3Channel</a></li>
-          <li><a href="#L803">V3Util</a></li>
-          <li><a href="#L915">V3Array</a></li>
-          <li><a href="#L956">V3CAMonitor</a></li>
-          <li><a href="#L1103">V3CAContext</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
+<p>The following is a list of unresolved issues for pvDataCPP:</p>
+<dl>
+   <dt>LOTS AND LOTS</dt>
+     <dd>The brief description of a pvIOC given above shows that almost
+     none of the desired features are implemented.</dd>
+</dl>
+  
+
+<div id="toc">
+<h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
 </div>
-<hr />
 
-<h2 style="text-align: center" id="L112">Preface</h2>
-<hr />
+<div id="contents" class="contents">
+<h2>Introduction</h2>
 
 <p>This product is available via an <a
 href="http://epics-pvdata.sourceforge.net/LICENSE.html">open source
 license</a></p>
 
-<p>This document overview for pvIOCDataCPP. Doxygen documentation is available
-at <a href="./html/index.html">doxygenDoc</a></p>
-
-<p><span style="font-weight:bold;">NOTE</span>: service developers only need to
-understand the next section. The remaining sections describe implementation.</p>
-
-<p>pvIOC is one of a set of related projects:</p>
-<dl>
-  <dt>pvData</dt>
-    <dd>Describes and implements structured data.</dd>
-  <dt>pvAccess</dt>
-    <dd>Provides networking for pvData.</dd>
-  <dt>pvIOC</dt>
-    <dd>Provides a database based on pvData together with record processing,
-      record scanning, and extensible support.</dd>
-</dl>
-
-<p>For pvData and pvAccess both Java and C++ implementations are available.</p>
+<p>pvIOCCPP is one of a set of related projects.
+This project uses projects pvDataCPP and pvAccessCPP.
+It is assumed that the reader is familar with these projects.</p>
 
 <p>At the present time the only parts of pvIOCCP that are implemented are:</p>
 <dl>
@@ -158,10 +131,13 @@ project is work in progress.</p>
 
 <p>A complete Java implementation of pvIOC (pvIOCJava) is available but it can not be used
 inside a V3 IOC.</p>
-<hr />
 
-<h2 style="text-align: center" id="L167">exampleServiceRPC</h2>
-<hr />
+<p>Doxygen documentation is available at <a
+href="./html/index.html">doxygenDoc</a></p>
+
+
+<h2>exampleServiceRPC</h2>
+
 
 <p>Currently the only C++ support for services is support for channelRPC, i. e.
 support for services where the client and server communicate via
@@ -182,7 +158,7 @@ the command:</p>
 another window, via the command:</p>
 <pre>    bin/&lt;arch&gt;/exampleClient</pre>
 
-<h3 id="L185">ServiceRPC</h3>
+<h3>ServiceRPC</h3>
 
 <p>The service support is described in service.h</p>
 <pre>class ServiceRPC
@@ -229,7 +205,7 @@ care of all other pvAccess requirements. It has the methods:</p>
     <dd>Can be called to destroy the service.</dd>
 </dl>
 
-<h3 id="L217">exampleServiceRPC</h3>
+<h3>exampleServiceRPC</h3>
 
 <p>The example is in testApp/exampleServiceRPC. </p>
 
@@ -457,7 +433,7 @@ epicsExportRegistrar(startExampleServiceRegister);</pre>
 <p>Again any service can provide similar code. Just change ExampleService to
 something else.</p>
 
-<h3 id="L301">exampleClient</h3>
+<h3>exampleClient</h3>
 
 <p>An example client that calls the exampleServerRPC is also in
 pvIOCCPP/testApp/exampleServiceRPC.</p>
@@ -587,10 +563,10 @@ printf("\nresponse\n%s\n",builder.c_str());
     // can look for other data
     channelRPC-&gt;destroy();
 }</pre>
-<hr />
 
-<h2 style="text-align: center" id="L360">service</h2>
-<hr />
+
+<h2>service</h2>
+
 
 <p>Service provides three classes that can be used by service support:</p>
 <dl>
@@ -615,7 +591,7 @@ channelBase.h. PVServiceProvider is described in pvServiceProvider.h. The
 following provides a brief description. Look at the header files for complete
 details.</p>
 
-<h3 id="L386">channelBaseProvider</h3>
+<h3>channelBaseProvider</h3>
 
 <p>channelBaseProvider takes care of "lifetime" issues. It registers the
 provider, keeps a list of all channels the service provider creates and
@@ -686,7 +662,7 @@ public:
       channelBaseProvider is destroyed.</dd>
 </dl>
 
-<h3 id="L428">channelBase</h3>
+<h3>channelBase</h3>
 
 <p>This implements all the Channel methods. This a service only needs the
 implement the methods it supports. For example a service may only implement
@@ -805,7 +781,7 @@ interfaces. The service may also want to implement the printInfo methods.</p>
     <dd>This is called when a channelArray is destroyed.</dd>
 </dl>
 
-<h3 id="L509">pvServiceProvider</h3>
+<h3>pvServiceProvider</h3>
 
 <p>This is a complete implementation of ChannelProvider. The code that uses it
 must implement interface ServicePVTop. The code must also create a top level
@@ -832,12 +808,12 @@ public:
   <dt>destroy</dt>
     <dd>This is called when the serviceTop itself is being destroyed.</dd>
 </dl>
-<hr />
 
-<h2 style="text-align: center" id="L535">V3Channel</h2>
-<hr />
 
-<h3 id="L539">Introduction</h3>
+<h2>V3Channel</h2>
+
+
+<h3>Introduction</h3>
 
 <p>V3Channel provides access to V3 records. It can be used accesss V3 records
 by other code in the same IOC or by pvAccess network clients via remote
@@ -871,7 +847,7 @@ like:</p>
 <p>The channelName can be either just a record name or a "recordName.XXX" where
 XXX is the V3 field name, e. g. "SCAN".</p>
 
-<h3 id="L549">Remaining tasks</h3>
+<h3>Remaining tasks</h3>
 The main remaining tasks are: 
 <dl>
   <dt>Access Security</dt>
@@ -893,7 +869,7 @@ The main remaining tasks are:
       control should be included.</dd>
 </dl>
 
-<h3 id="L574">Getting started</h3>
+<h3>Getting started</h3>
 
 <p>NOTE: pvIOCCP has a zip file example/example.zip that provides an example
 IOC application that provides V3Channel support. To use it copy and unzip and
@@ -928,7 +904,7 @@ include "pvIOC.dbd"
     </dd>
 </dl>
 
-<h3 id="L607">Implementation</h3>
+<h3>Implementation</h3>
 
 <p>The implementation consists of the following header files:</p>
 <dl>
@@ -958,7 +934,7 @@ remainder of this section gives a brief description of each of these software
 components with an emphasis on how data is converted between pvData and data in
 V3 records.</p>
 
-<h4 id="L639">Main Concepts</h4>
+<h4>Main Concepts</h4>
 
 <p>In epics V3 there are two interfaces for accessing data:</p>
 <dl>
@@ -974,7 +950,7 @@ V3 records.</p>
       effects". For example writing to the SCAN field has side effects.</dd>
 </dl>
 
-<h4 id="L654">V3Channel</h4>
+<h4>V3Channel</h4>
 
 <p>This defines two interfaces:</p>
 <dl>
@@ -1135,7 +1111,7 @@ private:
     <dd>This just prints a short message.</dd>
 </dl>
 
-<h4 id="L803">V3Util</h4>
+<h4>V3Util</h4>
 
 <p>This does most of the work related to transfering data between a PVStructure
 and a V3 record. All methods are static and are called by V3ChannelGet,
@@ -1222,7 +1198,7 @@ public:
     accessed.</dd>
 </dl>
 
-<h4 id="L915">V3Array</h4>
+<h4>V3Array</h4>
 
 <p>This creates special implementations of PVByteArray, ... , PVStringArray
 that access the corresponding array types in the V3 record. Except for
@@ -1266,7 +1242,7 @@ extern V3ValueArrayCreate *getV3ValueArrayCreate();</pre>
       supports.</dd>
 </dl>
 
-<h4 id="L956">V3CAMonitor</h4>
+<h4>V3CAMonitor</h4>
 
 <p>In V3 dbEvent is what implements db_post_event, which is what is called when
 a field value changes in a V3 record. But dbEvent just passes this to V3CA.
@@ -1409,7 +1385,7 @@ private:
       should always return true.</dd>
 </dl>
 
-<h4 id="L1103">V3CAContext</h4>
+<h4>V3CAContext</h4>
 
 <p>CAV3Monitor calls CAV3 in order to monitor changes to the V3 records. In
 order to do this it must call ca_context_create(ca_enable_preemptive_callback).
