@@ -53,7 +53,7 @@ public:
     ChannelBase(
         ChannelProvider::shared_pointer const &channelProvider,
         ChannelRequester::shared_pointer const & requester,
-        epics::pvData::String channelName
+        epics::pvData::String const & channelName
     );
     virtual ~ChannelBase();
     virtual void destroy();
@@ -69,7 +69,7 @@ public:
     virtual bool isConnected();
     virtual void getField(
         GetFieldRequester::shared_pointer const &requester,
-        epics::pvData::String subField);
+        epics::pvData::String const & subField);
     virtual AccessRights getAccessRights(
         epics::pvData::PVField::shared_pointer const &pvField);
     virtual ChannelProcess::shared_pointer createChannelProcess(
@@ -144,16 +144,16 @@ public:
     virtual epics::pvData::String getProviderName();
     virtual void destroy();
     virtual ChannelFind::shared_pointer channelFind(
-        epics::pvData::String channelName,
+        epics::pvData::String const & channelName,
         ChannelFindRequester::shared_pointer const & channelFindRequester) = 0;
     virtual Channel::shared_pointer createChannel(
-        epics::pvData::String channelName,
+        epics::pvData::String const & channelName,
         ChannelRequester::shared_pointer const &requester, short priority);
     virtual Channel::shared_pointer createChannel(
-        epics::pvData::String channelName,
+        epics::pvData::String const & channelName,
         ChannelRequester::shared_pointer  const & channelRequester,
         short priority,
-        epics::pvData::String address) = 0;
+        epics::pvData::String const & address) = 0;
     // following called by derived class
     void channelFound(
         bool found,

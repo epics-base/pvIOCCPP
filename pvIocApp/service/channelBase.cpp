@@ -27,7 +27,7 @@ using std::tr1::dynamic_pointer_cast;
 ChannelBase::ChannelBase(
     ChannelProvider::shared_pointer const & provider,
     ChannelRequester::shared_pointer const & requester,
-    String name)
+    String const & name)
 :   provider(provider),
     requester(requester),
     channelName(name),
@@ -247,7 +247,7 @@ bool ChannelBase::isConnected()
 }
 
 void ChannelBase::getField(GetFieldRequester::shared_pointer const &requester,
-        String subField)
+        String const & subField)
 {
     Status status(Status::STATUSTYPE_ERROR,
         String("client asked for illegal field"));

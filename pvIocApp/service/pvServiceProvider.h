@@ -56,15 +56,15 @@ public:
     virtual ~PVServiceProvider();
     virtual void destroy();
     virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
-        epics::pvData::String channelName,
+        epics::pvData::String const & channelName,
         epics::pvAccess::ChannelFindRequester::shared_pointer const &
             channelFindRequester);
     virtual epics::pvAccess::Channel::shared_pointer createChannel(
-        epics::pvData::String channelName,
+        epics::pvData::String const & channelName,
         epics::pvAccess::ChannelRequester::shared_pointer  const &
              channelRequester,
         short priority,
-        epics::pvData::String address);
+        epics::pvData::String const & address);
     void addRecord(ServicePVTop::shared_pointer const & servicePVTop);
     void removeRecord(ServicePVTop::shared_pointer & servicePVTop);
 private:

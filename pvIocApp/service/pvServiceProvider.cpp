@@ -85,7 +85,7 @@ void PVServiceProvider::destroy()
 }
 
 ChannelFind::shared_pointer PVServiceProvider::channelFind(
-    String name,
+    String const & name,
     ChannelFindRequester::shared_pointer const &channelFindRequester)
 {
     Lock xx(mutex);
@@ -104,9 +104,10 @@ ChannelFind::shared_pointer PVServiceProvider::channelFind(
 }
 
 Channel::shared_pointer PVServiceProvider::createChannel(
-    String channelName,ChannelRequester::shared_pointer  const &channelRequester,
+    String const & channelName,
+    ChannelRequester::shared_pointer const & channelRequester,
     short priority,
-    String address)
+    String const & address)
 {
     Lock xx(mutex);
     ServicePVTopBaseList::iterator iter;

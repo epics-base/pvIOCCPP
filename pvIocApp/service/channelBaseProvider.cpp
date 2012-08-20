@@ -80,7 +80,7 @@ void ChannelBaseProvider::channelFound(
 }
 
 Channel::shared_pointer ChannelBaseProvider::createChannel(
-    String channelName,
+    String const & channelName,
     ChannelRequester::shared_pointer  const &channelRequester,
     short priority)
 {
