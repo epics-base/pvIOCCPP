@@ -1,28 +1,18 @@
 /* pvServiceProvider.h */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
+ */
+/**
+ * @author mrk
  */
 #ifndef PVSERVICEPROVIDER_H
 #define PVSERVICEPROVIDER_H
-#include <string>
-#include <cstring>
-#include <stdexcept>
-#include <memory>
-#include <set>
-
-#include <pv/lock.h>
+#include <pv/channelBase.h>
 #include <pv/thread.h>
 #include <pv/event.h>
-#include <pv/status.h>
-#include <pv/monitor.h>
-#include <pv/pvIntrospect.h>
-#include <pv/pvData.h>
-#include <pv/noDefaultMethods.h>
-#include <pv/pvAccess.h>
 #include <pv/serverContext.h>
-#include <pv/channelBase.h>
 
 namespace epics { namespace pvIOC { 
 
@@ -57,12 +47,10 @@ public:
     virtual void destroy();
     virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
         epics::pvData::String const & channelName,
-        epics::pvAccess::ChannelFindRequester::shared_pointer const &
-            channelFindRequester);
+        epics::pvAccess::ChannelFindRequester::shared_pointer const & channelFindRequester);
     virtual epics::pvAccess::Channel::shared_pointer createChannel(
         epics::pvData::String const & channelName,
-        epics::pvAccess::ChannelRequester::shared_pointer  const &
-             channelRequester,
+        epics::pvAccess::ChannelRequester::shared_pointer  const & channelRequester,
         short priority,
         epics::pvData::String const & address);
     void addRecord(ServicePVTop::shared_pointer const & servicePVTop);

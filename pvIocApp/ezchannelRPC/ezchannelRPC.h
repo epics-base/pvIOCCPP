@@ -1,7 +1,7 @@
 /* ezchannelRPC.h */
 /*
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * This code is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 /* Author Marty Kraimer 2011.12 */
@@ -25,7 +25,6 @@
 
 #include <pv/lock.h>
 #include <pv/event.h>
-
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/pvAccess.h>
@@ -53,13 +52,13 @@ class EZChannelRPC :
 public:
     POINTER_DEFINITIONS(EZChannelRPC);
     /** Constructor
-     * The channelName is the name of the channelRPC server.
+     * @param channelName The name of the channelRPC server.
      */
     EZChannelRPC(
         epics::pvData::String const &channelName);
     /** Constructor
-     * The channelName is the name of the channelRPC server.
-     * pvRequest is a request structure to pass to the server.
+     * @param channelName The name of the channelRPC server.
+     * @param pvRequest A request structure to pass to the server.
      */
     EZChannelRPC(
         epics::pvData::String const &channelName,
@@ -76,7 +75,7 @@ public:
      * Connect to the server.
      * The method blocks until the connection is made or a timeout occurs.
      * It is the same as calling issueConnect and then waitConnect.
-     * @param timeout timeout in seconds to wait.
+     * @param timeout Timeout in seconds to wait.
      * @returns (false,true) If (not connected, is connected).
      * If false then connect must be reissued.
      */
@@ -97,7 +96,8 @@ public:
      * Make a channelRPC request.
      * @param pvArgument The argument to pass to the server.
      * @param lastRequest If true an automatic destroy is made.
-     * @returns the result. If the result is null then getMessage can be called to get the reason.
+     * @returns the result.
+     * If the result is null then getMessage can be called to get the reason.
      */
     epics::pvData::PVStructure::shared_pointer  request(
         epics::pvData::PVStructure::shared_pointer const & pvArgument,
@@ -113,7 +113,8 @@ public:
         bool lastRequest);
     /**
      * Wait for the request to complete.
-     * @returns the result. If the result is null then getMessage can be called to get the reason.
+     * @returns the result.s
+     * If the result is null then getMessage can be called to get the reason.
      */
     epics::pvData::PVStructure::shared_pointer  waitRequest();
     /**
@@ -123,7 +124,7 @@ public:
     epics::pvData::String getMessage();
     // remaining methods are callbacks, i.e. not called by user code
     virtual void channelCreated(
-        const epics::pvData::Status& status,
+        epics::pvData::Status const & status,
         Channel::shared_pointer const & channel);
     virtual void channelStateChange(
         Channel::shared_pointer const & channel,
@@ -133,10 +134,10 @@ public:
         epics::pvData::String const & message,
         epics::pvData::MessageType messageType);
     virtual void channelRPCConnect(
-        const epics::pvData::Status& status,
+        epics::pvData::Status const & status,
         ChannelRPC::shared_pointer const & channelRPC);
     virtual void requestDone(
-        const epics::pvData::Status& status,
+        epics::pvData::Status const & status,
         epics::pvData::PVStructure::shared_pointer const & pvResponse);
 private:
     EZChannelRPC::shared_pointer getPtrSelf()

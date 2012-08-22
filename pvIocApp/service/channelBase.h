@@ -1,8 +1,11 @@
 /* channelBase.h */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
+ */
+/**
+ * @author mrk
  */
 #ifndef CHANNELBASE_H
 #define CHANNELBASE_H
@@ -11,13 +14,10 @@
 #include <stdexcept>
 #include <memory>
 
-#include <pv/lock.h>
-
 #include <pv/status.h>
 #include <pv/monitor.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
-#include <pv/noDefaultMethods.h>
 #include <pv/lock.h>
 #include <pv/pvAccess.h>
 
