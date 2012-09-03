@@ -33,7 +33,7 @@ public:
         epics::pvAccess::ChannelRPCRequester::shared_pointer const & channelRPCRequester,
         epics::pvData::PVStructure::shared_pointer const & pvArgument);
 private:
-    ExampleServiceRPC::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }

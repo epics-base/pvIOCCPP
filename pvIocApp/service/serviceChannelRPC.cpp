@@ -38,7 +38,7 @@ public:
         ChannelProvider::shared_pointer const &provider);
     virtual void destroy();
 private:
-    PVTop::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }
@@ -88,7 +88,7 @@ public:
     virtual void lock();
     virtual void unlock();
 private:
-    ChannelRPCImpl::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }

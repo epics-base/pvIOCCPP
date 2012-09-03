@@ -66,7 +66,7 @@ public:
      */
     virtual void destroy();
 private:
-    ServiceChannelRPC::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }

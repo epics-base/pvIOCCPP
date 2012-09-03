@@ -111,7 +111,7 @@ public:
     void removeChannelRPC(ChannelRPC::shared_pointer const &);
     void removeChannelArray(ChannelArray::shared_pointer const &);
 protected:
-    ChannelBase::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }
@@ -163,7 +163,7 @@ public:
     void channelCreated(ChannelBase::shared_pointer const &channel);
     void removeChannel(ChannelBase::shared_pointer const &channel);
 protected:
-    ChannelBaseProvider::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }

@@ -71,7 +71,7 @@ public:
     virtual ~PVServiceChannelCTX();
     virtual void run();
 private:
-    PVServiceChannelCTX::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }
