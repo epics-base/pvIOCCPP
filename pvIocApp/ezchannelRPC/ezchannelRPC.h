@@ -140,7 +140,7 @@ public:
         epics::pvData::Status const & status,
         epics::pvData::PVStructure::shared_pointer const & pvResponse);
 private:
-    EZChannelRPC::shared_pointer getPtrSelf()
+    shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }

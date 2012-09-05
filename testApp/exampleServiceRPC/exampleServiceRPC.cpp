@@ -120,10 +120,10 @@ void ExampleServiceRPC::request(
     labels[0] = pvPositions->getFieldName();
     labels[1] = pvAlarms->getFieldName();
     pvLabel->put(0,2,labels,0);
-    buffer.clear();
+    buffer.erase();
     pvStructure->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    channelRPCRequester->requestDone(Status::OK,pvStructure);
+    channelRPCRequester->requestDone(Status::Ok,pvStructure);
 }
 
 }}
