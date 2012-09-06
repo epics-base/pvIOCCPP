@@ -40,7 +40,7 @@ static PVServiceChannelCTX *myCTX = 0;
 static const iocshFuncDef startPVServiceChannelFuncDef = {
     "startPVServiceChannel", 0, 0};
 
-static void startPVServiceChannelCallFunc(const iocshArgBuf *args)
+extern "C" void startPVServiceChannel(const iocshArgBuf *args)
 {
     if(myCTX!=0) {
         printf("PVServiceChannel already started\n");
@@ -52,7 +52,7 @@ static void startPVServiceChannelCallFunc(const iocshArgBuf *args)
 static const iocshFuncDef stopPVServiceChannelFuncDef = {
     "stopPVServiceChannel", 0, 0
 };
-static void stopPVServiceChannelCallFunc(const iocshArgBuf *args)
+extern "C" void stopPVServiceChannel(const iocshArgBuf *args)
 {
    printf("stopPVServiceChannel\n");
    if(myCTX!=0) delete myCTX;
@@ -64,7 +64,7 @@ static void startPVServiceChannelRegister(void)
     static int firstTime = 1;
     if (firstTime) {
         firstTime = 0;
-        iocshRegister(&startPVServiceChannelFuncDef, startPVServiceChannelCallFunc);
+        iocshRegister(&startPVServiceChannelFuncDef, startPVServiceChannel);
     }
 }
 
@@ -73,7 +73,7 @@ static void stopPVServiceChannelRegister(void)
     static int firstTime = 1;
     if (firstTime) {
         firstTime = 0;
-        iocshRegister(&stopPVServiceChannelFuncDef, stopPVServiceChannelCallFunc);
+        iocshRegister(&stopPVServiceChannelFuncDef, stopPVServiceChannel);
     }
 }
 

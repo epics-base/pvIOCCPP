@@ -29,7 +29,7 @@ PVServiceChannelCTX::PVServiceChannelCTX()
 :
   event(),
   ctx(ServerContextImpl::create()),
-  thread(new Thread(String("pvServiceChannel"),lowerPriority,this))
+  thread(new Thread(String("pvServiceChannel"),lowerPriority,this,epicsThreadStackBig))
 {}
 
 PVServiceChannelCTX::~PVServiceChannelCTX()
