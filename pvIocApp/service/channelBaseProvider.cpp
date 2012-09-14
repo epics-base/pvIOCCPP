@@ -32,7 +32,6 @@ ChannelBaseProvider::ChannelBaseProvider(
 : providerName(providerName),
   beingDestroyed(false)
 {
-printf("ChannelBaseProvider::ChannelBaseProvider %s\n",providerName.c_str());
 }
 
 void ChannelBaseProvider::init()
@@ -42,12 +41,10 @@ void ChannelBaseProvider::init()
 
 ChannelBaseProvider::~ChannelBaseProvider()
 {
-printf("ChannelBaseProvider::~ChannelBaseProvider\n");
 }
 
 void ChannelBaseProvider::destroy()
 {
-printf("ChannelBaseProvider::destroy\n");
     Lock xx(mutex);
     beingDestroyed = true;
     unregisterChannelProvider(getPtrSelf());
@@ -101,7 +98,6 @@ void ChannelBaseProvider::channelNotCreated(
 
 void ChannelBaseProvider::channelCreated(ChannelBasePtr const &channel)
 {
-printf("ChannelBaseProvider::channelCreated\n");
     Lock xx(mutex);
     channelList.insert(channel);
     channel->getChannelRequester()->channelCreated(Status::Ok,channel);

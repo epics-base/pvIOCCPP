@@ -29,7 +29,6 @@ static ChannelBaseProvider::shared_pointer pvServiceProvider;
 
 static void unregister(void *)
 {
-printf("PVServiceProvider::unregister\n");
      unregisterChannelProvider(pvServiceProvider);
      pvServiceProvider.reset();
 }
@@ -71,9 +70,8 @@ PVServiceProvider::PVServiceProvider()
 
 PVServiceProvider::~PVServiceProvider()
 {
-printf("PVServiceProvider::~PVServiceProvider\n");
-destroy();
-pvServiceProvider.reset();
+    destroy();
+    pvServiceProvider.reset();
 }
 
 void PVServiceProvider::destroy()

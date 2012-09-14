@@ -106,7 +106,6 @@ PVTop::PVTop(String channelName,ServiceRPC::shared_pointer const &serviceRPC)
 
 PVTop::~PVTop()
 {
-printf("PVTop::~PVTop()\n");
 }
 
 String PVTop::getName() {return channelName;}
@@ -121,7 +120,6 @@ ChannelBase::shared_pointer PVTop::createChannel(
 
 void PVTop::destroy()
 {
-printf("void PVTop::destroy()\n");
 }
 
 ChannelImpl::ChannelImpl(
@@ -132,19 +130,16 @@ ChannelImpl::ChannelImpl(
 : ChannelBase(channelProvider,requester,name),
   serviceRPC(serviceRPC)
 {
-printf("ChannelImpl::ChannelImpl()\n");
 }
 
 ChannelImpl::~ChannelImpl()
 {
-printf("ChannelImpl::~ChannelImpl()\n");
 }
 
 epics::pvAccess::ChannelRPC::shared_pointer ChannelImpl::createChannelRPC(
     ChannelRPCRequester::shared_pointer const &channelRPCRequester,
     PVStructure::shared_pointer const &pvRequest)
 {
-printf("ChannelImpl::createChannelRPC\n");
     ChannelRPC *channel = new ChannelRPCImpl(getPtrSelf(),channelRPCRequester,serviceRPC);
     ChannelRPC::shared_pointer channelRPC(channel);
     addChannelRPC(channelRPC);
@@ -163,12 +158,10 @@ ChannelRPCImpl::ChannelRPCImpl(
   channelRPCRequester(channelRPCRequester),
   serviceRPC(serviceRPC)
 {
-printf("ChannelRPCImpl::ChannelRPCImpl\n");
 }
  
 ChannelRPCImpl::~ChannelRPCImpl()
 {
-printf("ChannelRPCImpl::~ChannelRPCImpl()\n");
 }
 
 String ChannelRPCImpl::getRequesterName() 
@@ -182,14 +175,12 @@ void ChannelRPCImpl::message(String message,MessageType messageType)
 }
 
 void ChannelRPCImpl::destroy() {
-printf("ChannelRPC::destroy()\n");
     channel->removeChannelRPC(getPtrSelf());
 }
 
 void ChannelRPCImpl::request(
         PVStructure::shared_pointer const & pvArgument,bool lastRequest)
 {
-printf("ChannelRPCImpl::request\n");
     {
         Lock lock(dataMutex);
         serviceRPC->request(channelRPCRequester,pvArgument);
@@ -222,13 +213,11 @@ ServiceChannelRPC::ServiceChannelRPC(
 
 ServiceChannelRPC::~ServiceChannelRPC()
 {
-printf("ServiceChannelRPC::~ServiceChannelRPC()\n");
     serviceRPC->destroy();
 }
 
 void ServiceChannelRPC::destroy()
 { 
-printf("ServiceChannelRPC::destroy\n");
 }
 
 }}
