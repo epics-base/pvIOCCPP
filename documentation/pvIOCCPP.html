@@ -38,7 +38,7 @@
 <h1>EPICS pvIOCCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 22-Aug-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 18-Sep-2012</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
@@ -83,7 +83,7 @@ Control System.</a></p>
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 22-Aug-2012 version of the C++ implementation of pvIOC. This
+<p>This is the 18-Sep-2012 version of the C++ implementation of pvIOC. This
 release implements only the following:</p>
 <dl>
   <dt>service</dt>
@@ -92,6 +92,13 @@ release implements only the following:</p>
     <dd>Client code that issues a channelRPC request</dd>
   <dt>v3Channel</dt>
     <dd>This provides pvAccess for V3 records.</dd>
+  <dt>channelProviderLocal</dt>
+    <dd>Provides a context for a pvAccess channelProvider named local.</dd>
+  <dt>multiValue</dt>
+    <dd>Support that creates channels for channelProviderLocal.
+     Each channel has a top level Structure that has an alarm and a timeStamp field.
+     If addition the top level structure has a a set of fields where each field is the
+     value field of a channel provided by another provider.</dd>
 </dl>
 
 <p>Read the documentation for pvIOCJava to see what a full implementation
@@ -103,7 +110,7 @@ should provide.</p>
 <dl>
   <dt>LOTS AND LOTS</dt>
     <dd>The brief description of a pvIOC given above shows that almost none of
-      the desired features are implemented.</dd>
+ l     the desired features are implemented.</dd>
   <dt>ezchannelRPC</dt>
     <dd>When pvAccess implements EasyPVA move ezchannelRPC it pvAccess.</dd>
 </dl>
@@ -815,23 +822,23 @@ has the same information. For example if a client asks for a ChannelGet for
 everything for an analog type channel what the client gets is something
 like:</p>
 <pre>record double01
-    double value 2.0
-    structure alarm
-        severity major
-        message LOLO
-    timeStamp 2011-04-13 06:56:06.932
-    structure display
-        string description 
-        string format %f
-        string units Counts
-        structure limit
-            double low 0.0
-            double high 10.0
-    structure control
-        structure limit
-            double low -0.1
-            double high 9.9
-        double minStep 0.0</pre>
+double value 2.0
+structure alarm
+severity major
+message LOLO
+timeStamp 2011-04-13 06:56:06.932
+structure display
+string description 
+string format %f
+string units Counts
+structure limit
+    double low 0.0
+    double high 10.0
+structure control
+structure limit
+    double low -0.1
+    double high 9.9
+double minStep 0.0</pre>
 
 <p>The channelName can be either just a record name or a "recordName.XXX" where
 XXX is the V3 field name, e. g. "SCAN".</p>
@@ -839,23 +846,23 @@ XXX is the V3 field name, e. g. "SCAN".</p>
 <h3>Remaining tasks</h3>
 The main remaining tasks are: 
 <dl>
-  <dt>Access Security</dt>
-    <dd>Since V3Channnel is not using any of the remote part of V3CA, it
-      "sidesteps" access security. The V3 access security system is independent
-      of CAV3 so V3Channel will be able to implement access security without
-      going through V3CA but this has not been done.</dd>
-  <dt>Monitor Algorithm</dt>
-    <dd>pvIOCJava supports an extensible set of monitor algorithms. It provides
-      support for onChange and onPercentChange but allows additional
-      algorithms. This same support will be implemented by pvIOCCP.</dd>
-  <dt>Alarm Limits</dt>
-    <dd>Currently it is not possible to get alarmLimits via V3Channel.</dd>
-  <dt>V3Channel::init</dt>
-    <dd>This creates the introspection interface that is returned by getField.
-      Currently it always has property fields alarm, timeStamp, and display. If
-      the field is not an array it also has a property field control. It might
-      be better to look at the record support entry table to see if display and
-      control should be included.</dd>
+<dt>Access Security</dt>
+<dd>Since V3Channnel is not using any of the remote part of V3CA, it
+"sidesteps" access security. The V3 access security system is independent
+of CAV3 so V3Channel will be able to implement access security without
+going through V3CA but this has not been done.</dd>
+<dt>Monitor Algorithm</dt>
+<dd>pvIOCJava supports an extensible set of monitor algorithms. It provides
+support for onChange and onPercentChange but allows additional
+algorithms. This same support will be implemented by pvIOCCP.</dd>
+<dt>Alarm Limits</dt>
+<dd>Currently it is not possible to get alarmLimits via V3Channel.</dd>
+<dt>V3Channel::init</dt>
+<dd>This creates the introspection interface that is returned by getField.
+Currently it always has property fields alarm, timeStamp, and display. If
+the field is not an array it also has a property field control. It might
+be better to look at the record support entry table to see if display and
+control should be included.</dd>
 </dl>
 
 <h3>Getting started</h3>
@@ -867,50 +874,50 @@ application. Use it to start a V3 IOC for the example.</p>
 build system and is built as an EPICS application. To use V3Channel do the
 following:</p>
 <dl>
-  <dt>Create an epics application</dt>
-    <dd>Look at the example to see how to get started or use MakeBaseApp that
-      comes with EPICS base.</dd>
-  <dt>configure/RELEASE</dt>
-    <dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
-      <pre>PVBASE=/home/mrk/hg
+<dt>Create an epics application</dt>
+<dd>Look at the example to see how to get started or use MakeBaseApp that
+comes with EPICS base.</dd>
+<dt>configure/RELEASE</dt>
+<dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
+<pre>PVBASE=/home/mrk/hg
 PVDATA=${PVBASE}/pvDataCPP
 PVACCESS=${PVBASE}/pvAccessCPP
 PVIOC=${PVBASE}/pvIOCCPP</pre>
-    </dd>
-  <dt>pvIOC.dbd</dt>
-    <dd>In the src directory where your application is being built add an
-      include statement for pvIOC.dbd. For example: 
-      <pre>include "base.dbd"
+</dd>
+<dt>pvIOC.dbd</dt>
+<dd>In the src directory where your application is being built add an
+include statement for pvIOC.dbd. For example: 
+<pre>include "base.dbd"
 include "pvIOC.dbd"</pre>
-    </dd>
-  <dt>st.cmd</dt>
-    <dd>After the iocInit command in the st.cmd file add: 
-      <pre>startPVAccessServer</pre>
-    </dd>
+</dd>
+<dt>st.cmd</dt>
+<dd>After the iocInit command in the st.cmd file add: 
+<pre>startPVAccessServer</pre>
+</dd>
 </dl>
 
 <h3>Implementation</h3>
 
 <p>The implementation consists of the following header files:</p>
 <dl>
-  <dt>v3Channel.h</dt>
-    <dd>The V3Channel interface. It defines extensions for both ChannelProvider
-      and Channel. This is what client code including remote pvAccess sees.</dd>
-  <dt>v3Util.h</dt>
-    <dd>The interace for transfering data between V3 records and pvData, i. e.
-      the code that converts between the V3 data and pvData.</dd>
-  <dt>v3Array.h</dt>
-    <dd>Because arrays are more complex than scalar data they are handled by a
-      separate interface instead of by v3Util itself.</dd>
-  <dt>v3CAMonitor.h</dt>
-    <dd>db_post_event is implement in code (dbEvent) that passes events
-      directly to CAV3. Thus the only way V3Channel can trap monitors is via
-      CAV3. V3Channel only uses CAV3 for scalar numeric data, timeStamp, and
-      alarms. All other monitored data is obtained from the V3 record
-    itself.</dd>
-  <dt>CAV3Context.h</dt>
-    <dd>This is code that interfaces between pvAccess threads and CAV3
-    context.</dd>
+<dt>v3Channel.h</dt>
+<dd>The V3Channel interface. It defines extensions for both ChannelProvider
+and Channel. This is what client code including remote pvAccess sees.</dd>
+<dt>v3Util.h</dt>
+<dd>The interace for transfering data between V3 records and pvData, i. e.
+the code that converts between the V3 data and pvData.</dd>
+<dt>v3Array.h</dt>
+<dd>Because arrays are more complex than scalar data they are handled by a
+separate interface instead of by v3Util itself.</dd>
+<dt>v3CAMonitor.h</dt>
+<dd>db_post_event is implement in code (dbEvent) that passes events
+directly to CAV3. Thus the only way V3Channel can trap monitors is via
+CAV3. V3Channel only uses CAV3 for scalar numeric data, timeStamp, and
+alarms. All other monitored data is obtained from the V3 record
+itself.</dd>
+<dt>CAV3Context.h</dt>
+<dd>This is code that interfaces between pvAccess threads and CAV3
+context.</dd>
 </dl>
 
 <p>Associated with each header file is a corresponding implementation file
@@ -923,183 +930,183 @@ V3 records.</p>
 
 <p>In epics V3 there are two interfaces for accessing data:</p>
 <dl>
-  <dt>db_access</dt>
-    <dd>This defines all the DBR_XXX types and associated C structures as seen
-      by CAV3 clients. V3Channel, with the exception of V3CAMonitor does not
-      use this. Even for monitors only a few of the DBR_XXX types are used.</dd>
-  <dt>dbAccess</dt>
-    <dd>This and some additional interfaces like the RSET (record support entry
-      table) and the DBADDR are what V3Channel uses to get/put data from the V3
-      records. Wherever possible data is accessed via the DBADDR and RSET.
-      pvAccess method pvPutField is used to put data to fields that have "side
-      effects". For example writing to the SCAN field has side effects.</dd>
+<dt>db_access</dt>
+<dd>This defines all the DBR_XXX types and associated C structures as seen
+by CAV3 clients. V3Channel, with the exception of V3CAMonitor does not
+use this. Even for monitors only a few of the DBR_XXX types are used.</dd>
+<dt>dbAccess</dt>
+<dd>This and some additional interfaces like the RSET (record support entry
+table) and the DBADDR are what V3Channel uses to get/put data from the V3
+records. Wherever possible data is accessed via the DBADDR and RSET.
+pvAccess method pvPutField is used to put data to fields that have "side
+effects". For example writing to the SCAN field has side effects.</dd>
 </dl>
 
 <h4>v3Channel.h</h4>
 
 <p>This defines two interfaces:</p>
 <dl>
-  <dt>V3ChannelProvider</dt>
-    <dd>The implementation of ChannelProvider.</dd>
-  <dt>V3Channel</dt>
-    <dd>The implementation of Channel.</dd>
+<dt>V3ChannelProvider</dt>
+<dd>The implementation of ChannelProvider.</dd>
+<dt>V3Channel</dt>
+<dd>The implementation of Channel.</dd>
 </dl>
 
 <p>V3ChannelProvider is defined as:</p>
 <pre>class V3ChannelProvider :
-    public epics::pvAccess::ChannelBaseProvider
+public epics::pvAccess::ChannelBaseProvider
 {
 public:
-    POINTER_DEFINITIONS(V3ChannelProvider);
-    V3ChannelProvider();
-    virtual ~V3ChannelProvider();
-    virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
-        epics::pvData::String const &amp;channelName,
-        epics::pvAccess::ChannelFindRequester::shared_pointer const &amp; channelFindRequester);
-    virtual epics::pvAccess::Channel::shared_pointer createChannel(
-        epics::pvData::String const &amp;channelName,
-        epics::pvAccess::ChannelRequester::shared_pointer  const &amp;channelRequester,
-        short priority,
-        epics::pvData::String const &amp;address);
+POINTER_DEFINITIONS(V3ChannelProvider);
+V3ChannelProvider();
+virtual ~V3ChannelProvider();
+virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
+epics::pvData::String const &amp;channelName,
+epics::pvAccess::ChannelFindRequester::shared_pointer const &amp; channelFindRequester);
+virtual epics::pvAccess::Channel::shared_pointer createChannel(
+epics::pvData::String const &amp;channelName,
+epics::pvAccess::ChannelRequester::shared_pointer  const &amp;channelRequester,
+short priority,
+epics::pvData::String const &amp;address);
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>getChannelProvider</dt>
-    <dd>This returns the single instance od the V3ChannelProvider.</dd>
-  <dt>getProviderName</dt>
-    <dd>This returns "v3Channel"</dd>
-  <dt>channelFind</dt>
-    <dd>Calls dbNameToAddr to see if the requested channelName is in the V3
-      database. If calls channelFindRequester-&gt;channelFindResult to report
-      the result. It always returns null.</dd>
-  <dt>createChannel</dt>
-    <dd>Calls dbNameToAddr to see if the requested channelName is in the V3
-      database. If not it calls
-      channelRequester-&gt;channelCreated(notFoundStatus,0) and returns null.
-      If it is in the V3 database it creates a new V3Channel, calls init, calls
-      channelRequester-&gt;channelCreated(Status::Ok,v3Channel) and returns the
-      newly created V3Channel.</dd>
+<dt>getChannelProvider</dt>
+<dd>This returns the single instance od the V3ChannelProvider.</dd>
+<dt>getProviderName</dt>
+<dd>This returns "v3Channel"</dd>
+<dt>channelFind</dt>
+<dd>Calls dbNameToAddr to see if the requested channelName is in the V3
+database. If calls channelFindRequester-&gt;channelFindResult to report
+the result. It always returns null.</dd>
+<dt>createChannel</dt>
+<dd>Calls dbNameToAddr to see if the requested channelName is in the V3
+database. If not it calls
+channelRequester-&gt;channelCreated(notFoundStatus,0) and returns null.
+If it is in the V3 database it creates a new V3Channel, calls init, calls
+channelRequester-&gt;channelCreated(Status::Ok,v3Channel) and returns the
+newly created V3Channel.</dd>
 </dl>
 
 <p>V3Channel is defined as:</p>
 <pre>class V3Channel :
-  public virtual epics::pvAccess::ChannelBase
+public virtual epics::pvAccess::ChannelBase
 {
 public:
-    POINTER_DEFINITIONS(V3Channel);
-    V3Channel(
-        epics::pvAccess::ChannelBaseProvider::shared_pointer const &amp; channelProvider,
-        epics::pvAccess::ChannelRequester::shared_pointer const &amp; requester,
-        epics::pvData::String const &amp; name,
-        std::auto_ptr&lt;DbAddr&gt; addr
-        );
-    virtual ~V3Channel();
-    void init();
-    virtual void getField(
-        epics::pvAccess::GetFieldRequester::shared_pointer const &amp;requester,
-        epics::pvData::String const &amp;subField);
-    virtual epics::pvAccess::ChannelProcess::shared_pointer createChannelProcess(
-        epics::pvAccess::ChannelProcessRequester::shared_pointer const &amp;channelProcessRequester,
-        epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
-    virtual epics::pvAccess::ChannelGet::shared_pointer createChannelGet(
-        epics::pvAccess::ChannelGetRequester::shared_pointer const &amp;channelGetRequester,
-        epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
-    virtual epics::pvAccess::ChannelPut::shared_pointer createChannelPut(
-        epics::pvAccess::ChannelPutRequester::shared_pointer const &amp;channelPutRequester,
-        epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
-    virtual epics::pvData::Monitor::shared_pointer createMonitor(
-        epics::pvData::MonitorRequester::shared_pointer const &amp;monitorRequester,
-        epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
-    virtual epics::pvAccess::ChannelArray::shared_pointer createChannelArray(
-        epics::pvAccess::ChannelArrayRequester::shared_pointer const &amp;channelArrayRequester,
-        epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
-    virtual void printInfo();
-    virtual void printInfo(epics::pvData::StringBuilder out);
+POINTER_DEFINITIONS(V3Channel);
+V3Channel(
+epics::pvAccess::ChannelBaseProvider::shared_pointer const &amp; channelProvider,
+epics::pvAccess::ChannelRequester::shared_pointer const &amp; requester,
+epics::pvData::String const &amp; name,
+std::auto_ptr&lt;DbAddr&gt; addr
+);
+virtual ~V3Channel();
+void init();
+virtual void getField(
+epics::pvAccess::GetFieldRequester::shared_pointer const &amp;requester,
+epics::pvData::String const &amp;subField);
+virtual epics::pvAccess::ChannelProcess::shared_pointer createChannelProcess(
+epics::pvAccess::ChannelProcessRequester::shared_pointer const &amp;channelProcessRequester,
+epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
+virtual epics::pvAccess::ChannelGet::shared_pointer createChannelGet(
+epics::pvAccess::ChannelGetRequester::shared_pointer const &amp;channelGetRequester,
+epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
+virtual epics::pvAccess::ChannelPut::shared_pointer createChannelPut(
+epics::pvAccess::ChannelPutRequester::shared_pointer const &amp;channelPutRequester,
+epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
+virtual epics::pvData::Monitor::shared_pointer createMonitor(
+epics::pvData::MonitorRequester::shared_pointer const &amp;monitorRequester,
+epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
+virtual epics::pvAccess::ChannelArray::shared_pointer createChannelArray(
+epics::pvAccess::ChannelArrayRequester::shared_pointer const &amp;channelArrayRequester,
+epics::pvData::PVStructure::shared_pointer const &amp;pvRequest);
+virtual void printInfo();
+virtual void printInfo(epics::pvData::StringBuilder out);
 private:
-    std::auto_ptr&lt;DbAddr&gt; dbAddr;
-    epics::pvData::FieldConstPtr recordField;
+std::auto_ptr&lt;DbAddr&gt; dbAddr;
+epics::pvData::FieldConstPtr recordField;
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>V3Channel</dt>
-    <dd>This is the constructor called by V3ChannelProvider.</dd>
-  <dt>init</dt>
-    <dd>This is called by V3ChannelProvider after it has created the V3Channel.
-      It's primary function is to create a FieldConstPtr that provides the
-      introspection interface for the field being accessed. This is what is
-      returned by getField. It is always a structure with a value field that
-      has a type determined by the V3 field being accessed. It always has
-      property fields value, timeStamp, alarm, and display. In addition if the
-      value field is not an array a control property field. <b>NOTE: </b>It might be
-      better to look at the record support entry table to determine what
-      property fields to include.</dd>
-  <dt>destroy</dt>
-    <dd>This is called by whoever accesses the V3Channel. For example remote
-      PVAccess calls this when the client disconnects from the channel.</dd>
-  <dt>getRequesterName</dt>
-    <dd>Get the requester that created the V3Channel.</dd>
-  <dt>message</dt>
-    <dd>This is a method that can be called by any code associated with the
-      V3Channel. It just passes the message to the requester.</dd>
-  <dt>getProvider</dt>
-    <dd>This returns the provider which is V3ChannelProvider.</dd>
-  <dt>getRemoteAddress</dt>
-    <dd>This returns String("local").</dd>
-  <dt>getConnectionStatus</dt>
-    <dd>This returns Channel::CONNECTED;</dd>
-  <dt>getChannelRequester</dt>
-    <dd>This gets the requester that asked to create the channel.</dd>
-  <dt>isConnected</dt>
-    <dd>Always returns true.</dd>
-  <dt>getField</dt>
-    <dd>This returns the introspection interface created by init.</dd>
-  <dt>getAccessRights</dt>
-    <dd>This is currently throws an exception. As stated in the TODO list this
-      should interact with the V3 access security system.</dd>
-  <dt>createChannelProcess</dt>
-    <dd>This creates a V3ChannelProcess and then call V3ChannelProcess::init.
-      Process is implemented via a V3 dbPutNotify to the .PROC field of the
-      record.</dd>
-  <dt>createChannelGet</dt>
-    <dd>This creates a V3ChannelGet and then calls V3ChannelGet::init. The
-      implementation uses V3Util to do most of the work. See V3Util below for
-      details. If an option to process is given then the record is processed
-      via a dbPutNotify to the PROC field before data is fetched. Note that
-      display and control data is only returned for the first get, i.e. display
-      and control data do not change.</dd>
-  <dt>createChannelPut</dt>
-    <dd>This creates a V3ChannelPut and then calls V3ChannelPut::init. The
-      implementation uses V3Util to do most of the work. See V3Util below for
-      details. It is responsible for creating the PVStructure that holds the
-      data and for getting/putting data between the V3 record and the
-      PVStructure. Although properties alarm, timeStamp, control, and display
-      can be requested they can not be modified because V3 does not allow them
-      to be changed by a client. If a V3 dbPut to a field has side effects than
-      a put results in a call to the V3 dbPut. Examples are a put to the SCAN
-      field. It actually changes the scanning mechanism for the record. If a V3
-      dbPut does not have side effects other than causing a record to process a
-      put does NOT result in a call to the V3 dbPut. Instead processing is
-      determined by the pvAccess client. If the client requests processing the
-      normal pvAccess semantics are used, i. e. the record is processed via a
-      dbPutNotify to the PROC field after the data is written into the V3
-      record.</dd>
-  <dt>createChannelPutGet</dt>
-    <dd>This is not implemented since it does not make sense for V3 records.
-    </dd>
-  <dt>createChannelRPC</dt>
-    <dd>This is not implemented since it does not make sense for V3
-    records.</dd>
-  <dt>createMonitor</dt>
-    <dd>This is implemented via a monitior request call to CAV3. See
-      V3CaMonitor below for details.</dd>
-  <dt>createChannelArray</dt>
-    <dd>This creates a V3ChannelArray that implements the normal ChannelArray
-      semantics. It uses DBADDR and the RSET to direcly access the array in the
-      V3 record.</dd>
-  <dt>printInfo</dt>
-    <dd>This just prints a short message.</dd>
+<dt>V3Channel</dt>
+<dd>This is the constructor called by V3ChannelProvider.</dd>
+<dt>init</dt>
+<dd>This is called by V3ChannelProvider after it has created the V3Channel.
+It's primary function is to create a FieldConstPtr that provides the
+introspection interface for the field being accessed. This is what is
+returned by getField. It is always a structure with a value field that
+has a type determined by the V3 field being accessed. It always has
+property fields value, timeStamp, alarm, and display. In addition if the
+value field is not an array a control property field. <b>NOTE: </b>It might be
+better to look at the record support entry table to determine what
+property fields to include.</dd>
+<dt>destroy</dt>
+<dd>This is called by whoever accesses the V3Channel. For example remote
+PVAccess calls this when the client disconnects from the channel.</dd>
+<dt>getRequesterName</dt>
+<dd>Get the requester that created the V3Channel.</dd>
+<dt>message</dt>
+<dd>This is a method that can be called by any code associated with the
+V3Channel. It just passes the message to the requester.</dd>
+<dt>getProvider</dt>
+<dd>This returns the provider which is V3ChannelProvider.</dd>
+<dt>getRemoteAddress</dt>
+<dd>This returns String("local").</dd>
+<dt>getConnectionStatus</dt>
+<dd>This returns Channel::CONNECTED;</dd>
+<dt>getChannelRequester</dt>
+<dd>This gets the requester that asked to create the channel.</dd>
+<dt>isConnected</dt>
+<dd>Always returns true.</dd>
+<dt>getField</dt>
+<dd>This returns the introspection interface created by init.</dd>
+<dt>getAccessRights</dt>
+<dd>This is currently throws an exception. As stated in the TODO list this
+should interact with the V3 access security system.</dd>
+<dt>createChannelProcess</dt>
+<dd>This creates a V3ChannelProcess and then call V3ChannelProcess::init.
+Process is implemented via a V3 dbPutNotify to the .PROC field of the
+record.</dd>
+<dt>createChannelGet</dt>
+<dd>This creates a V3ChannelGet and then calls V3ChannelGet::init. The
+implementation uses V3Util to do most of the work. See V3Util below for
+details. If an option to process is given then the record is processed
+via a dbPutNotify to the PROC field before data is fetched. Note that
+display and control data is only returned for the first get, i.e. display
+and control data do not change.</dd>
+<dt>createChannelPut</dt>
+<dd>This creates a V3ChannelPut and then calls V3ChannelPut::init. The
+implementation uses V3Util to do most of the work. See V3Util below for
+details. It is responsible for creating the PVStructure that holds the
+data and for getting/putting data between the V3 record and the
+PVStructure. Although properties alarm, timeStamp, control, and display
+can be requested they can not be modified because V3 does not allow them
+to be changed by a client. If a V3 dbPut to a field has side effects than
+a put results in a call to the V3 dbPut. Examples are a put to the SCAN
+field. It actually changes the scanning mechanism for the record. If a V3
+dbPut does not have side effects other than causing a record to process a
+put does NOT result in a call to the V3 dbPut. Instead processing is
+determined by the pvAccess client. If the client requests processing the
+normal pvAccess semantics are used, i. e. the record is processed via a
+dbPutNotify to the PROC field after the data is written into the V3
+record.</dd>
+<dt>createChannelPutGet</dt>
+<dd>This is not implemented since it does not make sense for V3 records.
+</dd>
+<dt>createChannelRPC</dt>
+<dd>This is not implemented since it does not make sense for V3
+records.</dd>
+<dt>createMonitor</dt>
+<dd>This is implemented via a monitior request call to CAV3. See
+V3CaMonitor below for details.</dd>
+<dt>createChannelArray</dt>
+<dd>This creates a V3ChannelArray that implements the normal ChannelArray
+semantics. It uses DBADDR and the RSET to direcly access the array in the
+V3 record.</dd>
+<dt>printInfo</dt>
+<dd>This just prints a short message.</dd>
 </dl>
 
 <h4>v3Util.h</h4>
@@ -1111,103 +1118,103 @@ passed to the other methods. The mask bits show a combination of what the
 requester requested and characteristics of the V3 field being accessed. The
 mask has the following bits:</p>
 <dl>
-  <dt>processBit</dt>
-    <dd>The client has requested that the record be processed as part of a
-      ChannelGet::get or a ChannelPut::put.</dd>
-  <dt>shareArrayBit</dt>
-    <dd>The client has specified that array data be shared, e. g. has set
-      record[shareData=true], In this case no copy of the array data is
-      created. Instead data is transfered directly between network buffers and
-      the data array in the V3 record. If this is specified the client must
-      understand that if an array is split between network buffers the array
-      may change between buffers.</dd>
-  <dt>timeStampBit</dt>
-    <dd>The requester has requsted the timeStamp.</dd>
-  <dt>alarmBit</dt>
-    <dd>The requester has requested alarm info.</dd>
-  <dt>displayBit</dt>
-    <dd>The requseter has requested display info.</dd>
-  <dt>controlBit</dt>
-    <dd>The requester has requested control info.</dd>
-  <dt>scalarValueBit</dt>
-    <dd>The V3 field is a scalar.</dd>
-  <dt>arrayValueBit</dt>
-    <dd>The V3 field is an array.</dd>
-  <dt>enumValueBit</dt>
-    <dd>The V3 field is a DBF_ENUM, DBF_MENU, or DBF_DEVICE.</dd>
-  <dt>noAccessBit</dt>
-    <dd>The V3 field is a no access field. The client will not be allowed any
-      access to the field.</dd>
-  <dt>noModBit</dt>
-    <dd>The V3 field is a no mod field. The client will not be allowed to
-      modify the field.</dd>
-  <dt>dbPutBit</dt>
-    <dd>Side effects occur if a dbPut is issued to the field. ChannelPut will
-      issue a dbPutField for such fields instead of directly modifying the
-      field..</dd>
-  <dt>isLinkBit</dt>
-    <dd>Is the field a link field? Link fields require special handling for
-      both get and put.</dd>
+<dt>processBit</dt>
+<dd>The client has requested that the record be processed as part of a
+ChannelGet::get or a ChannelPut::put.</dd>
+<dt>shareArrayBit</dt>
+<dd>The client has specified that array data be shared, e. g. has set
+record[shareData=true], In this case no copy of the array data is
+created. Instead data is transfered directly between network buffers and
+the data array in the V3 record. If this is specified the client must
+understand that if an array is split between network buffers the array
+may change between buffers.</dd>
+<dt>timeStampBit</dt>
+<dd>The requester has requsted the timeStamp.</dd>
+<dt>alarmBit</dt>
+<dd>The requester has requested alarm info.</dd>
+<dt>displayBit</dt>
+<dd>The requseter has requested display info.</dd>
+<dt>controlBit</dt>
+<dd>The requester has requested control info.</dd>
+<dt>scalarValueBit</dt>
+<dd>The V3 field is a scalar.</dd>
+<dt>arrayValueBit</dt>
+<dd>The V3 field is an array.</dd>
+<dt>enumValueBit</dt>
+<dd>The V3 field is a DBF_ENUM, DBF_MENU, or DBF_DEVICE.</dd>
+<dt>noAccessBit</dt>
+<dd>The V3 field is a no access field. The client will not be allowed any
+access to the field.</dd>
+<dt>noModBit</dt>
+<dd>The V3 field is a no mod field. The client will not be allowed to
+modify the field.</dd>
+<dt>dbPutBit</dt>
+<dd>Side effects occur if a dbPut is issued to the field. ChannelPut will
+issue a dbPutField for such fields instead of directly modifying the
+field..</dd>
+<dt>isLinkBit</dt>
+<dd>Is the field a link field? Link fields require special handling for
+both get and put.</dd>
 </dl>
 
 <p>V3Util is defined as:</p>
 <pre>class V3Util {
 public:
-    static int getProperties(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        epics::pvData::PVStructure::shared_pointer const &amp;pvRequest,
-        DbAddr &amp;dbAddr);
-    static epics::pvData::PVStructurePtr createPVStructure(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        int mask,DbAddr &amp;dbAddr);
-    static void getPropertyData(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        int mask,DbAddr &amp;dbAddr,
-        epics::pvData::PVStructurePtr const &amp;pvStructure);
-    static epics::pvData::Status get(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        int mask,DbAddr &amp;dbAddr,
-        epics::pvData::PVStructurePtr const &amp;pvStructure,
-        epics::pvData::BitSet::shared_pointer const &amp;bitSet,
-        CAV3Data *caV3Data);
-    static epics::pvData::Status put(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        int mask,DbAddr &amp;dbAddr,
-        epics::pvData::PVFieldPtr const &amp;pvField);
-    static epics::pvData::Status putField(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        int mask,DbAddr &amp;dbAddr,
-        epics::pvData::PVFieldPtr const &amp;pvField);
-    static epics::pvData::ScalarType getScalarType(
-        epics::pvData::Requester::shared_pointer const &amp;requester,
-        DbAddr &amp;dbAddr);
+static int getProperties(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+epics::pvData::PVStructure::shared_pointer const &amp;pvRequest,
+DbAddr &amp;dbAddr);
+static epics::pvData::PVStructurePtr createPVStructure(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+int mask,DbAddr &amp;dbAddr);
+static void getPropertyData(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+int mask,DbAddr &amp;dbAddr,
+epics::pvData::PVStructurePtr const &amp;pvStructure);
+static epics::pvData::Status get(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+int mask,DbAddr &amp;dbAddr,
+epics::pvData::PVStructurePtr const &amp;pvStructure,
+epics::pvData::BitSet::shared_pointer const &amp;bitSet,
+CAV3Data *caV3Data);
+static epics::pvData::Status put(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+int mask,DbAddr &amp;dbAddr,
+epics::pvData::PVFieldPtr const &amp;pvField);
+static epics::pvData::Status putField(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+int mask,DbAddr &amp;dbAddr,
+epics::pvData::PVFieldPtr const &amp;pvField);
+static epics::pvData::ScalarType getScalarType(
+epics::pvData::Requester::shared_pointer const &amp;requester,
+DbAddr &amp;dbAddr);
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>getProperties</dt>
-    <dd>As mentioned that computes the mask discussed above.</dd>
-  <dt>createPVStructure</dt>
-    <dd>This method creates a PVStructure that holds data that is transfered
-      between pvAccess and the V3 record. It uses a combination of the mask
-      computed by gerProperties and the V3 DbAddr to determine the contents of
-      the PVStructure.</dd>
-  <dt>getPropertyData</dt>
-    <dd>This gets display and control info from the V3 record. Note that this
-      is called only once by V3ChannelGet, V3ChannelPut, and V3ChannelMonitor.
-      This only the first get or monitor will cause the property data to be
-      sent to the client.</dd>
-  <dt>get</dt>
-    <dd>This gets data from the V3 record and puts it into the PVStructure.</dd>
-  <dt>put</dt>
-    <dd>This takes data from the PVStructure and puts it into the V3 record.
-      Only the value field can be changed.</dd>
-  <dt>putField</dt>
-    <dd>This transfers data from the PVfield to the V3 field via a call to
-      dbPutField.</dd>
-  <dt>getScalarType</dt>
-    <dd>This gets the scalar type associated for the V3 field being
-    accessed.</dd>
+<dt>getProperties</dt>
+<dd>As mentioned that computes the mask discussed above.</dd>
+<dt>createPVStructure</dt>
+<dd>This method creates a PVStructure that holds data that is transfered
+between pvAccess and the V3 record. It uses a combination of the mask
+computed by gerProperties and the V3 DbAddr to determine the contents of
+the PVStructure.</dd>
+<dt>getPropertyData</dt>
+<dd>This gets display and control info from the V3 record. Note that this
+is called only once by V3ChannelGet, V3ChannelPut, and V3ChannelMonitor.
+This only the first get or monitor will cause the property data to be
+sent to the client.</dd>
+<dt>get</dt>
+<dd>This gets data from the V3 record and puts it into the PVStructure.</dd>
+<dt>put</dt>
+<dd>This takes data from the PVStructure and puts it into the V3 record.
+Only the value field can be changed.</dd>
+<dt>putField</dt>
+<dd>This transfers data from the PVfield to the V3 field via a call to
+dbPutField.</dd>
+<dt>getScalarType</dt>
+<dd>This gets the scalar type associated for the V3 field being
+accessed.</dd>
 </dl>
 
 <h4>v3Array.h</h4>
@@ -1222,44 +1229,44 @@ deserialize that are not provided by PVDataCreate.</p>
 <p>V3Array is defined as:</p>
 <pre>class V3ValueArrayCreate {
 public:
-    POINTER_DEFINITIONS(V3ValueArrayCreate);
-    epics::pvData::PVByteArrayPtr createByteArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVUByteArrayPtr createUByteArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVShortArrayPtr createShortArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVUShortArrayPtr createUShortArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVIntArrayPtr createIntArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVUIntArrayPtr createUIntArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVFloatArrayPtr createFloatArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    epics::pvData::PVDoubleArrayPtr createDoubleArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr,bool shareData);
-    // Note that V3StringArray can not share
-    epics::pvData::PVStringArrayPtr createStringArray(
-        epics::pvData::PVStructurePtr const &amp; parent,
-        epics::pvData::ScalarArrayConstPtr const &amp; scalar,
-        DbAddr &amp;dbAddr);
+POINTER_DEFINITIONS(V3ValueArrayCreate);
+epics::pvData::PVByteArrayPtr createByteArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVUByteArrayPtr createUByteArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVShortArrayPtr createShortArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVUShortArrayPtr createUShortArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVIntArrayPtr createIntArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVUIntArrayPtr createUIntArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVFloatArrayPtr createFloatArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+epics::pvData::PVDoubleArrayPtr createDoubleArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr,bool shareData);
+// Note that V3StringArray can not share
+epics::pvData::PVStringArrayPtr createStringArray(
+epics::pvData::PVStructurePtr const &amp; parent,
+epics::pvData::ScalarArrayConstPtr const &amp; scalar,
+DbAddr &amp;dbAddr);
 };
 
 typedef std::tr1::shared_ptr&lt;V3ValueArrayCreate&gt; V3ValueArrayCreatePtr;
@@ -1268,23 +1275,23 @@ extern V3ValueArrayCreatePtr getV3ValueArrayCreate();</pre>
 
 <p>where</p>
 <dl>
-  <dt>createByteArray</dt>
-    <dd>Create a PVByteArray attached to a DBF_CHAR or DBF_UCHAR array
-    field.</dd>
-  <dt>createShortArray</dt>
-    <dd>Create a PVShortArray attached to a DBF_SHORT or DBF_USHORT array
-    field.</dd>
-  <dt>createIntArray</dt>
-    <dd>Create a PVIntArray attached to a DBF_LONG or DBF_ULONG array
-    field.</dd>
-  <dt>createFloatArray</dt>
-    <dd>Create a PVFloatArray attached to a DBF_FLOATarray field.</dd>
-  <dt>createDoubleArray</dt>
-    <dd>Create a PVDoubleArray attached to a DBF_DOUBLE array field.</dd>
-  <dt>createStringArray</dt>
-    <dd>Create a PVFloatArray attached to a DBF_STRING array field. Note that
-      it has special semantics to handle the fixed size strings that V3
-      supports.</dd>
+<dt>createByteArray</dt>
+<dd>Create a PVByteArray attached to a DBF_CHAR or DBF_UCHAR array
+field.</dd>
+<dt>createShortArray</dt>
+<dd>Create a PVShortArray attached to a DBF_SHORT or DBF_USHORT array
+field.</dd>
+<dt>createIntArray</dt>
+<dd>Create a PVIntArray attached to a DBF_LONG or DBF_ULONG array
+field.</dd>
+<dt>createFloatArray</dt>
+<dd>Create a PVFloatArray attached to a DBF_FLOATarray field.</dd>
+<dt>createDoubleArray</dt>
+<dd>Create a PVDoubleArray attached to a DBF_DOUBLE array field.</dd>
+<dt>createStringArray</dt>
+<dd>Create a PVFloatArray attached to a DBF_STRING array field. Note that
+it has special semantics to handle the fixed size strings that V3
+supports.</dd>
 </dl>
 
 <h4>v3CAMonitor.h</h4>
@@ -1300,144 +1307,144 @@ callback. </p>
 <p>V3CAMonitor provides an enum that describes the data type of a V3 field as
 seen by pvData.</p>
 <pre>enum V3Type {
-    v3Enum,
-    v3Byte,
-    v3UByte,
-    v3Short,
-    v3UShort,
-    v3Int,
-    v3UInt,
-    v3Float,
-    v3Double,
-    v3String
+v3Enum,
+v3Byte,
+v3UByte,
+v3Short,
+v3UShort,
+v3Int,
+v3UInt,
+v3Float,
+v3Double,
+v3String
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>v3Enum</dt>
-    <dd>A pvData enumerated structure is created for this. The monitor request
-      will be a DBR_TIME_ENUM. For an enum a DBF_ENUM is an index. For pvData
-      it is the index field on an enumerated structure.</dd>
-  <dt>v3Byte</dt>
-    <dd>The monitor request will be a DBR_TIME_CHAR.</dd>
-  <dt>v3Short</dt>
-    <dd>The monitor request will be a DBR_TIME_SHORT.</dd>
-  <dt>v3Int</dt>
-    <dd>The monitor request will be a DBR_TIME_LONG.</dd>
-  <dt>v3Float</dt>
-    <dd>The monitor request will be a DBR_TIME_FLOAT.</dd>
-  <dt>v3Double</dt>
-    <dd>The monitor request will be a DBR_TIME_DOUBLE.</dd>
-  <dt>v3String</dt>
-    <dd>The monitor request will be a DBR_TIME_STRING. Note that for strings
-      data is taken from the record not from CAV3.</dd>
+<dt>v3Enum</dt>
+<dd>A pvData enumerated structure is created for this. The monitor request
+will be a DBR_TIME_ENUM. For an enum a DBF_ENUM is an index. For pvData
+it is the index field on an enumerated structure.</dd>
+<dt>v3Byte</dt>
+<dd>The monitor request will be a DBR_TIME_CHAR.</dd>
+<dt>v3Short</dt>
+<dd>The monitor request will be a DBR_TIME_SHORT.</dd>
+<dt>v3Int</dt>
+<dd>The monitor request will be a DBR_TIME_LONG.</dd>
+<dt>v3Float</dt>
+<dd>The monitor request will be a DBR_TIME_FLOAT.</dd>
+<dt>v3Double</dt>
+<dd>The monitor request will be a DBR_TIME_DOUBLE.</dd>
+<dt>v3String</dt>
+<dd>The monitor request will be a DBR_TIME_STRING. Note that for strings
+data is taken from the record not from CAV3.</dd>
 </dl>
 
 <p>Next a C structure is defined in which data from CAV3 is put. Each time CAV3
 calls the event callback the CAV3 data is copied to this structure.</p>
 <pre>struct CAV3Data {
-    CAV3Data();
-    ~CAV3Data();
-    /* The following have new values after each data event*/
-    union { //only used for scalar values
-        epics::pvData::int8   byteValue;
-        epics::pvData::uint8  ubyteValue;
-        epics::pvData::uint16 ushortValue;
-        epics::pvData::int16  shortValue;
-        epics::pvData::int32  intValue;
-        epics::pvData::uint32 uintValue;
-        float                 floatValue;
-        double                doubleValue;
-    };
-    epicsTimeStamp  timeStamp;
-    int             sevr;
-    int             stat;
-    const char *    status;
+CAV3Data();
+~CAV3Data();
+/* The following have new values after each data event*/
+union { //only used for scalar values
+epics::pvData::int8   byteValue;
+epics::pvData::uint8  ubyteValue;
+epics::pvData::uint16 ushortValue;
+epics::pvData::int16  shortValue;
+epics::pvData::int32  intValue;
+epics::pvData::uint32 uintValue;
+float                 floatValue;
+double                doubleValue;
+};
+epicsTimeStamp  timeStamp;
+int             sevr;
+int             stat;
+const char *    status;
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>union</dt>
-    <dd>This holds a scalar numeric value obtained from CAV3. If the field is
-      an array or a DBF_STRING then the actual data is taken from the record
-      via the DBADDR and RSET.</dd>
-  <dt>timeStamp</dt>
-    <dd>The epics timestamp obtained from CAV3.</dd>
-  <dt>sevr</dt>
-    <dd>The severity obtained from CAV3.</dd>
-  <dt>stat</dt>
-    <dd>The status obtained from CAV3.</dd>
-  <dt>status</dt>
-    <dd>The string value associated with stat. It is taken from
-      epicsAlarmConditionStrings, which is an extrernal that is part of
-      dbAccess.</dd>
+<dt>union</dt>
+<dd>This holds a scalar numeric value obtained from CAV3. If the field is
+an array or a DBF_STRING then the actual data is taken from the record
+via the DBADDR and RSET.</dd>
+<dt>timeStamp</dt>
+<dd>The epics timestamp obtained from CAV3.</dd>
+<dt>sevr</dt>
+<dd>The severity obtained from CAV3.</dd>
+<dt>stat</dt>
+<dd>The status obtained from CAV3.</dd>
+<dt>status</dt>
+<dd>The string value associated with stat. It is taken from
+epicsAlarmConditionStrings, which is an extrernal that is part of
+dbAccess.</dd>
 </dl>
 
 <p>Next is an interface that provides c++ callbacks that can be called by the C
 callbacks that CAV3 calls:</p>
 <pre>class CAV3MonitorRequester : public virtual epics::pvData::Requester {
 public:
-    POINTER_DEFINITIONS(CAV3MonitorRequester);
-    virtual ~CAV3MonitorRequester(){}
-    virtual void exceptionCallback(long status,long op) = 0;
-    virtual void connectionCallback() = 0;
-    virtual void accessRightsCallback() = 0;
-    virtual void eventCallback(const char *status) = 0;
+POINTER_DEFINITIONS(CAV3MonitorRequester);
+virtual ~CAV3MonitorRequester(){}
+virtual void exceptionCallback(long status,long op) = 0;
+virtual void connectionCallback() = 0;
+virtual void accessRightsCallback() = 0;
+virtual void eventCallback(const char *status) = 0;
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>exceptionCallback</dt>
-    <dd>Called when CAV3 calls the exception callback.</dd>
-  <dt>connectionCallback</dt>
-    <dd>Called when CAV3 calls the connection callback.</dd>
-  <dt>accessRightsCallback</dt>
-    <dd>Called when CAV3 calls the access rights callback,</dd>
-  <dt>eventCallback</dt>
-    <dd>Called when CAV3 calls the event callback. The data in CAV3Data is
-      updated before this is called,</dd>
+<dt>exceptionCallback</dt>
+<dd>Called when CAV3 calls the exception callback.</dd>
+<dt>connectionCallback</dt>
+<dd>Called when CAV3 calls the connection callback.</dd>
+<dt>accessRightsCallback</dt>
+<dd>Called when CAV3 calls the access rights callback,</dd>
+<dt>eventCallback</dt>
+<dd>Called when CAV3 calls the event callback. The data in CAV3Data is
+updated before this is called,</dd>
 </dl>
 
 <p>Finally the interface for CAV3Monitor:</p>
 <pre>class CAV3Monitor : private epics::pvData::NoDefaultMethods {
 public:
-    CAV3Monitor(
-        CAV3MonitorRequesterPtr const &amp;requester,
-        epics::pvData::String const &amp;pvName,
-        V3Type v3Type);
-    ~CAV3Monitor();
-    CAV3Data &amp; getData();
-    void connect();
-    void start();
-    void stop();
-    const char * getStatusString(long status);
-    bool hasReadAccess();
-    bool hasWriteAccess();
-    bool isConnected();
+CAV3Monitor(
+CAV3MonitorRequesterPtr const &amp;requester,
+epics::pvData::String const &amp;pvName,
+V3Type v3Type);
+~CAV3Monitor();
+CAV3Data &amp; getData();
+void connect();
+void start();
+void stop();
+const char * getStatusString(long status);
+bool hasReadAccess();
+bool hasWriteAccess();
+bool isConnected();
 private:
-    class CAV3MonitorPvt *pImpl;
+class CAV3MonitorPvt *pImpl;
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>connect</dt>
-    <dd>Ask to connect. This calls ca_create_channel and
-      ca_replace_access_rights_event.</dd>
-  <dt>start</dt>
-    <dd>This calls ca_create_subscription.</dd>
-  <dt>stop</dt>
-    <dd>This calls ca_clear_subscription.</dd>
-  <dt>getStatusString</dt>
-    <dd>This returns ca_message(status),</dd>
-  <dt>hasReadAccess</dt>
-    <dd>This calls ca_read_access. This will always be true because CAV3 treats
-      this a local rather than remote client.</dd>
-  <dt>hasWriteAccess</dt>
-    <dd>This calls ca_write_access. This will always be true because CAV3
-      treats this a local rather than remote client.</dd>
-  <dt>isConnected</dt>
-    <dd>This calls ca_state to determine connection state. If connected this
-      should always return true.</dd>
+<dt>connect</dt>
+<dd>Ask to connect. This calls ca_create_channel and
+ca_replace_access_rights_event.</dd>
+<dt>start</dt>
+<dd>This calls ca_create_subscription.</dd>
+<dt>stop</dt>
+<dd>This calls ca_clear_subscription.</dd>
+<dt>getStatusString</dt>
+<dd>This returns ca_message(status),</dd>
+<dt>hasReadAccess</dt>
+<dd>This calls ca_read_access. This will always be true because CAV3 treats
+this a local rather than remote client.</dd>
+<dt>hasWriteAccess</dt>
+<dd>This calls ca_write_access. This will always be true because CAV3
+treats this a local rather than remote client.</dd>
+<dt>isConnected</dt>
+<dd>This calls ca_state to determine connection state. If connected this
+should always return true.</dd>
 </dl>
 
 <h4>CAV3Context.h</h4>
@@ -1462,59 +1469,125 @@ same context.:q</p>
 <p>V4CAContext is defined as:</p>
 <pre>class CAV3Context {
 public:
-    POINTER_DEFINITIONS(CAV3Context);
-    ~CAV3Context();
-    void release();
-    void stop();
-    void exception(epics::pvData::String const &amp;message);
-    void checkContext();
+POINTER_DEFINITIONS(CAV3Context);
+~CAV3Context();
+void release();
+void stop();
+void exception(epics::pvData::String const &amp;message);
+void checkContext();
 private:
-    std::list&lt;epicsThreadId&gt; auxThreadList ;
-    epics::pvData::Mutex mutex;
-    CAV3Context(
-       epics::pvData::RequesterPtr const &amp; requester);
-    epics::pvData::RequesterPtr requester;
-    epicsThreadId threadId;
-    struct ca_client_context *context;
-    int referenceCount;
-    friend class CAV3ContextCreate;
+std::list&lt;epicsThreadId&gt; auxThreadList ;
+epics::pvData::Mutex mutex;
+CAV3Context(
+epics::pvData::RequesterPtr const &amp; requester);
+epics::pvData::RequesterPtr requester;
+epicsThreadId threadId;
+struct ca_client_context *context;
+int referenceCount;
+friend class CAV3ContextCreate;
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>~CAV3Context</dt>
-    <dd>This does nothing.</dd>
-  <dt>release</dt>
-    <dd>This is called by CAV3Monitor when a monitor is being destroyed.</dd>
-  <dt>stop</dt>
-    <dd>This is called when the thread that created the CAV3Context exits. That
-      is when ca_context_destroy is called.</dd>
-  <dt>exception</dt>
-    <dd>This is called when CAV3 calls the exception callback that V3CAContext
-      registers.</dd>
-  <dt>checkContext</dt>
-    <dd>This is called before any call to CAV3. It checks to see if the calling
-      thread is aleady known to CAV3. If not ca_attach_contex is called.</dd>
+<dt>~CAV3Context</dt>
+<dd>This does nothing.</dd>
+<dt>release</dt>
+<dd>This is called by CAV3Monitor when a monitor is being destroyed.</dd>
+<dt>stop</dt>
+<dd>This is called when the thread that created the CAV3Context exits. That
+is when ca_context_destroy is called.</dd>
+<dt>exception</dt>
+<dd>This is called when CAV3 calls the exception callback that V3CAContext
+registers.</dd>
+<dt>checkContext</dt>
+<dd>This is called before any call to CAV3. It checks to see if the calling
+thread is aleady known to CAV3. If not ca_attach_contex is called.</dd>
 </dl>
 
 <p>There is a separate class for creating a context:</p>
 <pre>class CAV3ContextCreate {
 public:
-    static CAV3ContextPtr get(epics::pvData::RequesterPtr const &amp; requester);
+static CAV3ContextPtr get(epics::pvData::RequesterPtr const &amp; requester);
 private:
-    static void erase(epicsThreadId id);
-    static std::map&lt;epicsThreadId,CAV3ContextPtr&gt; contextMap;
-    static epics::pvData::Mutex mutex;
-    friend class CAV3Context;
+static void erase(epicsThreadId id);
+static std::map&lt;epicsThreadId,CAV3ContextPtr&gt; contextMap;
+static epics::pvData::Mutex mutex;
+friend class CAV3Context;
 };</pre>
 
 <p>where</p>
 <dl>
-  <dt>get</dt>
-    <dd>This checks to see if the thread has already known to CAV3, i. e. if a
-      CAV3Context altready exists for the calling thread. If so it is returned.
-      If not a new CAV3Context is created and returned.</dd>
+<dt>get</dt>
+<dd>This checks to see if the thread has already known to CAV3, i. e. if a
+CAV3Context altready exists for the calling thread. If so it is returned.
+If not a new CAV3Context is created and returned.</dd>
 </dl>
+
+
+<h2>channelProviderLocal</h2>
+<h3>Introduction</h3>
+<h3>Usage</h3>
+<h3>channelProviderLocal.h</h3>
+
+<h2>multiValue</h2>
+<h3>Introduction</h3>
+<p><b>UNDER CONSTRUCTION</b>
+This support is just being developed. The header files and enough code has been created
+so that everything builds and testMultiChannel can be started.
+But nothing happens.</p>
+<p>MultiValue provides support for creating pvAccess channels that are made available via
+channelProviderLocal. Each channel holds data from the value fields of a set of channels provided
+by another channel provider. A primary use is the collect data from a set of V3 records in the
+same IOC.</p>
+<p>Each channel has a top level structure that has an alarm and timeStamp field.
+In addition there is a field for each value field obtained from the other channel provider.</p>
+<p>iocBoot/testMultiValue provides an example of how multiChannel is used.</p>
+<p>The V3 database that is loaded is:</p>
+<pre>
+record(waveform, "quadruple:POLYNOMIAL")
+{...}
+record(ai, "quadruple:Current")
+{...}
+record(ai, "quadruple:BField")
+{...}
+</pre>
+<p>The st.cmd file ends with:</p>
+<pre>
+createMultiValueChannel quadrupole.txt
+</pre>
+<p>The field quadrupole.txt contains:</p>
+<pre>
+channelValueProvider v3Channel
+channelName quadrupole
+channelValue
+    bfield quadrupole:BField
+    current quadrupole:Current
+    conversionPolynomial quadrupole:POLYNOMIAL
+</pre>
+<p>This says to create a pvAccess channel with channelName quadrupole.
+The channel provider for the data fields is v3Channel, i.e. the provider that accesses
+V3 records.</p>
+<p>The command:</p>
+<pre>
+pvget -r "field()" quadrupole
+</pre>
+<p> will return the following structure:</p>
+<pre>
+structure
+   alarm_t alarm
+       ...
+   timeStamp_t timeStamp
+       ...
+   double bfield ...
+   double current ...
+   double[] conversionPolynomial ...
+</pre>
+   
+
+<h3>Usage</h3>
+<h3>createMultiValueChannel.h</h3>
+<h3>multiValueChannel.h</h3>
+<h3>valueChannel.h</h3>
 </div>
 </body>
 </html>

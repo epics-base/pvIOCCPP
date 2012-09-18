@@ -10,24 +10,26 @@ include $(TOP)/configure/CONFIG
 #
 
 
-DBD += testLocalChannelProvider.dbd
+DBD += testMultiValue.dbd
 
+
+#=============================
 # build an ioc application
 
-PROD_IOC += testLocalChannelProvider
+PROD_IOC += testMultiValue
 
 
 # <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
-testLocalChannelProvider_SRCS += testLocalChannelProvider_registerRecordDeviceDriver.cpp
-testLocalChannelProvider_SRCS_DEFAULT += testLocalChannelProviderMain.cpp
-testLocalChannelProvider_SRCS_vxWorks += -nil-
+testMultiValue_SRCS += testMultiValue_registerRecordDeviceDriver.cpp
+testMultiValue_SRCS_DEFAULT += testMultiValueMain.cpp
+testMultiValue_SRCS_vxWorks += -nil-
 
 
 # The following adds support from base/src/vxWorks
-testLocalChannelProvider_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+testMultiValue_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
-testLocalChannelProvider_LIBS += pvIOC pvData pvAccess
-testLocalChannelProvider_LIBS += $(EPICS_BASE_IOC_LIBS)
+testMultiValue_LIBS += pvIOC pvData pvAccess
+testMultiValue_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
