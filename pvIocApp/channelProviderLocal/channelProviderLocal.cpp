@@ -69,11 +69,10 @@ ChannelFind::shared_pointer ChannelProviderLocal::channelFind(
     String const &channelName,
     ChannelFindRequester::shared_pointer const & channelFindRequester)
 {
-printf("ChannelProviderLocal::channelFind\n");
     Lock lock(mutex);
     for(size_t i=0; i<channelNames.size(); i++)
     {
-         if(channelNames[i]==channelName) {
+         if((channelName.compare(channelNames[i])==0)) {
              return channelProviders[i]->channelFind(
                  channelName,channelFindRequester);
          }
@@ -94,7 +93,6 @@ Channel::shared_pointer ChannelProviderLocal::createChannel(
     ChannelRequester::shared_pointer  const &channelRequester,
     short priority)
 {
-printf("ChannelProviderLocal::createChannel\n");
     Lock lock(mutex);
     for(size_t i=0; i<channelNames.size(); i++)
     {
