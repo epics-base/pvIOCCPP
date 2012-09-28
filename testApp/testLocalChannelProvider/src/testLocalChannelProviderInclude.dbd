@@ -1,4 +1,0 @@
-include "base.dbd"
-include "v3Channel.dbd"
-include "channelProviderLocal.dbd"
-#registrar("testV3ChannelRegister")
