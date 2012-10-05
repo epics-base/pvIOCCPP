@@ -26,6 +26,7 @@
 namespace epics { namespace pvAccess { 
 
 class ChannelBaseProvider;
+typedef std::tr1::shared_ptr<ChannelBaseProvider> ChannelBaseProviderPtr;
 
 class ChannelBase;
 class ChannelBaseProcess;
@@ -139,7 +140,6 @@ public:
     ChannelBaseProvider(
         epics::pvData::String const &providerName
     );
-    void init();
     virtual ~ChannelBaseProvider();
     virtual epics::pvData::String getProviderName();
     virtual void destroy();
@@ -162,6 +162,8 @@ public:
         ChannelRequester::shared_pointer const & requester);
     void channelCreated(ChannelBase::shared_pointer const &channel);
     void removeChannel(ChannelBase::shared_pointer const &channel);
+    void unregisterSelf();
+    void registerSelf();
 protected:
     shared_pointer getPtrSelf()
     {
@@ -170,6 +172,7 @@ protected:
 private:
     epics::pvData::String providerName;
     ChannelBaseList channelList;
+    bool isRegistered;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
 };

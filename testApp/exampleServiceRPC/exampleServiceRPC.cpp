@@ -72,12 +72,18 @@ void ExampleServiceRPC::request(
     names.push_back("label");
     names.push_back("position");
     names.push_back("alarms");
+StructureConstPtr xxx = standardField->alarm();
+printf("xxx %p\n",xxx.get());
     fields.push_back(standardField->alarm());
     fields.push_back(standardField->timeStamp());
     fields.push_back(fieldCreate->createScalarArray(pvString));
     fields.push_back(fieldCreate->createScalarArray(pvDouble));
     fields.push_back(fieldCreate->createStructureArray(standardField->alarm()));
     StructureConstPtr structure = fieldCreate->createStructure(names,fields);
+printf("structure %p\n",structure.get());
+buffer.clear();
+structure->toString(&buffer);
+printf("structure\n%s\n",buffer.c_str());
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
     PVTimeStamp pvTimeStamp;
     TimeStamp timeStamp;

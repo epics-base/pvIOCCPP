@@ -16,10 +16,13 @@
 
 namespace epics { namespace pvIOC { 
 
+class PVServiceChannelCTX;
 class PVServiceProvider;
 class ServicePVTop;
 class ServicePVTopBase;
 
+typedef std::tr1::shared_ptr<PVServiceChannelCTX> PVServiceChannelCTXPtr;
+typedef std::tr1::shared_ptr<PVServiceProvider> PVServiceProviderPtr;
 typedef std::tr1::shared_ptr<ServicePVTop> ServicePVTopPtr;
 typedef std::tr1::shared_ptr<ServicePVTopBase> ServicePVTopBasePtr;
 typedef std::set<ServicePVTopBasePtr> ServicePVTopBaseList;
@@ -42,7 +45,7 @@ class PVServiceProvider :
 {
 public:
     POINTER_DEFINITIONS(PVServiceProvider);
-    static epics::pvAccess::ChannelBaseProvider::shared_pointer getPVServiceProvider();
+    static PVServiceProviderPtr getPVServiceProvider();
     virtual ~PVServiceProvider();
     virtual void destroy();
     virtual epics::pvAccess::ChannelFind::shared_pointer channelFind(
@@ -67,15 +70,18 @@ class PVServiceChannelCTX :
 {
 public:
     POINTER_DEFINITIONS(PVServiceChannelCTX);
-    PVServiceChannelCTX();
+    static PVServiceChannelCTXPtr getPVServiceChannelCTX();
+    PVServiceProviderPtr getPVServiceProvider() {return pvServiceProvider;}
     virtual ~PVServiceChannelCTX();
     virtual void run();
 private:
+    PVServiceChannelCTX();
     shared_pointer getPtrSelf()
     {
         return shared_from_this();
     }
     epics::pvData::Event event;
+    PVServiceProviderPtr pvServiceProvider;
     epics::pvAccess::ServerContextImpl::shared_pointer ctx;
     epics::pvData::Thread *thread;
 };

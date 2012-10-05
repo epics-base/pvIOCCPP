@@ -121,7 +121,6 @@ int main(int argc,char *argv[])
     }
     ClientFactory::start();
     exampleClient();
-    ClientFactory::stop();
     return (0);
 }
 

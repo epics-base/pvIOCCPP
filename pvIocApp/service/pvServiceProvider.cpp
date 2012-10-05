@@ -15,7 +15,6 @@
 #include <pv/pvData.h>
 #include <pv/noDefaultMethods.h>
 #include <pv/lock.h>
-#include <epicsExit.h>
 #include <dbAccess.h>
 
 #include <pv/pvServiceProvider.h>
@@ -25,20 +24,6 @@ namespace epics { namespace pvIOC {
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
-static ChannelBaseProvider::shared_pointer pvServiceProvider;
-
-static void unregister(void *)
-{
-     unregisterChannelProvider(pvServiceProvider);
-     pvServiceProvider.reset();
-}
-
-static void initStatic(void *)
-{
-    epicsAtExit(&unregister,0);
-}
-
-static epicsThreadOnceId initOnce = EPICS_THREAD_ONCE_INIT;
 
 class ServicePVTopBase
 {
@@ -49,16 +34,14 @@ public:
     std::set<epics::pvAccess::Channel::shared_pointer> channelList;
 };
 
-ChannelBaseProvider::shared_pointer PVServiceProvider::getPVServiceProvider()
+PVServiceProviderPtr PVServiceProvider::getPVServiceProvider()
 {
+    static PVServiceProviderPtr pvServiceProvider;
     static Mutex mutex;
     Lock xx(mutex);
 
     if(pvServiceProvider.get()==0) {
-        epicsThreadOnce(&initOnce, &initStatic, 0);
-        pvServiceProvider = ChannelBaseProvider::shared_pointer(
-            new PVServiceProvider());
-        pvServiceProvider->init();
+        pvServiceProvider = PVServiceProviderPtr(new PVServiceProvider());
     }
     return pvServiceProvider;
 }
@@ -71,7 +54,6 @@ PVServiceProvider::PVServiceProvider()
 PVServiceProvider::~PVServiceProvider()
 {
     destroy();
-    pvServiceProvider.reset();
 }
 
 void PVServiceProvider::destroy()
@@ -131,7 +113,6 @@ Channel::shared_pointer PVServiceProvider::createChannel(
 void PVServiceProvider::addRecord(
     ServicePVTop::shared_pointer const & servicePVTop)
 {
-//printf("PVServiceProvider::addRecord\n");
     Lock xx(mutex);
     ServicePVTopBasePtr topBase(new ServicePVTopBase(servicePVTop));
     topList.insert(topBase);

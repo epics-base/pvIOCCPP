@@ -35,32 +35,21 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 using namespace epics::pvIOC;
 
-static PVServiceChannelCTX *myCTX = 0;
-
-static const iocshFuncDef startPVServiceChannelFuncDef = {
-    "startPVServiceChannel", 0, 0};
-
 extern "C" void startPVServiceChannel(const iocshArgBuf *args)
 {
-    if(myCTX!=0) {
-        printf("PVServiceChannel already started\n");
-        return;
-    }
-    myCTX = new PVServiceChannelCTX();
+    PVServiceChannelCTXPtr pvServiceChannelCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
+    epicsThreadSleep(.1);
+    pvServiceChannelCTX->getPVServiceProvider()->registerSelf();
 }
-
-static const iocshFuncDef stopPVServiceChannelFuncDef = {
-    "stopPVServiceChannel", 0, 0
-};
 extern "C" void stopPVServiceChannel(const iocshArgBuf *args)
 {
-   printf("stopPVServiceChannel\n");
-   if(myCTX!=0) delete myCTX;
-   myCTX = 0;
+    PVServiceChannelCTXPtr pvServiceChannelCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
+    pvServiceChannelCTX->getPVServiceProvider()->unregisterSelf();
 }
 
 static void startPVServiceChannelRegister(void)
 {
+    static const iocshFuncDef startPVServiceChannelFuncDef = {"startPVServiceChannel", 0, 0};
     static int firstTime = 1;
     if (firstTime) {
         firstTime = 0;
@@ -70,6 +59,8 @@ static void startPVServiceChannelRegister(void)
 
 static void stopPVServiceChannelRegister(void)
 {
+
+    static const iocshFuncDef stopPVServiceChannelFuncDef = { "stopPVServiceChannel", 0, 0 };
     static int firstTime = 1;
     if (firstTime) {
         firstTime = 0;

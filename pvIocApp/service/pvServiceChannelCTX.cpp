@@ -25,9 +25,21 @@ namespace epics { namespace pvIOC {
 using namespace epics::pvData;
 using namespace epics::pvAccess;
 
+PVServiceChannelCTXPtr PVServiceChannelCTX::getPVServiceChannelCTX()
+{
+    static PVServiceChannelCTXPtr pvServiceChannelCTX;
+    static Mutex mutex;
+    Lock xx(mutex);
+
+   if(pvServiceChannelCTX.get()==0) {
+      pvServiceChannelCTX = PVServiceChannelCTXPtr(new PVServiceChannelCTX());
+   }
+   return pvServiceChannelCTX;
+}
+
 PVServiceChannelCTX::PVServiceChannelCTX()
 :
-  event(),
+  pvServiceProvider(PVServiceProvider::getPVServiceProvider()),
   ctx(ServerContextImpl::create()),
   thread(new Thread(String("pvServiceChannel"),lowerPriority,this,epicsThreadStackBig))
 {}
@@ -42,10 +54,9 @@ PVServiceChannelCTX::~PVServiceChannelCTX()
 }
 void PVServiceChannelCTX::run()
 {
-    ChannelProvider::shared_pointer channelProvider(
-        PVServiceProvider::getPVServiceProvider());
-    registerChannelProvider(channelProvider);
-    ctx->setChannelProviderName(channelProvider->getProviderName());
+    pvServiceProvider->registerSelf();
+    String providerName = pvServiceProvider->getProviderName();
+    ctx->setChannelProviderName(providerName);
     ctx->initialize(getChannelAccess());
     ctx->printInfo();
     ctx->run(0);

@@ -40,8 +40,7 @@ using namespace epics::pvIOC;
 
 void example()
 {
-    PVServiceChannelCTX::shared_pointer myCTX
-        = PVServiceChannelCTX::shared_pointer(new PVServiceChannelCTX());
+    PVServiceChannelCTX::shared_pointer myCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
     ExampleServiceRPC::shared_pointer example
         = ExampleServiceRPC::shared_pointer(new ExampleServiceRPC());
     ServiceChannelRPC::shared_pointer serviceChannelRPC
