@@ -653,7 +653,8 @@ public:
     int getProperties(
         gRequester::shared_pointer const &amp;requester,
         gPVStructure::shared_pointer const &amp;pvRequest,
-        DbAddr &amp;dbAddr);
+        DbAddr &amp;dbAddr,
+        bool processDefault);
     gPVStructurePtr createPVStructure(
         gRequester::shared_pointer const &amp;requester,
         int mask,DbAddr &amp;dbAddr);
