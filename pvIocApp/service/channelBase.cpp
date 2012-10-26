@@ -22,10 +22,11 @@
 #include <pv/channelBase.h>
 
 namespace epics { namespace pvAccess { 
-
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 using std::tr1::dynamic_pointer_cast;
+
+static bool debug = true;
 
 ChannelBase::ChannelBase(
     ChannelProvider::shared_pointer const & provider,
@@ -34,77 +35,74 @@ ChannelBase::ChannelBase(
 :   provider(provider),
     requester(requester),
     channelName(name),
-    channelProcessList(),
-    channelGetList(),
-    channelPutList(),
-    channelPutGetList(),
-    channelMonitorList(),
-    channelRPCList(),
-    channelArrayList(),
     beingDestroyed(false)
 {
-//printf("ChannelBase::ChannelBase\n");
+    if(debug) printf("ChannelBase::ChannelBase\n");
 }
 
 ChannelBase::~ChannelBase()
 {
-//printf("ChannelBase::~ChannelBase\n");
+    if(debug) printf("ChannelBase::~ChannelBase\n");
 }
 
 void ChannelBase::destroy()
 {
-//printf("ChannelBase::destroy\n");
+    if(debug) printf("ChannelBase::destroy beingDestroyed %s\n",
+         (beingDestroyed ? "true" : "false"));
     {
         Lock xx(mutex);
+        if(beingDestroyed) return;
         beingDestroyed = true;
     }
-    /*
-    // NOTE: std::set will automatically release shared pointer
-    // but it will not call destroy()... however, now destroy only calls remove from the list
-    // so, do we need to call destroy here?
     while(true) {
-        ChannelProcessListNode *node = channelProcessList.getHead();
-        if(node==0) break;
-        ChannelProcess::shared_pointer &channelProcess = node->getObject();
-        channelProcess->destroy();
+        std::set<ChannelProcess::shared_pointer>::iterator it;
+        it = channelProcessList.begin();
+        if(it==channelProcessList.end()) break;
+        it->get()->destroy();
+        channelProcessList.erase(it);
     }
     while(true) {
-        ChannelGetListNode *node = channelGetList.getHead();
-        if(node==0) break;
-        ChannelGet::shared_pointer &channelGet = node->getObject();
-        channelGet->destroy();
+        std::set<ChannelGet::shared_pointer>::iterator it;
+        it = channelGetList.begin();
+        if(it==channelGetList.end()) break;
+        it->get()->destroy();
+        channelGetList.erase(it);
     }
     while(true) {
-        ChannelPutListNode *node = channelPutList.getHead();
-        if(node==0) break;
-        ChannelPut::shared_pointer &channelPut = node->getObject();
-        channelPut->destroy();
+        std::set<ChannelPut::shared_pointer>::iterator it;
+        it = channelPutList.begin();
+        if(it==channelPutList.end()) break;
+        it->get()->destroy();
+        channelPutList.erase(it);
     }
     while(true) {
-        ChannelPutGetListNode *node = channelPutGetList.getHead();
-        if(node==0) break;
-        ChannelPutGet::shared_pointer &channelPutGet = node->getObject();
-        channelPutGet->destroy();
+        std::set<ChannelPutGet::shared_pointer>::iterator it;
+        it = channelPutGetList.begin();
+        if(it==channelPutGetList.end()) break;
+        it->get()->destroy();
+        channelPutGetList.erase(it);
     }
     while(true) {
-        ChannelMonitorListNode *node = channelMonitorList.getHead();
-        if(node==0) break;
-        Monitor::shared_pointer &channelMonitor = node->getObject();
-        channelMonitor->destroy();
+        std::set<Monitor::shared_pointer>::iterator it;
+        it = channelMonitorList.begin();
+        if(it==channelMonitorList.end()) break;
+        it->get()->destroy();
+        channelMonitorList.erase(it);
     }
     while(true) {
-        ChannelRPCListNode *node = channelRPCList.getHead();
-        if(node==0) break;
-        ChannelRPC::shared_pointer &channelRPC = node->getObject();
-        channelRPC->destroy();
+        std::set<ChannelRPC::shared_pointer>::iterator it;
+        it = channelRPCList.begin();
+        if(it==channelRPCList.end()) break;
+        it->get()->destroy();
+        channelRPCList.erase(it);
     }
     while(true) {
-        ChannelArrayListNode *node = channelArrayList.getHead();
-        if(node==0) break;
-        ChannelArray::shared_pointer &channelArray = node->getObject();
-        channelArray->destroy();
+        std::set<ChannelArray::shared_pointer>::iterator it;
+        it = channelArrayList.begin();
+        if(it==channelArrayList.end()) break;
+        it->get()->destroy();
+        channelArrayList.erase(it);
     }
-    */
     std::tr1::static_pointer_cast<ChannelBaseProvider>(provider)->removeChannel(getPtrSelf());
 }
 
@@ -139,6 +137,7 @@ void ChannelBase::addChannelPutGet(ChannelPutGet::shared_pointer const &channelP
 
 void ChannelBase::addChannelMonitor(Monitor::shared_pointer const &monitor)
 {
+    if(debug) printf("ChannelBase::addChannelMonitor\n");
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelMonitorList.insert(monitor);
@@ -188,6 +187,7 @@ void ChannelBase::removeChannelPutGet(ChannelPutGet::shared_pointer const &ref)
 
 void ChannelBase::removeChannelMonitor(Monitor::shared_pointer const &ref)
 {
+    if(debug) printf("ChannelBase::removeChannelMonitor\n");
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelMonitorList.erase(ref);
