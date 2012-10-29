@@ -25,6 +25,12 @@
 
 namespace epics { namespace pvAccess { 
 
+class ChannelBaseDebug {
+public:
+    static void setLevel(int level);
+    static int getLevel();
+};
+
 class ChannelBaseProvider;
 typedef std::tr1::shared_ptr<ChannelBaseProvider> ChannelBaseProviderPtr;
 

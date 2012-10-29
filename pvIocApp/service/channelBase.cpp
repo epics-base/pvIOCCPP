@@ -26,7 +26,9 @@ using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 using std::tr1::dynamic_pointer_cast;
 
-static bool debug = true;
+int ChannelBaseDebugLevel = 0;
+void ChannelBaseDebug::setLevel(int level) {ChannelBaseDebugLevel = level;}
+int ChannelBaseDebug::getLevel() {return ChannelBaseDebugLevel;}
 
 ChannelBase::ChannelBase(
     ChannelProvider::shared_pointer const & provider,
@@ -37,18 +39,24 @@ ChannelBase::ChannelBase(
     channelName(name),
     beingDestroyed(false)
 {
-    if(debug) printf("ChannelBase::ChannelBase\n");
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::ChannelBase\n");
+    }
 }
 
 ChannelBase::~ChannelBase()
 {
-    if(debug) printf("ChannelBase::~ChannelBase\n");
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::~ChannelBase\n");
+    }
 }
 
 void ChannelBase::destroy()
 {
-    if(debug) printf("ChannelBase::destroy beingDestroyed %s\n",
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::destroy beingDestroyed %s\n",
          (beingDestroyed ? "true" : "false"));
+    }
     {
         Lock xx(mutex);
         if(beingDestroyed) return;
@@ -109,6 +117,9 @@ void ChannelBase::destroy()
 
 void ChannelBase::addChannelProcess(ChannelProcess::shared_pointer const & channelProcess)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelProcess\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelProcessList.insert(channelProcess);
@@ -116,6 +127,9 @@ void ChannelBase::addChannelProcess(ChannelProcess::shared_pointer const & chann
 
 void ChannelBase::addChannelGet(ChannelGet::shared_pointer const &channelGet)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelGet\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelGetList.insert(channelGet);
@@ -123,6 +137,9 @@ void ChannelBase::addChannelGet(ChannelGet::shared_pointer const &channelGet)
 
 void ChannelBase::addChannelPut(ChannelPut::shared_pointer const &channelPut)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelPut\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelPutList.insert(channelPut);
@@ -130,6 +147,9 @@ void ChannelBase::addChannelPut(ChannelPut::shared_pointer const &channelPut)
 
 void ChannelBase::addChannelPutGet(ChannelPutGet::shared_pointer const &channelPutGet)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelPutGet\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelPutGetList.insert(channelPutGet);
@@ -137,7 +157,9 @@ void ChannelBase::addChannelPutGet(ChannelPutGet::shared_pointer const &channelP
 
 void ChannelBase::addChannelMonitor(Monitor::shared_pointer const &monitor)
 {
-    if(debug) printf("ChannelBase::addChannelMonitor\n");
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelMonitor\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelMonitorList.insert(monitor);
@@ -145,6 +167,9 @@ void ChannelBase::addChannelMonitor(Monitor::shared_pointer const &monitor)
 
 void ChannelBase::addChannelRPC(ChannelRPC::shared_pointer const &channelRPC)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelRPC\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelRPCList.insert(channelRPC);
@@ -152,6 +177,9 @@ void ChannelBase::addChannelRPC(ChannelRPC::shared_pointer const &channelRPC)
 
 void ChannelBase::addChannelArray(ChannelArray::shared_pointer const &channelArray)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::addChannelArray\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelArrayList.insert(channelArray);
@@ -159,6 +187,9 @@ void ChannelBase::addChannelArray(ChannelArray::shared_pointer const &channelArr
 
 void ChannelBase::removeChannelProcess(ChannelProcess::shared_pointer const &ref)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelProcess\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelProcessList.erase(ref);
@@ -166,6 +197,9 @@ void ChannelBase::removeChannelProcess(ChannelProcess::shared_pointer const &ref
 
 void ChannelBase::removeChannelGet(ChannelGet::shared_pointer const &ref)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelGet\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelGetList.erase(ref);
@@ -173,6 +207,9 @@ void ChannelBase::removeChannelGet(ChannelGet::shared_pointer const &ref)
 
 void ChannelBase::removeChannelPut(ChannelPut::shared_pointer const &ref)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelPut\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelPutList.erase(ref);
@@ -180,6 +217,9 @@ void ChannelBase::removeChannelPut(ChannelPut::shared_pointer const &ref)
 
 void ChannelBase::removeChannelPutGet(ChannelPutGet::shared_pointer const &ref)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelPutGet\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelPutGetList.erase(ref);
@@ -187,7 +227,9 @@ void ChannelBase::removeChannelPutGet(ChannelPutGet::shared_pointer const &ref)
 
 void ChannelBase::removeChannelMonitor(Monitor::shared_pointer const &ref)
 {
-    if(debug) printf("ChannelBase::removeChannelMonitor\n");
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelMonitor\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelMonitorList.erase(ref);
@@ -195,6 +237,9 @@ void ChannelBase::removeChannelMonitor(Monitor::shared_pointer const &ref)
 
 void ChannelBase::removeChannelRPC(ChannelRPC::shared_pointer const &ref)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelRPC\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelRPCList.erase(ref);
@@ -202,6 +247,9 @@ void ChannelBase::removeChannelRPC(ChannelRPC::shared_pointer const &ref)
 
 void ChannelBase::removeChannelArray(ChannelArray::shared_pointer const &ref)
 {
+    if(ChannelBaseDebug::getLevel()>0) {
+         printf("ChannelBase::removeChannelArray\n");
+    }
     Lock xx(mutex);
     if(beingDestroyed) return;
     channelArrayList.erase(ref);

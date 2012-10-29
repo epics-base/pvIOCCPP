@@ -35,6 +35,18 @@ using namespace epics::pvData;
 using namespace epics::pvAccess;
 using namespace epics::pvIOC;
 
+static const iocshArg setChannelBaseDebugLevelArg0 = { "level",iocshArgInt};
+static const iocshArg *setChannelBaseDebugLevelArgs[] =
+     {&setChannelBaseDebugLevelArg0};
+static const iocshFuncDef setChannelBaseDebugLevelFuncDef = {
+    "setChannelBaseDebugLevel", 1, setChannelBaseDebugLevelArgs };
+extern "C" void setChannelBaseDebugLevel(const iocshArgBuf *args)
+{
+    int level = args[0].ival;
+    ChannelBaseDebug::setLevel(level);
+    printf("new level %d\n",level);
+}
+
 extern "C" void startPVServiceChannel(const iocshArgBuf *args)
 {
     PVServiceChannelCTXPtr pvServiceChannelCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
@@ -45,6 +57,15 @@ extern "C" void stopPVServiceChannel(const iocshArgBuf *args)
 {
     PVServiceChannelCTXPtr pvServiceChannelCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
     pvServiceChannelCTX->getPVServiceProvider()->unregisterSelf();
+}
+
+static void setChannelBaseDebugLevelRegister(void)
+{
+    static int firstTime = 1;
+    if (firstTime) {
+        firstTime = 0;
+        iocshRegister(&setChannelBaseDebugLevelFuncDef, setChannelBaseDebugLevel);
+    }
 }
 
 static void startPVServiceChannelRegister(void)
@@ -68,5 +89,6 @@ static void stopPVServiceChannelRegister(void)
     }
 }
 
+epicsExportRegistrar(setChannelBaseDebugLevelRegister);
 epicsExportRegistrar(startPVServiceChannelRegister);
 epicsExportRegistrar(stopPVServiceChannelRegister);
