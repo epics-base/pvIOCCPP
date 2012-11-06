@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <memory>
 
-#include <channelProviderLocal.h>
+#include <pv/channelProviderLocal.h>
 
 
 namespace epics { namespace pvIOC { 

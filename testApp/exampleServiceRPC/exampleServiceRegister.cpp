@@ -30,7 +30,7 @@
 #include <pv/pvAccess.h>
 #include <pv/serverContext.h>
 
-#include <exampleServiceRPC.h>
+#include "exampleServiceRPC.h"
 
 using namespace epics::pvData;
 using namespace epics::pvAccess;

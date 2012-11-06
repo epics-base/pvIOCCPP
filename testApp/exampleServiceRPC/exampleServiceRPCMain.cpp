@@ -31,7 +31,7 @@
 #include <pv/serverContext.h>
 
 #include <pv/pvServiceProvider.h>
-#include <exampleServiceRPC.h>
+#include "exampleServiceRPC.h"
 
 using namespace std;
 using namespace epics::pvData;

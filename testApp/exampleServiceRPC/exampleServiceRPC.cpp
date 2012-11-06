@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <memory>
 
-#include <exampleServiceRPC.h>
+#include "exampleServiceRPC.h"
 
 
 namespace epics { namespace pvIOC { 
