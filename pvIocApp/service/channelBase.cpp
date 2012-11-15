@@ -267,7 +267,7 @@ void ChannelBase::message(
     requester->message(message,messageType);
 }
 
-ChannelProvider::shared_pointer const & ChannelBase::getProvider()
+ChannelProvider::shared_pointer ChannelBase::getProvider()
 {
     return provider;
 }
@@ -287,7 +287,7 @@ String ChannelBase::getChannelName()
     return channelName;
 }
 
-ChannelRequester::shared_pointer const & ChannelBase::getChannelRequester()
+ChannelRequester::shared_pointer ChannelBase::getChannelRequester()
 {
     return requester;
 }

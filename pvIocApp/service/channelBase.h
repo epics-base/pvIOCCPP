@@ -68,11 +68,11 @@ public:
     virtual void message(
         epics::pvData::String const & message,
         epics::pvData::MessageType messageType);
-    virtual ChannelProvider::shared_pointer const & getProvider();
+    virtual ChannelProvider::shared_pointer getProvider();
     virtual epics::pvData::String getRemoteAddress();
     virtual Channel::ConnectionState getConnectionState();
     virtual epics::pvData::String getChannelName();
-    virtual ChannelRequester::shared_pointer const & getChannelRequester();
+    virtual ChannelRequester::shared_pointer getChannelRequester();
     virtual bool isConnected();
     virtual void getField(
         GetFieldRequester::shared_pointer const &requester,
