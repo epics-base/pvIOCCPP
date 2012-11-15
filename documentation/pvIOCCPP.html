@@ -1915,11 +1915,11 @@ public:
     virtual void message(
         String const &amp; message,
         MessageType messageType);
-    virtual ChannelProvider::shared_pointer const &amp; getProvider();
+    virtual ChannelProvider::shared_pointer getProvider();
     virtual String getRemoteAddress();
     virtual Channel::ConnectionState getConnectionState();
     virtual String getChannelName();
-    virtual ChannelRequester::shared_pointer const &amp; getChannelRequester();
+    virtual ChannelRequester::shared_pointer getChannelRequester();
     virtual bool isConnected();
     virtual void getField(
         GetFieldRequester::shared_pointer const &amp;requester,
