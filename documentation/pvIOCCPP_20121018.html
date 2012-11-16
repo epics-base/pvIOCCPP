@@ -38,7 +38,7 @@
 <h1>EPICS pvIOCCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 16-Nov-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 18-Oct-2012</h2>
 <dl>
     <dt>Latest version:</dt>
     <dd><a
@@ -46,11 +46,11 @@
     </dd>
     <dt>This version:</dt>
     <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCCPP/raw-file/tip/documentation/pvIOCCPP_20121116.html">pvIOCCPP_20121116.html</a>
+      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCCPP/raw-file/tip/documentation/pvIOCCPP_20121018.html">pvIOCCPP_20121018.html</a>
     </dd>
     <dt>Previous version:</dt>
     <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCCPP/raw-file/tip/documentation/pvIOCCPP_20121018.html">pvIOCCPP_20121018.html</a>
+      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCCPP/raw-file/tip/documentation/pvIOCCPP_20120927.html">pvIOCCPP_20120927.html</a>
     </dd>
   <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
@@ -96,7 +96,7 @@ Control System (EPICS).</a></p>
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 16-Nov-2012 version of the C++ implementation of pvIOC. This
+<p>This is the 18-Oct-2012 version of the C++ implementation of pvIOC. This
 release implements only the following:</p>
 <dl>
   <dt>v3Channel</dt>
@@ -145,10 +145,7 @@ projects.</p>
 <p>At the present time the only parts of pvIOCCP that are implemented are:</p>
 <dl>
   <dt>v3Channel</dt>
-    <dd>This provides pvAccess for V3 records.
-      For now this is the most important feature provided by this project
-      so it will be the first topic discussed.
-    </dd>
+    <dd>This provides pvAccess for V3 records.</dd>
   <dt>channelProviderLocal</dt>
     <dd>This implements a channel provider named "local".
      It interfaces with pvAccess and allows code that implements channel
@@ -172,200 +169,6 @@ not be used inside a V3 IOC.</p>
 
 <p>Doxygen documentation is available at <a
 href="./html/index.html">doxygenDoc</a></p>
-
-<h2>V3Channel User's Guide</h2>
-
-<h3>Introduction</h3>
-
-<p>V3Channel provides access to V3 records.
-It can be used by other code in the same IOC
-or by pvAccess network clients via remote pvAccess.
-It implements channelProcess, channelGet, channelPut, channelArray,
-and Monitor. It does not implement channelPutGet or channelRPC since, at least
-for now, these do not apply to V3 records.</p>
-<p>It also provides the ability to get and put a set of V3 records.
-Only data from field VAL is allowed and all the V3 records must have the
-same scalar numeric type. The data appears as a scalarArray.
-The records can be processed.
-If all V3 records are in the same lockSet then each get or put is an atomic
-operation, i. e. dbScanLock is called only once.
-If the records are not in the same lockSet each record is individually locked.
-</p>
-<h3>Accessing a single V3Record</h3>
-<p>Because V3 records have a flat record structure the top level
-structure the pvAccess client sees also has a "flat" structure.
-The exception is that alarm, timeStamp, display, control, and valueAlarm
-appear as the pvData property structures.
-For example an ai record will appear as:</p>
-<pre>
-mrk&gt; pvget -r "field()" double01
-double01
-uri:ev4:nt/2012/pwd:NTScalar 
-    double value 0
-    alarm_t alarm
-        int severity 3
-        int status 0
-        string message UDF
-    time_t timeStamp
-        long secondsPastEpoch 631152000
-        int nanoSeconds 0
-        int userTag 0
-    display_t display
-        double limitLow 0
-        double limitHigh 10
-        string description 
-        string format %f
-        string units Counts
-    control_t control
-        double limitLow -0.1
-        double limitHigh 9.9
-        double minStep 0
-    valueAlarm_t valueAlarm
-        boolean active false
-        double lowAlarmLimit 2
-        double lowWarningLimit 4
-        double highWarningLimit 6
-        double highAlarmLimit 8
-        int lowAlarmSeverity 0
-        int lowWarningSeverity 0
-        int highWarningSeverity 0
-        int highAlarmSeverity 0
-        double hystersis 0
-mrk&gt; 
-</pre>
-
-
-<p>The basic idea is to map what V3 records provide into a PVStruructure that
-has the same information. For example if a client makes the following request:</p>
-<pre>
-pvget -r "field()" quadruple:BField
-</pre>
-<p>The result is:</p>
-<pre>
-scalar_t 
-    double value 0
-    alarm_t alarm
-        int severity 3
-        int status 0
-        string message UDF
-    timeStamp_t timeStamp
-        long secondsPastEpoch 631152000
-        int nanoSeconds 0
-        int userTag 0
-    display_t display
-        double limitLow 0
-        double limitHigh 10
-        string description 
-        string format %f
-        string units tesla
-    control_t control
-        double limitLow 0
-        double limitHigh 10
-        double minStep 0
-    valueAlarm_t valueAlarm
-        boolean active false
-        double lowAlarmLimit 2
-        double lowWarningLimit 4
-        double highWarningLimit 6
-        double highAlarmLimit 8
-        int lowAlarmSeverity 0
-        int lowWarningSeverity 0
-        int highWarningSeverity 0
-        int highAlarmSeverity 0
-        double hystersis 0
-</pre>
-
-<p>The channelName can be either just a record name or a "recordName.XXX" where
-XXX is the V3 field name, e. g. "SCAN".</p>
-
-<h3>Accessing Multiple V3Records</h3>
-<p>The following are examples:</p>
-<pre>
-mrk&gt; pvput -r "record[process=true]putField(syncputb,syncputc)" syncputa 3 1 2 3
-Old : 
-uri:ev4:nt/2012/pwd:NTScalarArray 
-    double[] value [0,0,0]
-
-[ChannelPutRequesterImpl] message(atomic true, info)
-New : 
-uri:ev4:nt/2012/pwd:NTScalarArray 
-    double[] value [1,2,3]
-mrk&gt; pvget -r "record[process=true]getField(syncgetb,syncgetc)" syncgeta
-[ChannelGetRequesterImpl] message(atomic true, info)
-syncgeta
-uri:ev4:nt/2012/pwd:NTScalarArray 
-    double[] value [2,1,1]
-</pre>
-<p>Only get and put are supported. Only record names, i.e. no field name, can be given.
-All the V3 records must have the same scalar numeric scalar type.
-The channelName (in the above syncputa or syncgeta) is the first of the set of records
-desired. The putField for get or the getField for get is a list of the
-other records.</p>
-<p>If process is requested then the semantics of V3 record processing must be kept
-in mind. Processing a record may cause the processing of linked records.
-If a record is an asynchronous record then the record may not complete processing until
-after the get or put completes.
-If the record is already active a new process request will not be made.
-</p>
-<p>If an application wants a client to be able to do an atomic get or put to a set
-of record then a forward link record can be used to force the records
-into the same lockSet.
-For example:</p>
-<pre>
-record(calc, "syncgeta"){...}
-record(calc, "syncgetb"){...}
-record(calc, "syncgetc"){...}
-record(fanout,"syncgetfanout")
-{
-        field(LNK1,"syncgeta")
-        field(LNK2,"syncgetb")
-        field(LNK3,"syncgetc")
-}
-</pre>
-
-<h3>Getting started</h3>
-
-<p><b>NOTE: </b>pvIOCCP has a iocBoot directory structure like any V3
-application.
-To see an example do the following:</p>
-<p>In one window:</p>
-<pre>
-mrk&gt; pwd
-/home/mrk/hg/pvIOCCPP/iocBoot/simpleV3Channel
-mrk&gt;../../bin/linux-x86_64/simpleV3Channel st.cmd
-</pre>
-<p>In another window:</p>
-<pre>
-mrk&gt; pvget -r "field()" TESTDOUBLE
-</pre>
-
-<p>pvIOCCPP runs in a regular V3 IOC as defined by EPICS base. It uses the base
-build system and is built as an EPICS application. To use V3Channel do the
-following:</p>
-<dl>
-<dt>Create an epics application</dt>
-<dd>Look at the example (pvIOCCPP/exampleApp/simpleV3Channel) to see how create an application
-or use the MakeBaseApp that comes with EPICS base.</dd>
-<dt>configure/RELEASE</dt>
-<dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
-<pre>PVBASE=/home/mrk/hg
-PVDATA=${PVBASE}/pvDataCPP
-PVACCESS=${PVBASE}/pvAccessCPP
-PVIOC=${PVBASE}/pvIOCCPP</pre>
-</dd>
-<dt>v3Channel.dbd</dt>
-<dd>In the src directory where your application is being built add an
-include statement for v3Channel.dbd. For example: 
-<pre>include "base.dbd"
-include "v3Channel.dbd"</pre>
-</dd>
-<dt>st.cmd</dt>
-<dd>After the iocInit command in the st.cmd file add: 
-<pre>startV3Channel</pre>
-</dd>
-</dl>
-
-
 
 <h2>Overview Of iocCore, pvAccess and pvIOC</h2>
 <p>Both iocCore and pvIOC are based on the concept of a database
@@ -892,7 +695,148 @@ It still requires code to create record instances.</p>
 <p>This is a replacement for the asynManger component of asynDriver.
 See the implementation in pvIOCJava for details.</p>
 
-<h2>v3Channel Implementation</h2>
+<h2>V3Channel</h2>
+
+<h3>Introduction</h3>
+
+<p>V3Channel provides access to V3 records.
+It can be used by other code in the same IOC
+or by pvAccess network clients via remote pvAccess.
+It implements channelProcess, channelGet, channelPut, channelArray,
+and Monitor. It does not implement channelPutGet or channelRPC since, at least
+for now, these do not apply to V3 records.</p>
+<p>Because V3 records have a flat record structure the top level
+structure the pvAccess client sees also has a "flat" structure.
+The exception is that alarm, timeStamp, display, control, and valueAlarm
+appear as the pvData property structures.
+For example an ai record will appear as:</p>
+<pre>
+mrk> pvget -r "field()" double01
+double01
+uri:ev4:nt/2012/pwd:NTScalar 
+    double value 0
+    alarm_t alarm
+        int severity 3
+        int status 0
+        string message UDF
+    time_t timeStamp
+        long secondsPastEpoch 631152000
+        int nanoSeconds 0
+        int userTag 0
+    display_t display
+        double limitLow 0
+        double limitHigh 10
+        string description 
+        string format %f
+        string units Counts
+    control_t control
+        double limitLow -0.1
+        double limitHigh 9.9
+        double minStep 0
+    valueAlarm_t valueAlarm
+        boolean active false
+        double lowAlarmLimit 2
+        double lowWarningLimit 4
+        double highWarningLimit 6
+        double highAlarmLimit 8
+        int lowAlarmSeverity 0
+        int lowWarningSeverity 0
+        int highWarningSeverity 0
+        int highAlarmSeverity 0
+        double hystersis 0
+
+mrk> 
+</pre>
+
+
+<p>The basic idea is to map what V3 records provide into a PVStruructure that
+has the same information. For example if a client makes the following request:</p>
+<pre>
+pvget -r "field()" quadruple:BField
+</pre>
+<p>The result is:</p>
+<pre>
+scalar_t 
+    double value 0
+    alarm_t alarm
+        int severity 3
+        int status 0
+        string message UDF
+    timeStamp_t timeStamp
+        long secondsPastEpoch 631152000
+        int nanoSeconds 0
+        int userTag 0
+    display_t display
+        double limitLow 0
+        double limitHigh 10
+        string description 
+        string format %f
+        string units tesla
+    control_t control
+        double limitLow 0
+        double limitHigh 10
+        double minStep 0
+    valueAlarm_t valueAlarm
+        boolean active false
+        double lowAlarmLimit 2
+        double lowWarningLimit 4
+        double highWarningLimit 6
+        double highAlarmLimit 8
+        int lowAlarmSeverity 0
+        int lowWarningSeverity 0
+        int highWarningSeverity 0
+        int highAlarmSeverity 0
+        double hystersis 0
+</pre>
+
+<p>The channelName can be either just a record name or a "recordName.XXX" where
+XXX is the V3 field name, e. g. "SCAN".</p>
+
+
+<h3>Getting started</h3>
+
+<p><b>NOTE: </b>pvIOCCP has a iocBoot directory structure like any V3
+application.
+To see an example do the following:</p>
+<p>In one window:</p>
+<pre>
+mrk&gt; pwd
+/home/mrk/hg/pvIOCCPP/iocBoot/simpleV3Channel
+mrk&gt;../../bin/linux-x86_64/simpleV3Channel st.cmd
+</pre>
+<p>In another window:</p>
+<pre>
+mrk&gt; pvget -r "field()" TESTDOUBLE
+</pre>
+
+<p>pvIOCCPP runs in a regular V3 IOC as defined by EPICS base. It uses the base
+build system and is built as an EPICS application. To use V3Channel do the
+following:</p>
+<dl>
+<dt>Create an epics application</dt>
+<dd>Look at the example (pvIOCCPP/exampleApp/simpleV3Channel) to see how create an application
+or use the MakeBaseApp that comes with EPICS base.</dd>
+<dt>configure/RELEASE</dt>
+<dd>Add the location of pvDataCPP, pvAccessCPP, and PVIOCCP. For example: 
+<pre>PVBASE=/home/mrk/hg
+PVDATA=${PVBASE}/pvDataCPP
+PVACCESS=${PVBASE}/pvAccessCPP
+PVIOC=${PVBASE}/pvIOCCPP</pre>
+</dd>
+<dt>v3Channel.dbd</dt>
+<dd>In the src directory where your application is being built add an
+include statement for v3Channel.dbd. For example: 
+<pre>include "base.dbd"
+include "v3Channel.dbd"</pre>
+</dd>
+<dt>st.cmd</dt>
+<dd>After the iocInit command in the st.cmd file add: 
+<pre>startV3Channel</pre>
+</dd>
+</dl>
+
+
+<h3>Implementation</h3>
 <p><b>NOTE:</b>
 Most readers can skip this section.</p>
 <p>This section is only of interest to someone who wants to understand
@@ -901,7 +845,7 @@ Because v3Channel transfers data between pvData and V3 records it is complex.
 To understand it requires a knowledge of the internals of the V3 database and of
 pvData.</p>
 
-<h3>Introduction to Implementation</h3>
+<h4>Introduction to Implementation</h4>
 <p>The implementation consists of the following header files:</p>
 <dl>
 <dt>v3Channel.h</dt>
@@ -930,7 +874,7 @@ remainder of this section gives a brief description of each of these software
 components with an emphasis on how data is converted between pvData and data in
 V3 records.</p>
 
-<h3>Remaining tasks</h3>
+<h4>Remaining tasks</h4>
 The main remaining tasks are: 
 <dl>
 <dt>Access Security</dt>
@@ -950,7 +894,7 @@ be better to look at the record support entry table to see if display and
 control should be included.</dd>
 </dl>
 
-<h3>Main Concepts</h3>
+<h4>Main Concepts</h4>
 
 <p>In epics V3 there are two interfaces for accessing data:</p>
 <dl>
@@ -966,7 +910,7 @@ pvAccess method pvPutField is used to put data to fields that have "side
 effects". For example writing to the SCAN field has side effects.</dd>
 </dl>
 
-<h3>v3Channel.h</h3>
+<h4>v3Channel.h</h4>
 
 <p>This defines two interfaces:</p>
 <dl>
@@ -1135,7 +1079,7 @@ V3 record.</dd>
 <dd>This just prints a short message.</dd>
 </dl>
 
-<h3>v3Util.h</h3>
+<h4>v3Util.h</h4>
 
 <p>This does most of the work related to transfering data between a PVStructure
 and a V3 record. All methods are static and are called by V3ChannelGet,
@@ -1270,7 +1214,7 @@ dbPutField.</dd>
 accessed.</dd>
 </dl>
 
-<h3>v3Array.h</h3>
+<h4>v3Array.h</h4>
 
 <p>This creates special implementations of PVByteArray, ... , PVStringArray
 that access the corresponding array types in the V3 record. Except for
@@ -1350,7 +1294,7 @@ it has special semantics to handle the fixed size strings that V3
 supports.</dd>
 </dl>
 
-<h3>v3CAMonitor.h</h3>
+<h4>v3CAMonitor.h</h4>
 
 <p>In V3 dbEvent is what implements db_post_event, which is what is called when
 a field value changes in a V3 record. But dbEvent just passes this to V3CA.
@@ -1511,7 +1455,7 @@ treats this a local rather than remote client.</dd>
 should always return true.</dd>
 </dl>
 
-<h3>CAV3Context.h</h3>
+<h4>CAV3Context.h</h4>
 
 <p>CAV3Monitor calls CAV3 in order to monitor changes to the V3 records. In
 order to do this it must call ca_context_create(ca_enable_preemptive_callback).
@@ -1526,6 +1470,8 @@ Only when the thread that originally resulted in a CAV3Context exits is the
 CAV3Context deleted. Thus if a single client connects to several V3 records
 each instance of V3Channel and all ChannelGets, etc. for that channel share the
 same context.:q</p>
+
+<p></p>
 
 <p>CAV3Context is defined as:</p>
 <pre>
@@ -1969,11 +1915,11 @@ public:
     virtual void message(
         String const &amp; message,
         MessageType messageType);
-    virtual ChannelProvider::shared_pointer getProvider();
+    virtual ChannelProvider::shared_pointer const &amp; getProvider();
     virtual String getRemoteAddress();
     virtual Channel::ConnectionState getConnectionState();
     virtual String getChannelName();
-    virtual ChannelRequester::shared_pointer getChannelRequester();
+    virtual ChannelRequester::shared_pointer const &amp; getChannelRequester();
     virtual bool isConnected();
     virtual void getField(
         GetFieldRequester::shared_pointer const &amp;requester,
