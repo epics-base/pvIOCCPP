@@ -56,4 +56,4 @@ tar -czf pvIOC.CB-dist.tar.gz bin lib include db dbd COPYRIGHT LICENSE
 ###########################################
 # Publish documentation
 
-rsync -avP --delete -e ssh documentation epics-jenkins@web.sourceforge.net:/home/project-web/epics-pvdata/htdocs/docbuild/pvIOCCPP/tip
+rsync -aP --delete -e ssh documentation epics-jenkins@web.sourceforge.net:/home/project-web/epics-pvdata/htdocs/docbuild/pvIOCCPP/tip
