@@ -23,41 +23,11 @@ SRC_DIRS += $(IOC)/ezchannelRPC
 INC += ezchannelRPC.h
 LIBSRCS += ezchannelRPC.cpp
 
-SRC_DIRS += $(IOC)/v3Channel
-DBD += v3Channel.dbd
-INC += v3Channel.h
-INC += v3ChannelDebug.h
-INC += v3CAMonitor.h
-LIBSRCS += v3Util.cpp
-LIBSRCS += CAV3Context.cpp
-LIBSRCS += v3Array.cpp
-LIBSRCS += v3CAMonitor.cpp
-LIBSRCS += v3Channel.cpp
-LIBSRCS += v3ChannelProvider.cpp
-LIBSRCS += v3ChannelProcess.cpp
-LIBSRCS += v3ChannelGet.cpp
-LIBSRCS += v3ChannelMultiGet.cpp
-LIBSRCS += v3ChannelPut.cpp
-LIBSRCS += v3ChannelMultiPut.cpp
-LIBSRCS += v3ChannelArray.cpp
-LIBSRCS += v3ChannelRegister.cpp
-LIBSRCS += v3ChannelMonitor.cpp
-
 SRC_DIRS += $(IOC)/channelProviderLocal
 DBD += channelProviderLocal.dbd
 INC += channelProviderLocal.h
 LIBSRCS += channelProviderLocal.cpp
 LIBSRCS += channelProviderLocalRegister.cpp
-
-SRC_DIRS += $(IOC)/multiValue
-DBD += createMultiValue.dbd
-INC += multiValue.h
-INC += valueChannel.h
-LIBSRCS += valueChannel.cpp
-LIBSRCS += createMultiValueRegister.cpp
-LIBSRCS += multiValueChannelProvider.cpp
-LIBSRCS += multiValueChannel.cpp
-LIBSRCS += multiValueChannelGet.cpp
 
 #SRC_DIRS += $(IOC)/support
 #INC += support.h

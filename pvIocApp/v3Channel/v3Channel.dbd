@@ -1,3 +1,0 @@
-registrar("setV3ChannelDebugLevelRegister")
-registrar("startV3ChannelRegister")
-registrar("stopV3ChannelRegister")
