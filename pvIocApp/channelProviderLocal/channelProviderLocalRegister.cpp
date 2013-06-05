@@ -67,7 +67,8 @@ ChannelProviderLocalRun::~ChannelProviderLocalRun()
 void ChannelProviderLocalRun::run()
 {
     ChannelProviderPtr channelProvider(new ChannelProviderLocal());
-    registerChannelProvider(channelProvider);
+    ChannelBaseProviderFactory::shared_pointer channelProviderFactory(new ChannelBaseProviderFactory(channelProvider));
+    channelProviderFactory->registerSelf();
     ctx->setChannelProviderName(channelProvider->getProviderName());
     ctx->initialize(getChannelAccess());
     ctx->printInfo();

@@ -19,6 +19,8 @@
 #include <pv/pvData.h>
 #include <pv/pvAccess.h>
 
+#include <pv/channelBase.h>
+
 namespace epics { namespace pvIOC { 
 
 

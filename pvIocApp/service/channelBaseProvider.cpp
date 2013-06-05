@@ -29,25 +29,8 @@ ChannelBaseProvider::ChannelBaseProvider(
     String const &providerName
 )
 : providerName(providerName),
-  isRegistered(false),
   beingDestroyed(false)
 {
-}
-
-void ChannelBaseProvider::registerSelf()
-{
-    if(!isRegistered) {
-        isRegistered = true;
-        registerChannelProvider(getPtrSelf());
-    }
-}
-
-void ChannelBaseProvider::unregisterSelf()
-{
-    if(isRegistered) {
-       isRegistered = false;
-        unregisterChannelProvider(getPtrSelf());
-    }
 }
 
 ChannelBaseProvider::~ChannelBaseProvider()
@@ -58,7 +41,6 @@ void ChannelBaseProvider::destroy()
 {
     Lock xx(mutex);
     beingDestroyed = true;
-    unregisterSelf();
     ChannelBaseList::iterator iter;
     for(iter = channelList.begin(); iter!=channelList.end(); ++iter) {
         ChannelBasePtr channel = *iter;

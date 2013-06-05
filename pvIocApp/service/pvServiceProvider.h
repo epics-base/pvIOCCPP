@@ -71,7 +71,7 @@ class PVServiceChannelCTX :
 public:
     POINTER_DEFINITIONS(PVServiceChannelCTX);
     static PVServiceChannelCTXPtr getPVServiceChannelCTX();
-    PVServiceProviderPtr getPVServiceProvider() {return pvServiceProvider;}
+    epics::pvAccess::ChannelBaseProviderFactory::shared_pointer getPVServiceProviderFactory() {return pvServiceProviderFactory;}
     virtual ~PVServiceChannelCTX();
     virtual void run();
 private:
@@ -81,7 +81,7 @@ private:
         return shared_from_this();
     }
     epics::pvData::Event event;
-    PVServiceProviderPtr pvServiceProvider;
+    epics::pvAccess::ChannelBaseProviderFactory::shared_pointer pvServiceProviderFactory;
     epics::pvAccess::ServerContextImpl::shared_pointer ctx;
     epics::pvData::Thread *thread;
 };

@@ -168,8 +168,6 @@ public:
         ChannelRequester::shared_pointer const & requester);
     void channelCreated(ChannelBase::shared_pointer const &channel);
     void removeChannel(ChannelBase::shared_pointer const &channel);
-    void unregisterSelf();
-    void registerSelf();
 protected:
     shared_pointer getPtrSelf()
     {
@@ -178,9 +176,57 @@ protected:
 private:
     epics::pvData::String providerName;
     ChannelBaseList channelList;
-    bool isRegistered;
     bool beingDestroyed;
     epics::pvData::Mutex mutex;
+};
+
+class ChannelBaseProviderFactory :
+    public ChannelProviderFactory,
+    public std::tr1::enable_shared_from_this<ChannelBaseProviderFactory>
+{
+public:
+    POINTER_DEFINITIONS(ChannelBaseProviderFactory);
+
+    ChannelBaseProviderFactory(ChannelProvider::shared_pointer const & sharedInstance_) :
+        isRegistered(false),
+        instance(sharedInstance_)
+    {
+    }
+
+    virtual epics::pvData::String getFactoryName()
+    {
+        return instance->getProviderName();
+    }
+
+    virtual ChannelProvider::shared_pointer sharedInstance()
+    {
+        return instance;
+    }
+
+    virtual ChannelProvider::shared_pointer newInstance()
+    {
+        throw std::runtime_error("not supported");
+    }
+
+    void registerSelf()
+    {
+        if(!isRegistered) {
+            isRegistered = true;
+            registerChannelProviderFactory(shared_from_this());
+        }
+    }
+    
+    void unregisterSelf()
+    {
+        if(isRegistered) {
+           isRegistered = false;
+            unregisterChannelProviderFactory(shared_from_this());
+        }
+    }
+
+private:
+    bool isRegistered;
+    ChannelProvider::shared_pointer instance;
 };
 
 }}

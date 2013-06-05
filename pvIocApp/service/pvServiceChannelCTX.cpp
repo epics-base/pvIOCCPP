@@ -39,7 +39,7 @@ PVServiceChannelCTXPtr PVServiceChannelCTX::getPVServiceChannelCTX()
 
 PVServiceChannelCTX::PVServiceChannelCTX()
 :
-  pvServiceProvider(PVServiceProvider::getPVServiceProvider()),
+  pvServiceProviderFactory(new ChannelBaseProviderFactory(PVServiceProvider::getPVServiceProvider())),
   ctx(ServerContextImpl::create()),
   thread(new Thread(String("pvServiceChannel"),lowerPriority,this,epicsThreadStackBig))
 {}
@@ -54,8 +54,8 @@ PVServiceChannelCTX::~PVServiceChannelCTX()
 }
 void PVServiceChannelCTX::run()
 {
-    pvServiceProvider->registerSelf();
-    String providerName = pvServiceProvider->getProviderName();
+    pvServiceProviderFactory->registerSelf();
+    String providerName = pvServiceProviderFactory->sharedInstance()->getProviderName();
     ctx->setChannelProviderName(providerName);
     ctx->initialize(getChannelAccess());
     ctx->printInfo();

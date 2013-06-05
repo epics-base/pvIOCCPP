@@ -51,12 +51,12 @@ extern "C" void startPVServiceChannel(const iocshArgBuf *args)
 {
     PVServiceChannelCTXPtr pvServiceChannelCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
     epicsThreadSleep(.1);
-    pvServiceChannelCTX->getPVServiceProvider()->registerSelf();
+    pvServiceChannelCTX->getPVServiceProviderFactory()->registerSelf();
 }
 extern "C" void stopPVServiceChannel(const iocshArgBuf *args)
 {
     PVServiceChannelCTXPtr pvServiceChannelCTX = PVServiceChannelCTX::getPVServiceChannelCTX();
-    pvServiceChannelCTX->getPVServiceProvider()->unregisterSelf();
+    pvServiceChannelCTX->getPVServiceProviderFactory()->unregisterSelf();
 }
 
 static void setChannelBaseDebugLevelRegister(void)

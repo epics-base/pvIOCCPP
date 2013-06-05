@@ -48,7 +48,6 @@ void ChannelProviderLocal::destroy()
 {
     Lock xx(mutex);
     beingDestroyed = true;
-    unregisterChannelProvider(getPtrSelf());
     for(size_t i=0; i<channelNames.size(); i++)
     {
          channelProviders[i]->destroy();
