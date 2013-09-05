@@ -81,7 +81,7 @@ printf("xxx %p\n",xxx.get());
     fields.push_back(fieldCreate->createStructureArray(standardField->alarm()));
     StructureConstPtr structure = fieldCreate->createStructure(names,fields);
 printf("structure %p\n",structure.get());
-buffer.clear();
+buffer.resize(0);
 structure->toString(&buffer);
 printf("structure\n%s\n",buffer.c_str());
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
