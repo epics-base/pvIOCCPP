@@ -69,8 +69,8 @@ void EZChannelRPC::destroy()
 bool EZChannelRPC::connect(double timeOut)
 {
     if(pvRequest.get()==NULL) {
-        pvRequest = getCreateRequest()->createRequest(
-            "record[process=true]field()",getPtrSelf());
+        pvRequest = CreateRequest::create()->createRequest(
+            "record[process=true]field()");
     }
     issueConnect();
     return waitConnect(timeOut);
